@@ -48,7 +48,7 @@ Prerequisites: Node.js 20+, Eventicious API credentials
 
 5. Test endpoints:
    Landing page: http://localhost:3000
-   Health check: http://localhost:3000/health
+   Health check: http://localhost:3000/healthz
    MCP endpoint: POST http://localhost:3000/mcp
 
 ## Required Headers
@@ -92,7 +92,7 @@ Stateful sessions can be added later if needed for long-running operations.
 Run the smoke tests to verify the server is working:
 
 PowerShell:
-  .\scripts\smoke-health.ps1        # Tests GET /health
+  .\scripts\smoke-health.ps1        # Tests GET /healthz
   .\scripts\smoke-mcp-info.ps1      # Tests POST /mcp without credentials
 
 For full auth test:
@@ -118,7 +118,7 @@ The .local.ps1 files are git-ignored.
 - [ ] Set MCP_ACCESS_TOKEN in Layero environment
 - [ ] Set EVENTICIOUS_DEFAULT_BASE_URL in Layero environment
 - [ ] NEVER set client_id/client_secret as global env vars
-- [ ] Verify GET /health returns {ok: true}
+- [ ] Verify GET /healthz returns {ok: true}
 - [ ] Verify POST /mcp responds to smoke test
 - [ ] Test with dry_run=true first for all operations
 - [ ] Confirm that real writes require confirm=true
@@ -139,7 +139,7 @@ The .local.ps1 files are git-ignored.
 
 Tested on Layero preview deployment:
 
-- GET /health returns {ok: true, service: "eventicious-mcp-remote", version: "0.1.0"}
+- GET /healthz returns {ok: true, service: "eventicious-mcp-remote", version: "0.1.0"}
 - POST /mcp without Authorization returns 401 Unauthorized
 - POST /mcp with Authorization but without Eventicious headers returns 400 credentials error
 - tools/list returns 8 tools with correct schemas

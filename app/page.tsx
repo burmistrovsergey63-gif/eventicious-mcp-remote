@@ -4,7 +4,7 @@ export default function Home() {
       <h1>Eventicious MCP Remote Connector</h1>
       <p>Remote MCP server for Eventicious External API v2</p>
       <ul>
-        <li><a href='/health'>Health Check</a> - GET /health</li>
+        <li><a href='/healthz'>Health Check</a> - GET /healthz</li>
         <li><a href='/mcp'>MCP Endpoint</a> - POST /mcp</li>
       </ul>
       <h2>Quick Start</h2>

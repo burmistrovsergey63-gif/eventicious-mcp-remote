@@ -1,8 +1,8 @@
-# Smoke test: GET /health
+# Smoke test: GET /healthz
 # Usage: .\scripts\smoke-health.ps1
 
 $baseUrl = "http://localhost:3000"
-$url = "$baseUrl/health"
+$url = "$baseUrl/healthz"
 
 Write-Host "Testing GET $url" -ForegroundColor Cyan
 
