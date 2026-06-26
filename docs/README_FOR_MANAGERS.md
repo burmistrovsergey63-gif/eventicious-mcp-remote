@@ -88,3 +88,11 @@ Never send raw data directly to Eventicious without preview.
 - Always preview with dry_run before executing
 - Each project should have its own credentials
 - Contact support if you encounter errors
+
+## First safe test
+
+1. Check tools/list - verify all 8 tools are available
+2. Run eventicious_auth_check with your project keys - should return "Credentials valid"
+3. Create a dry_run preview of any write operation (e.g. create_users with dry_run: true)
+4. Review the preview payload carefully
+5. Only then execute a real action with dry_run: false AND confirm: true

@@ -135,6 +135,18 @@ The .local.ps1 files are git-ignored.
 - eventicious_create_acl_group: Create group (dry_run=true default)
 - eventicious_move_users_to_groups: Move users between groups (dry_run=true default)
 
+## v0.1.0 verified deploy
+
+Tested on Layero preview deployment:
+
+- GET /health returns {ok: true, service: "eventicious-mcp-remote", version: "0.1.0"}
+- POST /mcp without Authorization returns 401 Unauthorized
+- POST /mcp with Authorization but without Eventicious headers returns 400 credentials error
+- tools/list returns 8 tools with correct schemas
+- eventicious_auth_check with fake credentials returns Eventicious 401 without server 500
+- eventicious_create_users dry_run returns payload preview
+- No real write requests were executed during testing
+
 ## Development Commands
 
 npm run dev          - Start development server
