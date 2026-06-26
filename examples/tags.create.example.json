@@ -1,0 +1,11 @@
+{
+  "tool": "eventicious_create_tag",
+  "arguments": {
+    "id": 2001,
+    "name": "Business",
+    "color": "#3498db",
+    "visibilityFlag": 1,
+    "dry_run": true,
+    "confirm": false
+  }
+}

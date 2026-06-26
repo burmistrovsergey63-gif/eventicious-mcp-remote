@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_session",
+  "arguments": {
+    "id": 3001,
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_SESSIONS"
+  }
+}

@@ -42,7 +42,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
 ```
 
@@ -168,12 +168,36 @@ The .local.ps1 files are git-ignored.
 - eventicious_add_user_mentors: Assign a mentor to mentees (dry_run=true default)
 - eventicious_remove_user_mentors: Remove a mentor from mentees (dry_run=true default)
 
+### v0.3 schedule pack
+
+- eventicious_create_location: Create schedule location (dry_run=true default)
+- eventicious_update_location: Update schedule location (dry_run=true default)
+- eventicious_delete_location: Delete schedule location (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_LOCATIONS')
+- eventicious_create_tag: Create schedule tag/topic (dry_run=true default)
+- eventicious_update_tag: Update schedule tag (dry_run=true default)
+- eventicious_delete_tag: Delete schedule tag (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_TAGS')
+- eventicious_create_session: Create schedule session/event (dry_run=true default)
+- eventicious_update_session: Update schedule session (dry_run=true default)
+- eventicious_delete_session: Delete schedule session (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_SESSIONS')
+- eventicious_create_session_attachment: Create attachment for session (dry_run=true default)
+- eventicious_update_session_attachment: Update session attachment (dry_run=true default)
+- eventicious_delete_session_attachment: Delete session attachment (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_SESSION_ATTACHMENTS')
+- eventicious_prepare_schedule_import: Build safe import plan from Excel/JSON rows (helper, no API calls)
+- eventicious_validate_schedule_plan: Validate import plan before real execution (helper, no API calls)
+
+### v0.3 notes
+
+- Speakers are Eventicious users (created/managed via users API). No dedicated speakers endpoint exists in docs.
+- ACL groups control session visibility through session `aclGroupsIds` field.
+- Session field names follow docs exactly: `speakersIds` (not speakerIds), `locationsIds` (not locationIds).
+- Dry-run import workflow: prepare_schedule_import -> validate_schedule_plan -> dry_run previews -> approve -> real create.
+
 ## Safety model
 
 All write tools default to dry_run=true. Real execution requires:
 1. dry_run=false
 2. confirm=true
-3. For destructive operations (delete_users, delete_acl_group): danger_confirm must match an exact string
+3. For destructive operations (delete_users, delete_acl_group, delete_location, delete_tag, delete_session, delete_session_attachment): danger_confirm must match an exact string
 
 ## v0.1.0 verified deploy
 

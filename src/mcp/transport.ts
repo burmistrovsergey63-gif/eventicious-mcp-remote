@@ -9,6 +9,11 @@ import {
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
 import { guardUserBatchSize, warnAutoPublishRateLimit } from "../rate-limit";
+import { registerLocationTools } from "../tools/locations";
+import { registerTagTools } from "../tools/tags";
+import { registerSessionTools } from "../tools/sessions";
+import { registerSessionAttachmentTools } from "../tools/session-attachments";
+import { registerScheduleImportTools } from "../tools/schedule-import";
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
   logger.info("mcp_request_start", { method: request.method });
@@ -25,7 +30,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.2.0",
+    version: "0.3.0",
   });
 
   registerTools(server, credentials);
@@ -942,4 +947,10 @@ function registerTools(
       }
     }
   );
+
+  registerLocationTools(server, credentials);
+  registerTagTools(server, credentials);
+  registerSessionTools(server, credentials);
+  registerSessionAttachmentTools(server, credentials);
+  registerScheduleImportTools(server, credentials);
 }

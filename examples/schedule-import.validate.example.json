@@ -1,0 +1,72 @@
+{
+  "tool": "eventicious_validate_schedule_plan",
+  "arguments": {
+    "plan": {
+      "normalizedRows": [
+        {
+          "title": "Opening Keynote",
+          "description": "Welcome address",
+          "startTime": "2026-09-01T10:00",
+          "endTime": "2026-09-01T11:00",
+          "locationName": "Main Hall",
+          "tagIds": [1],
+          "speakerIds": [101],
+          "aclGroupsIds": [1],
+          "type": 0,
+          "externalId": "session-001"
+        },
+        {
+          "title": "Breakout: Tech Trends",
+          "description": "Panel discussion",
+          "startTime": "2026-09-01T11:30",
+          "endTime": "2026-09-01T12:30",
+          "locationName": "Room B",
+          "tagIds": [2],
+          "speakerIds": [102, 103],
+          "aclGroupsIds": [1],
+          "type": 0,
+          "externalId": "session-002"
+        }
+      ],
+      "locationsToCreate": [
+        { "name": "Room B", "suggestedId": 900000001 }
+      ],
+      "tagsToCreate": [
+        { "name": "Keynote", "suggestedId": 900000002 },
+        { "name": "Technology", "suggestedId": 900000003 }
+      ],
+      "speakersToResolve": [
+        { "name": "Alice Smith", "email": "alice@example.com", "id": 101, "resolved": true },
+        { "name": "Bob Johnson", "email": "bob@example.com", "resolved": false },
+        { "name": "Carol White", "email": "carol@example.com", "resolved": false }
+      ],
+      "speakersToCreateAsUsers": [
+        { "firstName": "Bob", "lastName": "Johnson", "email": "bob@example.com", "suggestedId": 900000004 },
+        { "firstName": "Carol", "lastName": "White", "email": "carol@example.com", "suggestedId": 900000005 }
+      ],
+      "aclGroupsToResolve": [
+        { "name": "All Attendees", "id": 1, "resolved": true }
+      ],
+      "aclGroupsToCreate": [
+        { "name": "VIP Attendees", "suggestedId": 900000006 }
+      ],
+      "sessionsToCreate": [
+        { "id": 900000010, "title": "Opening Keynote", "startTime": "2026-09-01T10:00", "endTime": "2026-09-01T11:00", "locationRef": "Main Hall", "tagRefs": ["Business", "Keynote"], "speakerRefs": ["Alice Smith"], "aclGroupRefs": ["VIP Attendees"] },
+        { "id": 900000011, "title": "Breakout: Tech Trends", "startTime": "2026-09-01T11:30", "endTime": "2026-09-01T12:30", "locationRef": "Room B", "tagRefs": ["Technology"], "speakerRefs": ["Bob Johnson", "Carol White"], "aclGroupRefs": ["All Attendees"] }
+      ],
+      "attachmentsToCreate": [
+        { "sessionId": 900000010, "title": "Slides", "url": "https://example.com/slides.pdf" }
+      ],
+      "warnings": [],
+      "errors": [],
+      "recommendedExecutionOrder": [
+        "1. Create locations",
+        "2. Create tags",
+        "3. Create speakers as users",
+        "4. Create/resolve ACL groups",
+        "5. Create sessions",
+        "6. Create session attachments"
+      ]
+    }
+  }
+}

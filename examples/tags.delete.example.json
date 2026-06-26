@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_tag",
+  "arguments": {
+    "id": 2001,
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_TAGS"
+  }
+}

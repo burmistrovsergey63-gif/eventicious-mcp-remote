@@ -1,0 +1,57 @@
+{
+  "tool": "eventicious_prepare_schedule_import",
+  "arguments": {
+    "rows": [
+      {
+        "title": "Opening Keynote",
+        "description": "Welcome address",
+        "startDate": "2026-09-01",
+        "startTime": "10:00",
+        "endDate": "2026-09-01",
+        "endTime": "11:00",
+        "locationName": "Main Hall",
+        "tagNames": ["Business", "Keynote"],
+        "speakerNames": ["Alice Smith"],
+        "speakerEmails": ["alice@example.com"],
+        "aclGroupNames": ["VIP Attendees"],
+        "attachments": [
+          { "title": "Slides", "url": "https://example.com/slides.pdf" }
+        ],
+        "externalId": "session-001",
+        "type": 0
+      },
+      {
+        "title": "Breakout: Tech Trends",
+        "description": "Panel discussion on emerging tech",
+        "startDate": "2026-09-01",
+        "startTime": "11:30",
+        "endDate": "2026-09-01",
+        "endTime": "12:30",
+        "locationName": "Room B",
+        "tagNames": ["Technology"],
+        "speakerNames": ["Bob Johnson", "Carol White"],
+        "speakerEmails": ["bob@example.com", "carol@example.com"],
+        "aclGroupNames": ["All Attendees"],
+        "type": 0
+      }
+    ],
+    "existingLocations": [
+      { "id": 1, "name": "Main Hall" }
+    ],
+    "existingTags": [
+      { "id": 1, "name": "Business" }
+    ],
+    "existingAclGroups": [
+      { "id": 1, "name": "All Attendees" }
+    ],
+    "existingUsersOrSpeakers": [
+      { "id": 101, "firstName": "Alice", "lastName": "Smith", "email": "alice@example.com" }
+    ],
+    "options": {
+      "createMissingLocations": true,
+      "createMissingTags": true,
+      "createMissingAclGroups": true,
+      "createMissingSpeakersAsUsers": true
+    }
+  }
+}

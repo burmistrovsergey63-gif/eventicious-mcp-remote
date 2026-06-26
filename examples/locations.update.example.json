@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_update_location",
+  "arguments": {
+    "id": 1001,
+    "name": "Updated Main Hall",
+    "position": 2,
+    "dry_run": true,
+    "confirm": false
+  }
+}

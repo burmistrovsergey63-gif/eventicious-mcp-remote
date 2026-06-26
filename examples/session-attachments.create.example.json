@@ -1,0 +1,11 @@
+{
+  "tool": "eventicious_create_session_attachment",
+  "arguments": {
+    "sessionId": 3001,
+    "id": 4001,
+    "title": "Presentation Slides",
+    "url": "https://example.com/slides.pdf",
+    "dry_run": true,
+    "confirm": false
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_update_tag",
+  "arguments": {
+    "id": 2001,
+    "name": "Business & Economics",
+    "color": "#2ecc71",
+    "dry_run": true,
+    "confirm": false
+  }
+}

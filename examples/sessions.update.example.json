@@ -1,0 +1,12 @@
+{
+  "tool": "eventicious_update_session",
+  "arguments": {
+    "id": 3001,
+    "title": "Updated Opening Keynote",
+    "description": "Updated description",
+    "startTime": "2026-09-01T10:30",
+    "endTime": "2026-09-01T11:30",
+    "dry_run": true,
+    "confirm": false
+  }
+}

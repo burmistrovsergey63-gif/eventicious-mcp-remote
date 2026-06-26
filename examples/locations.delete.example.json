@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_location",
+  "arguments": {
+    "id": 1001,
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_LOCATIONS"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_create_location",
+  "arguments": {
+    "id": 1001,
+    "name": "Main Hall",
+    "position": 1,
+    "dry_run": true,
+    "confirm": false
+  }
+}

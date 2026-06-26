@@ -80,6 +80,20 @@ Never send raw data directly to Eventicious without preview.
 | eventicious_remove_user_roles | Remove roles | dry_run=true |
 | eventicious_add_user_mentors | Assign mentor to mentees | dry_run=true |
 | eventicious_remove_user_mentors | Remove mentor from mentees | dry_run=true |
+| eventicious_create_location | Create schedule location | dry_run=true |
+| eventicious_update_location | Update schedule location | dry_run=true |
+| eventicious_delete_location | Delete schedule location permanently | dry_run=true |
+| eventicious_create_tag | Create schedule tag/topic | dry_run=true |
+| eventicious_update_tag | Update schedule tag | dry_run=true |
+| eventicious_delete_tag | Delete schedule tag permanently | dry_run=true |
+| eventicious_create_session | Create schedule session/event | dry_run=true |
+| eventicious_update_session | Update schedule session | dry_run=true |
+| eventicious_delete_session | Delete schedule session permanently | dry_run=true |
+| eventicious_create_session_attachment | Create session attachment/link | dry_run=true |
+| eventicious_update_session_attachment | Update session attachment | dry_run=true |
+| eventicious_delete_session_attachment | Delete session attachment permanently | dry_run=true |
+| eventicious_prepare_schedule_import | Build import plan from Excel/JSON | helper |
+| eventicious_validate_schedule_plan | Validate import plan | helper |
 
 ### Safety Limits
 
@@ -96,6 +110,29 @@ Two tools require an extra safety string beyond confirm=true:
 - **eventicious_delete_acl_group**: Requires `danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP'`
 
 This prevents accidental permanent deletion of users or groups.
+
+### Program Schedule Workflow (v0.3)
+
+Import schedule from Excel/JSON:
+
+1. **Prepare**: Use `eventicious_prepare_schedule_import` with your schedule rows
+2. **Validate**: Use `eventicious_validate_schedule_plan` to check for errors
+3. **Review**: Check warnings and resolved IDs
+4. **Dry-run**: Use `eventicious_create_location`, `eventicious_create_tag`, `eventicious_create_session` with `dry_run: true`
+5. **Approve**: Execute with `dry_run: false` + `confirm: true`
+
+Required columns for schedule import:
+- **title** — session title (required)
+- **startDate + startTime** or **startsAt** — when it starts (required)
+- **endDate + endTime** or **endsAt** — when it ends (required)
+- **locationName** or **locationId** — where it happens
+- **tagNames** or **tagIds** — topics/categories
+- **speakerNames** or **speakerIds** — who presents (must exist as users)
+- **aclGroupNames** or **aclGroupsIds** — visibility control (must exist as ACL groups)
+
+Speakers must exist as Eventicious users (created via `eventicious_create_users`) or be auto-created if `createMissingSpeakersAsUsers=true` in import options.
+
+ACL groups must exist or be created first if `createMissingAclGroups=true` in import options.
 
 ### Important Notes
 

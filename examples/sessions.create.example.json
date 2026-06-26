@@ -1,0 +1,17 @@
+{
+  "tool": "eventicious_create_session",
+  "arguments": {
+    "id": 3001,
+    "title": "Opening Keynote",
+    "description": "Welcome address and event overview",
+    "startTime": "2026-09-01T10:00",
+    "endTime": "2026-09-01T11:00",
+    "locationsIds": [1001],
+    "tagIds": [2001],
+    "speakersIds": [101],
+    "aclGroupsIds": [5001],
+    "type": 0,
+    "dry_run": true,
+    "confirm": false
+  }
+}

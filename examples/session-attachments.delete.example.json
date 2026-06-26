@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_delete_session_attachment",
+  "arguments": {
+    "sessionId": 3001,
+    "attachmentId": 4001,
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_SESSION_ATTACHMENTS"
+  }
+}
