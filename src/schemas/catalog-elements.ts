@@ -9,7 +9,7 @@ export const folderCreateSchema = {
   externalId: z.string().optional().describe("External identifier"),
   order: z.number().int().optional().describe("Display order"),
   coverImageUrl: z.string().url().optional().describe("Cover image URL"),
-  viewOptions: z.enum(["imageOnly", "textOnly", "textAndImage"]).describe("Display mode (required by API: imageOnly, textOnly, or textAndImage)"),
+  viewOptions: z.enum(["imageOnly", "textOnly", "textAndImage"]).describe("Display mode (required by API). textAndImage also requires textLogoImageUrl; imageOnly requires fullLogoImageUrl."),
   textLogoImageUrl: z.string().url().optional().describe("Logo for textAndImage mode"),
   fullLogoImageUrl: z.string().url().optional().describe("Logo for imageOnly mode"),
   aclGroupsExternalIds: z.array(z.number().int()).optional().describe("ACL group IDs that can access this folder. Groups must exist before use."),
