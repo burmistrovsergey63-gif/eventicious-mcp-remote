@@ -1,0 +1,35 @@
+{
+  "tool": "eventicious_validate_catalog_plan",
+  "description": "Validate a catalog import plan (helper, no API call)",
+  "params": {
+    "plan": {
+      "catalogsToCreate": [
+        { "name": "Event Program", "externalId": "program-001" }
+      ],
+      "foldersToCreate": [
+        { "name": "Day 1", "externalId": "day-1" }
+      ],
+      "filesToCreate": [],
+      "linksToCreate": [
+        { "name": "Website", "url": "https://example.com", "viewOptions": "textOnly" }
+      ],
+      "text2ToCreate": [
+        {
+          "title": "Welcome",
+          "gravityJson": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": { "dataLine": null },
+                "content": [{ "type": "text", "text": "Welcome!" }]
+              }
+            ]
+          }
+        }
+      ],
+      "videosToCreate": [],
+      "orderPlan": []
+    }
+  }
+}

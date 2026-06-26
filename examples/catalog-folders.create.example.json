@@ -1,0 +1,14 @@
+{
+  "tool": "eventicious_create_folder",
+  "description": "Create a folder with ACL group visibility",
+  "params": {
+    "catalogId": 12345,
+    "name": "VIP Speakers",
+    "description": "VIP speakers only",
+    "externalId": "vip-speakers-001",
+    "aclGroupsExternalIds": [1001],
+    "viewOptions": "textAndImage",
+    "dry_run": true,
+    "confirm": true
+  }
+}

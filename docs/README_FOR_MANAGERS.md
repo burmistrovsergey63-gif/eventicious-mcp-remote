@@ -15,6 +15,7 @@ Never use credentials from one project in another.
 
 Add to your MCP client config:
 
+```json
 {
   "mcpServers": {
     "eventicious": {
@@ -28,6 +29,7 @@ Add to your MCP client config:
     }
   }
 }
+```
 
 ### 3. Working with Tools
 
@@ -94,6 +96,33 @@ Never send raw data directly to Eventicious without preview.
 | eventicious_delete_session_attachment | Delete session attachment permanently | dry_run=true |
 | eventicious_prepare_schedule_import | Build import plan from Excel/JSON | helper |
 | eventicious_validate_schedule_plan | Validate import plan | helper |
+| eventicious_list_catalogs | List all root catalogs | Read-only |
+| eventicious_get_catalog | Get catalog/folder with elements | Read-only |
+| eventicious_create_catalog | Create root catalog | dry_run=true |
+| eventicious_update_catalog | Update catalog | dry_run=true |
+| eventicious_delete_catalog | Delete catalog permanently | dry_run=true |
+| eventicious_create_folder | Create folder with optional ACL visibility | dry_run=true |
+| eventicious_update_folder | Update folder with optional ACL visibility | dry_run=true |
+| eventicious_delete_folder | Delete folder permanently | dry_run=true |
+| eventicious_add_file_to_catalog | Add uploaded file to catalog | dry_run=true |
+| eventicious_delete_file_from_catalog | Delete file permanently | dry_run=true |
+| eventicious_create_link | Create link element | dry_run=true |
+| eventicious_delete_link | Delete link permanently | dry_run=true |
+| eventicious_create_text2 | Create Text 2.0 / GravityJson element | dry_run=true |
+| eventicious_delete_text2 | Delete Text 2.0 element permanently | dry_run=true |
+| eventicious_add_video_to_catalog | Add uploaded video | dry_run=true |
+| eventicious_delete_video_from_catalog | Delete video permanently | dry_run=true |
+| eventicious_add_groups_to_catalog | Add ACL groups to catalog | dry_run=true |
+| eventicious_delete_group_from_catalog | Delete group permanently | dry_run=true |
+| eventicious_set_catalog_order | Reorder root catalogs | dry_run=true |
+| eventicious_set_catalog_element_order | Reorder elements within catalog | dry_run=true |
+| eventicious_bulk_delete_catalog_elements | Bulk delete folders and elements | dry_run=true |
+| eventicious_add_to_menu | Add catalog/folder to menu | dry_run=true |
+| eventicious_delete_from_menu | Remove from menu | dry_run=true |
+| eventicious_convert_markdown_to_gravity_json | Convert markdown to GravityJson | helper |
+| eventicious_validate_gravity_json | Validate GravityJson object | helper |
+| eventicious_prepare_catalog_import | Build catalog import plan | helper |
+| eventicious_validate_catalog_plan | Validate catalog import plan | helper |
 
 ### Safety Limits
 
@@ -102,14 +131,32 @@ Never send raw data directly to Eventicious without preview.
 - All operations are logged for audit
 - Credentials are never stored on server
 
-### Destructive Operations (v0.2)
+### Destructive Operations
 
-Two tools require an extra safety string beyond confirm=true:
+Multiple tools require an extra safety string beyond confirm=true:
 
-- **eventicious_delete_users**: Requires `danger_confirm='DELETE_EVENTICIOUS_USERS'`
-- **eventicious_delete_acl_group**: Requires `danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP'`
+**User/group operations:**
+- eventicious_delete_users: Requires `danger_confirm='DELETE_EVENTICIOUS_USERS'`
+- eventicious_delete_acl_group: Requires `danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP'`
 
-This prevents accidental permanent deletion of users or groups.
+**Schedule operations:**
+- eventicious_delete_location: Requires `danger_confirm='DELETE_EVENTICIOUS_LOCATIONS'`
+- eventicious_delete_tag: Requires `danger_confirm='DELETE_EVENTICIOUS_TAGS'`
+- eventicious_delete_session: Requires `danger_confirm='DELETE_EVENTICIOUS_SESSIONS'`
+- eventicious_delete_session_attachment: Requires `danger_confirm='DELETE_EVENTICIOUS_SESSION_ATTACHMENTS'`
+
+**Catalog operations:**
+- eventicious_delete_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG'`
+- eventicious_delete_folder: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_FOLDER'`
+- eventicious_delete_file_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
+- eventicious_delete_link: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
+- eventicious_delete_text2: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
+- eventicious_delete_video_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
+- eventicious_delete_group_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_GROUP'`
+- eventicious_bulk_delete_catalog_elements: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK'`
+- eventicious_set_catalog_order: Requires `confirm=true`
+- eventicious_set_catalog_element_order: Requires `confirm=true`
+- eventicious_delete_from_menu: Requires `danger_confirm='CHANGE_EVENTICIOUS_CATALOG_ORDER'`
 
 ### Program Schedule Workflow (v0.3)
 
@@ -134,6 +181,45 @@ Speakers must exist as Eventicious users (created via `eventicious_create_users`
 
 ACL groups must exist or be created first if `createMissingAclGroups=true` in import options.
 
+### Catalog Content Workflow (v0.4)
+
+#### Text Content
+
+All catalog text content uses **Text 2.0 / GravityJson** format exclusively. Legacy `/elements/texts` endpoints are intentionally NOT exposed.
+
+Text input methods:
+- **GravityJson object**: ProseMirror document format
+- **JSON string**: Parsed and validated as GravityJson
+- **Markdown or plain text**: Auto-converted to GravityJson
+
+Use `eventicious_convert_markdown_to_gravity_json` helper to preview markdown conversion.
+
+Text 2.0 update is not available in current API docs. Safe update strategy: delete old + create new, only after explicit approval.
+
+#### Folder Visibility
+
+Folders support `aclGroupsExternalIds` to restrict content visibility by ACL groups:
+```json
+{
+  "name": "VIP Speakers",
+  "aclGroupsExternalIds": [1001, 1002]
+}
+```
+
+Groups must exist before using their external IDs in folder payload.
+
+#### Catalog Import Workflow
+
+Safe catalog import workflow:
+
+1. **Prepare**: Use `eventicious_prepare_catalog_import` with JSON/tree structure
+2. **Validate**: Use `eventicious_validate_catalog_plan` to check for errors
+3. **Review**: Check warnings and execution plan
+4. **Dry-run**: Preview each operation with `dry_run: true`
+5. **Approve**: Execute with `dry_run: false` + `confirm: true`
+
+Helper tools never perform real writes.
+
 ### Important Notes
 
 - Never share your client_secret
@@ -144,7 +230,7 @@ ACL groups must exist or be created first if `createMissingAclGroups=true` in im
 
 ## First safe test
 
-1. Check tools/list - verify all 15 tools are available
+1. Check tools/list - verify all 56 tools are available
 2. Run eventicious_auth_check with your project keys - should return "Credentials valid"
 3. Create a dry_run preview of any write operation (e.g. create_users with dry_run: true)
 4. Review the preview payload carefully

@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_catalog",
+  "description": "Delete a catalog (requires danger_confirm)",
+  "params": {
+    "catalogId": 12345,
+    "danger_confirm": "DELETE_EVENTICIOUS_CATALOG",
+    "dry_run": true
+  }
+}

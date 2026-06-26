@@ -1,0 +1,13 @@
+{
+  "tool": "eventicious_create_catalog",
+  "description": "Create a new root catalog",
+  "params": {
+    "name": "Speakers",
+    "description": "Event speakers catalog",
+    "externalId": "speakers-catalog-001",
+    "viewOptions": "textAndImage",
+    "aclGroupsExternalIds": [1001, 1002],
+    "dry_run": true,
+    "confirm": true
+  }
+}

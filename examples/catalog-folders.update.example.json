@@ -1,0 +1,12 @@
+{
+  "tool": "eventicious_update_folder",
+  "description": "Update folder ACL visibility",
+  "params": {
+    "catalogId": 12345,
+    "folderId": 67890,
+    "name": "VIP Speakers Updated",
+    "aclGroupsExternalIds": [1001, 1003],
+    "dry_run": true,
+    "confirm": true
+  }
+}

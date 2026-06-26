@@ -1,0 +1,11 @@
+{
+  "tool": "eventicious_update_catalog",
+  "description": "Update an existing catalog",
+  "params": {
+    "catalogId": 12345,
+    "name": "Speakers Updated",
+    "description": "Updated speakers catalog",
+    "dry_run": true,
+    "confirm": true
+  }
+}

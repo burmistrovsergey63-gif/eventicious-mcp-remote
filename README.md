@@ -42,7 +42,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.3.0"
+  "version": "0.4.0"
 }
 ```
 
@@ -95,7 +95,7 @@ Only these values are stored in server environment:
 Bearer tokens from Eventicious are cached for 50 minutes, keyed by clientId+baseUrl.
 Secrets are never written to logs (masked by logger).
 
-## Why Stateless MCP is Enough for v0.1
+## Why Stateless MCP is Enough
 
 The MCP transport runs in stateless mode (no session persistence).
 Each request creates a fresh MCP server instance and transport.
@@ -145,9 +145,9 @@ The .local.ps1 files are git-ignored.
 - [ ] Confirm that real writes require confirm=true
 - [ ] Check logs for any leaked secrets (should be masked)
 
-## Available Tools
+## Available Tools (56 total)
 
-### v0.1.0 core
+### v0.1.0 core (8 tools)
 
 - eventicious_auth_check: Verify credentials (read-only)
 - eventicious_create_users: Create users (dry_run=true default)
@@ -158,7 +158,7 @@ The .local.ps1 files are git-ignored.
 - eventicious_create_acl_group: Create group (dry_run=true default)
 - eventicious_move_users_to_groups: Move users between groups (dry_run=true default)
 
-### v0.2 safety lifecycle
+### v0.2 safety lifecycle (7 tools)
 
 - eventicious_delete_users: Delete users (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_USERS')
 - eventicious_update_acl_group: Rename a group (dry_run=true default)
@@ -168,7 +168,7 @@ The .local.ps1 files are git-ignored.
 - eventicious_add_user_mentors: Assign a mentor to mentees (dry_run=true default)
 - eventicious_remove_user_mentors: Remove a mentor from mentees (dry_run=true default)
 
-### v0.3 schedule pack
+### v0.3 schedule pack (14 tools)
 
 - eventicious_create_location: Create schedule location (dry_run=true default)
 - eventicious_update_location: Update schedule location (dry_run=true default)
@@ -185,31 +185,94 @@ The .local.ps1 files are git-ignored.
 - eventicious_prepare_schedule_import: Build safe import plan from Excel/JSON rows (helper, no API calls)
 - eventicious_validate_schedule_plan: Validate import plan before real execution (helper, no API calls)
 
-### v0.3 notes
+### v0.4 catalog pack (27 tools)
 
-- Speakers are Eventicious users (created/managed via users API). No dedicated speakers endpoint exists in docs.
-- ACL groups control session visibility through session `aclGroupsIds` field.
-- Session field names follow docs exactly: `speakersIds` (not speakerIds), `locationsIds` (not locationIds).
-- Dry-run import workflow: prepare_schedule_import -> validate_schedule_plan -> dry_run previews -> approve -> real create.
+**Root catalog CRUD (5 tools):**
+- eventicious_list_catalogs: List all root catalogs (read-only)
+- eventicious_get_catalog: Get catalog/folder by ID with all elements (read-only)
+- eventicious_create_catalog: Create root catalog (dry_run=true default)
+- eventicious_update_catalog: Update catalog (dry_run=true default)
+- eventicious_delete_catalog: Delete catalog (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG')
+
+**Folder management (3 tools):**
+- eventicious_create_folder: Create folder with optional ACL visibility (dry_run=true default)
+- eventicious_update_folder: Update folder with optional ACL visibility (dry_run=true default)
+- eventicious_delete_folder: Delete folder (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_FOLDER')
+
+**Content elements (10 tools):**
+- eventicious_add_file_to_catalog: Add uploaded file to catalog (dry_run=true default)
+- eventicious_delete_file_from_catalog: Delete file (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT')
+- eventicious_create_link: Create link element (dry_run=true default)
+- eventicious_delete_link: Delete link (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT')
+- eventicious_create_text2: Create Text 2.0 / GravityJson element (dry_run=true default). Accepts GravityJson object, JSON string, or markdown (auto-converted)
+- eventicious_delete_text2: Delete Text 2.0 element (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT')
+- eventicious_add_video_to_catalog: Add uploaded video (dry_run=true default)
+- eventicious_delete_video_from_catalog: Delete video (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT')
+- eventicious_add_groups_to_catalog: Add ACL groups to catalog (dry_run=true default)
+- eventicious_delete_group_from_catalog: Delete group (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_GROUP')
+
+**Order and menu (4 tools):**
+- eventicious_set_catalog_order: Reorder root catalogs (dry_run=true default)
+- eventicious_set_catalog_element_order: Reorder elements within catalog (dry_run=true default)
+- eventicious_add_to_menu: Add catalog/folder to menu (dry_run=true default)
+- eventicious_delete_from_menu: Remove from menu (dry_run=true default, requires danger_confirm='CHANGE_EVENTICIOUS_CATALOG_ORDER')
+
+**Bulk operations (1 tool):**
+- eventicious_bulk_delete_catalog_elements: Bulk delete folders and elements (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK')
+
+**Helper tools (4 tools, no API calls):**
+- eventicious_convert_markdown_to_gravity_json: Convert markdown/plain text to GravityJson
+- eventicious_validate_gravity_json: Validate GravityJson object
+- eventicious_prepare_catalog_import: Build catalog import plan from JSON/tree structure
+- eventicious_validate_catalog_plan: Validate catalog import plan before execution
+
+## v0.4 Text 2.0 / GravityJson
+
+All catalog text content uses Text 2.0 / GravityJson format exclusively. Legacy `/elements/texts` endpoints are intentionally NOT exposed as MCP tools.
+
+**Supported text input methods:**
+- GravityJson object (ProseMirror document)
+- JSON string (parsed and validated)
+- Markdown or plain text (auto-converted to GravityJson)
+
+**Text 2.0 update strategy:**
+Text 2.0 update is not available in current API docs. Safe update strategy is delete old Text 2.0 element + create new Text 2.0 element, only after explicit approval.
+
+## v0.4 Folder ACL Visibility
+
+Folders support `aclGroupsExternalIds` to restrict content visibility by ACL groups:
+- Create folder with `aclGroupsExternalIds: [1001, 1002]`
+- Update folder to change visibility: `aclGroupsExternalIds: [1001, 1003]`
+- Groups must exist before using their external IDs in folder payload
+
+## v0.4 Catalog Import Workflow
+
+Safe catalog import workflow:
+1. `eventicious_prepare_catalog_import` - Build plan from JSON/tree
+2. `eventicious_validate_catalog_plan` - Validate plan
+3. Review dry_run previews
+4. Approve and execute with real API calls
+
+Helper tools never perform real writes.
 
 ## Safety model
 
 All write tools default to dry_run=true. Real execution requires:
 1. dry_run=false
 2. confirm=true
-3. For destructive operations (delete_users, delete_acl_group, delete_location, delete_tag, delete_session, delete_session_attachment): danger_confirm must match an exact string
-
-## v0.1.0 verified deploy
-
-Tested on Layero preview deployment:
-
-- GET /healthz returns {ok: true, service: "eventicious-mcp-remote", version: "0.1.0"}
-- POST /mcp without Authorization returns 401 Unauthorized
-- POST /mcp with Authorization but without Eventicious headers returns 400 credentials error
-- tools/list returns 8 tools with correct schemas
-- eventicious_auth_check with fake credentials returns Eventicious 401 without server 500
-- eventicious_create_users dry_run returns payload preview
-- No real write requests were executed during testing
+3. For destructive operations: danger_confirm must match exact strings:
+   - DELETE_EVENTICIOUS_USERS
+   - DELETE_EVENTICIOUS_ACL_GROUP
+   - DELETE_EVENTICIOUS_LOCATIONS
+   - DELETE_EVENTICIOUS_TAGS
+   - DELETE_EVENTICIOUS_SESSIONS
+   - DELETE_EVENTICIOUS_SESSION_ATTACHMENTS
+   - DELETE_EVENTICIOUS_CATALOG
+   - DELETE_EVENTICIOUS_CATALOG_FOLDER
+   - DELETE_EVENTICIOUS_CATALOG_CONTENT
+   - DELETE_EVENTICIOUS_CATALOG_GROUP
+   - DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK
+   - CHANGE_EVENTICIOUS_CATALOG_ORDER
 
 ## Development Commands
 

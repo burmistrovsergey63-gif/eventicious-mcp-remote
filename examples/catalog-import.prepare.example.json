@@ -1,0 +1,34 @@
+{
+  "tool": "eventicious_prepare_catalog_import",
+  "description": "Prepare a catalog import plan (helper, no API call)",
+  "params": {
+    "catalog": {
+      "name": "Event Program",
+      "description": "Full event program catalog",
+      "externalId": "program-001"
+    },
+    "folders": [
+      {
+        "name": "Day 1",
+        "description": "First day sessions",
+        "externalId": "day-1",
+        "aclGroupsExternalIds": [1001]
+      }
+    ],
+    "links": [
+      {
+        "name": "Event Website",
+        "url": "https://example.com",
+        "viewOptions": "textOnly",
+        "externalId": "link-website"
+      }
+    ],
+    "text2": [
+      {
+        "title": "Welcome Message",
+        "markdown": "# Welcome\n\nWelcome to the event!",
+        "externalId": "text2-welcome"
+      }
+    ]
+  }
+}

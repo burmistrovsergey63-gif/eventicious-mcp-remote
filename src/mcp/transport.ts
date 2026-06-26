@@ -14,6 +14,10 @@ import { registerTagTools } from "../tools/tags";
 import { registerSessionTools } from "../tools/sessions";
 import { registerSessionAttachmentTools } from "../tools/session-attachments";
 import { registerScheduleImportTools } from "../tools/schedule-import";
+import { registerCatalogTools } from "../tools/catalogs";
+import { registerCatalogElementTools } from "../tools/catalog-elements";
+import { registerGravityJsonTools } from "../tools/gravity-json";
+import { registerCatalogImportTools } from "../tools/catalog-import";
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
   logger.info("mcp_request_start", { method: request.method });
@@ -30,7 +34,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.3.0",
+    version: "0.4.0",
   });
 
   registerTools(server, credentials);
@@ -953,4 +957,8 @@ function registerTools(
   registerSessionTools(server, credentials);
   registerSessionAttachmentTools(server, credentials);
   registerScheduleImportTools(server, credentials);
+  registerCatalogTools(server, credentials, toolError);
+  registerCatalogElementTools(server, credentials, toolError);
+  registerGravityJsonTools(server, toolError);
+  registerCatalogImportTools(server, toolError);
 }

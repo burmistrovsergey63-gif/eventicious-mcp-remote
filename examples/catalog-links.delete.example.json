@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_delete_link",
+  "description": "Delete a link element (requires danger_confirm)",
+  "params": {
+    "catalogId": 12345,
+    "catalogElementId": 11111,
+    "danger_confirm": "DELETE_EVENTICIOUS_CATALOG_CONTENT",
+    "dry_run": true
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "tool": "eventicious_create_text2",
+  "description": "Create a Text 2.0 element with GravityJson object",
+  "params": {
+    "catalogId": 12345,
+    "text": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 1, "id": "", "dataLine": null },
+          "content": [{ "type": "text", "text": "Welcome" }]
+        },
+        {
+          "type": "paragraph",
+          "attrs": { "dataLine": null },
+          "content": [{ "type": "text", "text": "This is a Text 2.0 element." }]
+        }
+      ]
+    },
+    "externalId": "text2-001",
+    "order": 1,
+    "dry_run": true,
+    "confirm": true
+  }
+}

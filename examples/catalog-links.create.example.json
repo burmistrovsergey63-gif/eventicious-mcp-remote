@@ -1,0 +1,14 @@
+{
+  "tool": "eventicious_create_link",
+  "description": "Create a link element in a catalog",
+  "params": {
+    "catalogId": 12345,
+    "name": "Event Website",
+    "url": "https://example.com/event",
+    "viewOptions": "textOnly",
+    "externalId": "link-001",
+    "order": 1,
+    "dry_run": true,
+    "confirm": true
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_delete_text2",
+  "description": "Delete a Text 2.0 element (requires danger_confirm)",
+  "params": {
+    "catalogId": 12345,
+    "catalogElementId": 22222,
+    "danger_confirm": "DELETE_EVENTICIOUS_CATALOG_CONTENT",
+    "dry_run": true
+  }
+}

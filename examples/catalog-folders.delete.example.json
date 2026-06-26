@@ -1,0 +1,10 @@
+{
+  "tool": "eventicious_delete_folder",
+  "description": "Delete a folder (requires danger_confirm)",
+  "params": {
+    "catalogId": 12345,
+    "folderId": 67890,
+    "danger_confirm": "DELETE_EVENTICIOUS_CATALOG_FOLDER",
+    "dry_run": true
+  }
+}

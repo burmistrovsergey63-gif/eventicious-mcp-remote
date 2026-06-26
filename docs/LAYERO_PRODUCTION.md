@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.3.0"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.4.0"}
 
 # 2. Auth protection
 POST /mcp without Authorization
@@ -51,8 +51,34 @@ POST /mcp with Authorization but without Eventicious headers
 
 # 4. Tools available
 POST /mcp tools/list
-# Expected: 27+ tools (15 v0.1/v0.2 + 12 v0.3 schedule + 2 helpers)
+# Expected: 56+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog)
 ```
+
+## v0.4 Dry-Run Smoke Test
+
+Run the v0.4 smoke test after deploy:
+
+```powershell
+.\scripts\smoke-v04-dryrun.ps1 -BaseUrl "https://your-app.layero.ru" -McpAccessToken "your-token"
+```
+
+This tests:
+- Catalog CRUD dry_run
+- Folder CRUD dry_run with aclGroupsExternalIds
+- Link create/delete dry_run
+- Text 2.0 create/delete dry_run with GravityJson
+- Markdown to GravityJson helper
+- Video create/delete dry_run
+- Group add/delete dry_run
+- Order/menu dry_run
+- Bulk delete dry_run
+- Catalog import prepare/validate helpers
+
+## Important Notes
+
+- No real catalog import without `eventicious_validate_catalog_plan` passing
+- Text 2.0 / GravityJson only - legacy text endpoints intentionally not exposed
+- All destructive operations require exact danger_confirm strings
 
 ## First Real Write Test
 
