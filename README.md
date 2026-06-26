@@ -42,7 +42,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }
 ```
 
@@ -147,6 +147,8 @@ The .local.ps1 files are git-ignored.
 
 ## Available Tools
 
+### v0.1.0 core
+
 - eventicious_auth_check: Verify credentials (read-only)
 - eventicious_create_users: Create users (dry_run=true default)
 - eventicious_update_users: Update users (dry_run=true default)
@@ -155,6 +157,23 @@ The .local.ps1 files are git-ignored.
 - eventicious_get_acl_groups: List groups (read-only)
 - eventicious_create_acl_group: Create group (dry_run=true default)
 - eventicious_move_users_to_groups: Move users between groups (dry_run=true default)
+
+### v0.2 safety lifecycle
+
+- eventicious_delete_users: Delete users (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_USERS')
+- eventicious_update_acl_group: Rename a group (dry_run=true default)
+- eventicious_delete_acl_group: Delete a group (dry_run=true default, requires danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP')
+- eventicious_add_user_roles: Assign Curator/Supervisor roles (dry_run=true default)
+- eventicious_remove_user_roles: Remove roles (dry_run=true default)
+- eventicious_add_user_mentors: Assign a mentor to mentees (dry_run=true default)
+- eventicious_remove_user_mentors: Remove a mentor from mentees (dry_run=true default)
+
+## Safety model
+
+All write tools default to dry_run=true. Real execution requires:
+1. dry_run=false
+2. confirm=true
+3. For destructive operations (delete_users, delete_acl_group): danger_confirm must match an exact string
 
 ## v0.1.0 verified deploy
 

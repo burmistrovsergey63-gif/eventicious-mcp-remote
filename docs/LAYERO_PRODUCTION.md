@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.1.0"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.2.0"}
 
 # 2. Auth protection
 POST /mcp without Authorization
@@ -51,7 +51,7 @@ POST /mcp with Authorization but without Eventicious headers
 
 # 4. Tools available
 POST /mcp tools/list
-# Expected: 8 tools
+# Expected: 15 tools (8 v0.1 + 7 v0.2)
 ```
 
 ## First Real Write Test

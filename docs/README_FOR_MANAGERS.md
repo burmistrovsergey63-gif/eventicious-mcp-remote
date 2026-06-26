@@ -73,6 +73,13 @@ Never send raw data directly to Eventicious without preview.
 | eventicious_get_acl_groups | List all groups | Read-only |
 | eventicious_create_acl_group | Create a new group | dry_run=true |
 | eventicious_move_users_to_groups | Move users between groups | dry_run=true |
+| eventicious_delete_users | Delete users permanently | dry_run=true |
+| eventicious_update_acl_group | Rename a group | dry_run=true |
+| eventicious_delete_acl_group | Delete a group permanently | dry_run=true |
+| eventicious_add_user_roles | Assign Curator/Supervisor | dry_run=true |
+| eventicious_remove_user_roles | Remove roles | dry_run=true |
+| eventicious_add_user_mentors | Assign mentor to mentees | dry_run=true |
+| eventicious_remove_user_mentors | Remove mentor from mentees | dry_run=true |
 
 ### Safety Limits
 
@@ -80,6 +87,15 @@ Never send raw data directly to Eventicious without preview.
 - Rate limit: 10 requests/minute for user operations (when auto-publish is enabled)
 - All operations are logged for audit
 - Credentials are never stored on server
+
+### Destructive Operations (v0.2)
+
+Two tools require an extra safety string beyond confirm=true:
+
+- **eventicious_delete_users**: Requires `danger_confirm='DELETE_EVENTICIOUS_USERS'`
+- **eventicious_delete_acl_group**: Requires `danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP'`
+
+This prevents accidental permanent deletion of users or groups.
 
 ### Important Notes
 
@@ -91,7 +107,7 @@ Never send raw data directly to Eventicious without preview.
 
 ## First safe test
 
-1. Check tools/list - verify all 8 tools are available
+1. Check tools/list - verify all 15 tools are available
 2. Run eventicious_auth_check with your project keys - should return "Credentials valid"
 3. Create a dry_run preview of any write operation (e.g. create_users with dry_run: true)
 4. Review the preview payload carefully

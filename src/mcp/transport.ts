@@ -25,7 +25,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.1.0",
+    version: "0.2.0",
   });
 
   registerTools(server, credentials);
@@ -44,6 +44,13 @@ function toolError(message: string) {
     content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }],
     isError: true as const,
   };
+}
+
+function requireDangerConfirm(
+  dangerConfirm: string | undefined,
+  expected: string
+): boolean {
+  return dangerConfirm === expected;
 }
 
 function registerTools(
@@ -500,6 +507,435 @@ function registerTools(
       } catch (e) {
         logger.error("eventicious_api_error", {
           tool: "eventicious_move_users_to_groups",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  // ── v0.2 tools ──────────────────────────────────────────────
+
+  server.tool(
+    "eventicious_delete_users",
+    "Permanently delete users from Eventicious. Requires danger_confirm='DELETE_EVENTICIOUS_USERS' and confirm=true. dry_run=true by default.",
+    {
+      userIds: z.array(z.number()).min(1).max(maxUsers),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").describe("Exact string required"),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_delete_users",
+        dry_run: params.dry_run,
+        user_count: params.userIds.length,
+      });
+
+      if (!params.dry_run) {
+        if (!params.confirm) {
+          return toolError("confirm=true required for real deletion");
+        }
+        if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_USERS")) {
+          return toolError("danger_confirm='DELETE_EVENTICIOUS_USERS' required");
+        }
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: "DELETE /api/external/v2/users/delete",
+                payload: { userIds: params.userIds },
+              }),
+            },
+          ],
+        };
+      }
+
+      warnAutoPublishRateLimit("eventicious_delete_users");
+
+      try {
+        const res = await eventiciousRequest({
+          method: "DELETE",
+          endpoint: "/api/external/v2/users/delete",
+          body: { userIds: params.userIds },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_delete_users",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_update_acl_group",
+    "Rename an ACL group in Eventicious. dry_run=true by default.",
+    {
+      id: z.number().describe("Group ID in your external system"),
+      name: z.string().describe("New group name"),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_update_acl_group",
+        dry_run: params.dry_run,
+        group_id: params.id,
+      });
+
+      if (!params.dry_run && !params.confirm) {
+        return toolError("confirm=true required");
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: `PUT /api/external/v2/aclgroups/update/${params.id}`,
+                payload: { name: params.name },
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "PUT",
+          endpoint: `/api/external/v2/aclgroups/update/${params.id}`,
+          body: { name: params.name },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_update_acl_group",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_delete_acl_group",
+    "Permanently delete an ACL group from Eventicious. Requires danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP' and confirm=true. dry_run=true by default.",
+    {
+      id: z.number().describe("Group ID in your external system"),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").describe("Exact string required"),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_delete_acl_group",
+        dry_run: params.dry_run,
+        group_id: params.id,
+      });
+
+      if (!params.dry_run) {
+        if (!params.confirm) {
+          return toolError("confirm=true required for real deletion");
+        }
+        if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_ACL_GROUP")) {
+          return toolError("danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP' required");
+        }
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: `DELETE /api/external/v2/aclgroups/delete/${params.id}`,
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "DELETE",
+          endpoint: `/api/external/v2/aclgroups/delete/${params.id}`,
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_delete_acl_group",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_add_user_roles",
+    "Assign roles (Curator=1, Supervisor=2) to users within ACL groups. dry_run=true by default.",
+    {
+      roleInfo: z
+        .array(
+          z.object({
+            groupId: z.number().describe("Group ID in your external system"),
+            userId: z.number().describe("User ID in your external system"),
+            roleIds: z.array(z.number()).min(1).describe("Role IDs: 1=Curator, 2=Supervisor"),
+          })
+        )
+        .min(1)
+        .max(maxUsers),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_add_user_roles",
+        dry_run: params.dry_run,
+        role_count: params.roleInfo.length,
+      });
+
+      if (!params.dry_run && !params.confirm) {
+        return toolError("confirm=true required");
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: "POST /api/external/v2/aclgroups/roles/add",
+                payload: { roleInfo: params.roleInfo },
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "POST",
+          endpoint: "/api/external/v2/aclgroups/roles/add",
+          body: { roleInfo: params.roleInfo },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_add_user_roles",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_remove_user_roles",
+    "Remove roles from users within ACL groups. dry_run=true by default.",
+    {
+      roleInfo: z
+        .array(
+          z.object({
+            groupId: z.number().describe("Group ID in your external system"),
+            userId: z.number().describe("User ID in your external system"),
+            roleIds: z.array(z.number()).min(1).describe("Role IDs: 1=Curator, 2=Supervisor"),
+          })
+        )
+        .min(1)
+        .max(maxUsers),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_remove_user_roles",
+        dry_run: params.dry_run,
+        role_count: params.roleInfo.length,
+      });
+
+      if (!params.dry_run && !params.confirm) {
+        return toolError("confirm=true required");
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: "POST /api/external/v2/aclgroups/roles/remove",
+                payload: { roleInfo: params.roleInfo },
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "POST",
+          endpoint: "/api/external/v2/aclgroups/roles/remove",
+          body: { roleInfo: params.roleInfo },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_remove_user_roles",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_add_user_mentors",
+    "Assign a mentor to mentees in Eventicious. dry_run=true by default.",
+    {
+      mentorId: z.number().describe("External system user ID of the mentor"),
+      menteeIds: z.array(z.number()).min(1).max(maxUsers).describe("External system user IDs of mentees"),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_add_user_mentors",
+        dry_run: params.dry_run,
+        mentor_id: params.mentorId,
+        mentee_count: params.menteeIds.length,
+      });
+
+      if (!params.dry_run && !params.confirm) {
+        return toolError("confirm=true required");
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: "POST /api/external/v2/users/mentor",
+                payload: { mentorId: params.mentorId, menteeIds: params.menteeIds },
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "POST",
+          endpoint: "/api/external/v2/users/mentor",
+          body: { mentorId: params.mentorId, menteeIds: params.menteeIds },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_add_user_mentors",
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
+        return toolError(e instanceof Error ? e.message : "Unknown error");
+      }
+    }
+  );
+
+  server.tool(
+    "eventicious_remove_user_mentors",
+    "Remove a mentor from mentees in Eventicious. dry_run=true by default.",
+    {
+      mentorId: z.number().describe("External system user ID of the mentor"),
+      menteeIds: z.array(z.number()).min(1).max(maxUsers).describe("External system user IDs of mentees"),
+      dry_run: z.boolean().default(true),
+      confirm: z.boolean().default(false),
+    },
+    async (params) => {
+      logger.info("tool_call", {
+        tool: "eventicious_remove_user_mentors",
+        dry_run: params.dry_run,
+        mentor_id: params.mentorId,
+        mentee_count: params.menteeIds.length,
+      });
+
+      if (!params.dry_run && !params.confirm) {
+        return toolError("confirm=true required");
+      }
+
+      if (params.dry_run) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({
+                dry_run: true,
+                endpoint: "DELETE /api/external/v2/users/mentor",
+                payload: { mentorId: params.mentorId, menteeIds: params.menteeIds },
+              }),
+            },
+          ],
+        };
+      }
+
+      try {
+        const res = await eventiciousRequest({
+          method: "DELETE",
+          endpoint: "/api/external/v2/users/mentor",
+          body: { mentorId: params.mentorId, menteeIds: params.menteeIds },
+          credentials,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(res.data) },
+          ],
+        };
+      } catch (e) {
+        logger.error("eventicious_api_error", {
+          tool: "eventicious_remove_user_mentors",
           error: e instanceof Error ? e.message : "Unknown error",
         });
         return toolError(e instanceof Error ? e.message : "Unknown error");

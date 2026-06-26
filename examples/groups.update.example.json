@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_update_acl_group",
+  "arguments": {
+    "id": 100,
+    "name": "Updated Marketing Team",
+    "dry_run": true,
+    "confirm": false
+  }
+}

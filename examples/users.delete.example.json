@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_users",
+  "arguments": {
+    "userIds": [1, 2, 3],
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_USERS"
+  }
+}

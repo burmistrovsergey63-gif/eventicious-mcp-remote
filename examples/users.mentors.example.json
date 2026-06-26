@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_add_user_mentors",
+  "arguments": {
+    "mentorId": 1,
+    "menteeIds": [10, 11, 12],
+    "dry_run": true,
+    "confirm": false
+  }
+}

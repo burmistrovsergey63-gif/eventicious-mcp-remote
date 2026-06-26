@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_delete_acl_group",
+  "arguments": {
+    "id": 100,
+    "dry_run": true,
+    "confirm": false,
+    "danger_confirm": "DELETE_EVENTICIOUS_ACL_GROUP"
+  }
+}

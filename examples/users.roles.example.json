@@ -1,0 +1,14 @@
+{
+  "tool": "eventicious_add_user_roles",
+  "arguments": {
+    "roleInfo": [
+      {
+        "groupId": 1,
+        "userId": 1,
+        "roleIds": [1, 2]
+      }
+    ],
+    "dry_run": true,
+    "confirm": false
+  }
+}
