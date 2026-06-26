@@ -1,0 +1,9 @@
+{
+  "tool": "eventicious_create_acl_group",
+  "arguments": {
+    "id": 100,
+    "name": "Marketing Team",
+    "dry_run": true,
+    "confirm": false
+  }
+}

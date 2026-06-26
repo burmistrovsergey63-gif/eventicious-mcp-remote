@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "build": "npm run build",
+  "node": "20"
+}

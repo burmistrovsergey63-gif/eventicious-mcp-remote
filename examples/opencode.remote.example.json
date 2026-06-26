@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "eventicious": {
+      "type": "http",
+      "url": "https://your-layero-app.run.layero.app/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_ACCESS_TOKEN",
+        "x-eventicious-base-url": "https://api-integration.eventicious.ru",
+        "x-eventicious-client-id": "YOUR_CLIENT_ID",
+        "x-eventicious-client-secret": "YOUR_CLIENT_SECRET"
+      }
+    }
+  }
+}

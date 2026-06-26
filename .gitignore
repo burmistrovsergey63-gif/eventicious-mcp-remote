@@ -1,0 +1,7 @@
+.env
+.env.*
+*.local.ps1
+node_modules
+.next
+dist
+*.log
