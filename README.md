@@ -13,7 +13,7 @@ Remote MCP server for Eventicious External API v2, designed for deployment on La
 
 app/ - Next.js App Router routes
   page.tsx - Landing page
-  health/route.ts - Health check endpoint
+  healthz/route.ts - Health check endpoint
   mcp/route.ts - MCP endpoint (POST)
 src/ - Source code
   config.ts - Environment configuration
@@ -27,6 +27,26 @@ src/ - Source code
   schemas/ - Input validation schemas
   tools/ - Tool implementations
 scripts/ - Smoke test scripts
+
+## Health endpoint
+
+Primary health endpoint:
+
+```
+GET /healthz
+```
+
+Expected response:
+
+```json
+{
+  "ok": true,
+  "service": "eventicious-mcp-remote",
+  "version": "0.1.0"
+}
+```
+
+> Note: Use `/healthz` (not `/health`) for Layero/production health checks. The `/health` path may be intercepted by platform built-in health checks.
 
 ## Quick Start
 
@@ -111,7 +131,8 @@ The .local.ps1 files are git-ignored.
    - MCP_ACCESS_TOKEN: Your secure token
    - EVENTICIOUS_DEFAULT_BASE_URL: https://api-integration.eventicious.ru
    - DRY_RUN_DEFAULT: true
-5. Deploy - Layero builds and deploys automatically
+5. Set health check path: `/healthz`
+6. Deploy - Layero builds and deploys automatically
 
 ## Production Checklist Before Layero Deploy
 
