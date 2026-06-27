@@ -269,7 +269,7 @@ Test-Step "add_manual_gamification_charge dry_run (no confirm)" {
 
 # --- Total tools check ---
 
-Test-Step "tools/count >= 64" {
+Test-Step "tools/count == 68 and all v0.5 tools present" {
     $headers = @{
         "Authorization" = "Bearer $McpAccessToken"
         "x-eventicious-client-id" = "fake-client-id"
@@ -282,12 +282,41 @@ Test-Step "tools/count >= 64" {
     $dataLine = ($sse -split "`n") | Where-Object { $_ -match "^data: " } | Select-Object -First 1
     $json = $dataLine -replace "^data: ", ""
     $parsed = $json | ConvertFrom-Json
-    $toolCount = ($parsed.result.tools | Measure-Object).Count
+    $toolNames = $parsed.result.tools | ForEach-Object { $_.name } | Sort-Object
+    $toolCount = ($toolNames | Measure-Object).Count
     Write-Host "  Tools count: $toolCount"
-    if ($toolCount -ge 64) {
-        return "$toolCount tools found"
+
+    if ($toolCount -ne 68) {
+        throw "Expected exactly 68 tools, got $toolCount"
     }
-    throw "Expected >= 64 tools, got $toolCount"
+
+    $v05Tools = @(
+        "eventicious_prepare_course_import",
+        "eventicious_validate_course_plan",
+        "eventicious_map_course_import_response",
+        "eventicious_check_course_ready_to_finalize",
+        "eventicious_upload_course_images",
+        "eventicious_import_course_structure",
+        "eventicious_import_poll_content",
+        "eventicious_import_task_content",
+        "eventicious_upload_task_attachments",
+        "eventicious_upload_scorm_to_stage",
+        "eventicious_finalize_course",
+        "eventicious_add_manual_gamification_charge"
+    )
+
+    $missing = @()
+    foreach ($t in $v05Tools) {
+        if ($toolNames -notcontains $t) {
+            $missing += $t
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        throw "Missing v0.5 tools: $($missing -join ', ')"
+    }
+
+    return "$toolCount tools, all 12 v0.5 tools present"
 }
 
 # --- Print results ---
