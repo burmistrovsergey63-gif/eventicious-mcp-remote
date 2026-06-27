@@ -22,7 +22,7 @@ export const deleteAclGroupSchema = z.object({
   id: z.number().describe("Group ID in your external system"),
   dry_run: z.boolean().default(true),
   confirm: z.boolean().default(false),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").describe("Exact string required for delete"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").optional().describe("Exact string required for real deletion"),
 });
 
 export const roleInfoSchema = z.object({

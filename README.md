@@ -5,6 +5,9 @@ Remote MCP server for Eventicious External API v2, designed for deployment on La
 ## Features
 
 - Safe by default: All write operations use dry_run=true
+- dry_run=true always works without confirm — previews are always safe
+- confirm=true only required for real execution (dry_run=false)
+- danger_confirm only required for destructive real execution (dry_run=false)
 - Secure: Eventicious credentials passed via headers, never stored on server
 - Simple: Clean architecture with TypeScript and Next.js App Router
 - Deployable: Ready for Layero deployment via GitHub
@@ -42,7 +45,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.4.0"
+  "version": "0.4.1"
 }
 ```
 

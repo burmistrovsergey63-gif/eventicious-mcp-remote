@@ -8,6 +8,10 @@ import {
   catalogDeleteSchema,
 } from "../schemas/catalogs";
 
+function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
+  return dangerConfirm === expected;
+}
+
 export function registerCatalogTools(
   server: McpServer,
   credentials: EventiciousCredentials,
@@ -57,12 +61,12 @@ export function registerCatalogTools(
     catalogCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_catalog", dry_run: params.dry_run });
-      if (!params.confirm) {
-        return toolError("confirm must be true to create catalog");
-      }
       const { dry_run, confirm, ...body } = params;
       if (dry_run) {
         return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: body }) }] };
+      }
+      if (!confirm) {
+        return toolError("confirm=true required to create catalog");
       }
       try {
         const res = await eventiciousRequest({
@@ -84,12 +88,12 @@ export function registerCatalogTools(
     catalogUpdateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) {
-        return toolError("confirm must be true to update catalog");
-      }
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) {
         return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      }
+      if (!confirm) {
+        return toolError("confirm=true required to update catalog");
       }
       try {
         const res = await eventiciousRequest({
@@ -113,6 +117,12 @@ export function registerCatalogTools(
       logger.info("tool_call", { tool: "eventicious_delete_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) {
         return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId }) }] };
+      }
+      if (!params.confirm) {
+        return toolError("confirm=true required to delete catalog");
+      }
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG")) {
+        return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG' required");
       }
       try {
         const res = await eventiciousRequest({

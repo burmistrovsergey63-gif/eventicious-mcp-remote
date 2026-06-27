@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.4.0"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.4.1"}
 
 # 2. Auth protection
 POST /mcp without Authorization
@@ -79,6 +79,13 @@ This tests:
 - No real catalog import without `eventicious_validate_catalog_plan` passing
 - Text 2.0 / GravityJson only - legacy text endpoints intentionally not exposed
 - All destructive operations require exact danger_confirm strings
+
+## v0.4.1 Patch Notes
+
+- dry-run previews do NOT require `confirm=true` — all tools now correctly return previews when `dry_run=true` (or default true)
+- `confirm=true` is only required when `dry_run=false`
+- `danger_confirm` is only required when `dry_run=false` for destructive operations
+- Run `.\scripts\smoke-dryrun-no-confirm.ps1` to verify the regression fix
 
 ## First Real Write Test
 

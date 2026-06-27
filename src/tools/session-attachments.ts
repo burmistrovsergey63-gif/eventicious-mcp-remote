@@ -95,7 +95,7 @@ export function registerSessionAttachmentTools(
       attachmentId: z.number().describe("Attachment ID"),
       dry_run: z.boolean().default(true),
       confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSION_ATTACHMENTS").describe("Exact string required"),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSION_ATTACHMENTS").optional().describe("Exact string required for real deletion"),
     },
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_session_attachment", dry_run: params.dry_run, session_id: params.sessionId, attachment_id: params.attachmentId });

@@ -52,6 +52,8 @@ Every write operation defaults to dry_run=true. This means:
 The confirm flag is a safety mechanism. It prevents accidental execution.
 Even if you set dry_run: false, the tool will refuse to run without confirm: true.
 
+**Important:** dry_run=true (the default) never requires confirm. Managers can ask for previews without confirmations. Real execution (dry_run=false) requires explicit approval via confirm=true.
+
 ### Handling Excel/CSV Data from Clients
 
 When a client sends user data in Excel or CSV:

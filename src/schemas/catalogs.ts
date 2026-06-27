@@ -33,6 +33,7 @@ export const catalogUpdateSchema = {
 
 export const catalogDeleteSchema = {
   catalogId: z.number().int().describe("Catalog ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };

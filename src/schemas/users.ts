@@ -25,7 +25,7 @@ export const deleteUsersSchema = z.object({
   userIds: z.array(z.number()).min(1).max(200),
   dry_run: z.boolean().default(true),
   confirm: z.boolean().default(false),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").describe("Exact string required for delete"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").optional().describe("Exact string required for real deletion"),
 });
 
 export const mentorSchema = z.object({

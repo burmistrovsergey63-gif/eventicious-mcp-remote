@@ -96,7 +96,7 @@ export function registerTagTools(
       id: z.number().describe("Tag ID"),
       dry_run: z.boolean().default(true),
       confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_TAGS").describe("Exact string required"),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_TAGS").optional().describe("Exact string required for real deletion"),
     },
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_tag", dry_run: params.dry_run, tag_id: params.id });

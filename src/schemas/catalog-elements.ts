@@ -37,8 +37,9 @@ export const folderUpdateSchema = {
 export const folderDeleteSchema = {
   catalogId: z.number().int().describe("Parent catalog ID"),
   folderId: z.number().int().describe("Folder ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_FOLDER").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_FOLDER").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Files ---
@@ -54,8 +55,9 @@ export const fileAddToCatalogSchema = {
 export const fileDeleteFromCatalogSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   catalogElementId: z.number().int().describe("Catalog element ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Links ---
@@ -76,8 +78,9 @@ export const linkCreateSchema = {
 export const linkDeleteSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   catalogElementId: z.number().int().describe("Link element ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Text 2.0 / GravityJson ---
@@ -93,8 +96,9 @@ export const text2CreateSchema = {
 export const text2DeleteSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   catalogElementId: z.number().int().describe("Text 2.0 element ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Videos ---
@@ -112,8 +116,9 @@ export const videoAddToCatalogSchema = {
 export const videoDeleteFromCatalogSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   catalogElementId: z.number().int().describe("Video element ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_CONTENT").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Groups ---
@@ -130,8 +135,9 @@ export const catalogGroupAddSchema = {
 export const catalogGroupDeleteSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   catalogElementId: z.number().int().describe("Group element ID to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_GROUP").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_GROUP").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Order ---
@@ -156,8 +162,9 @@ export const catalogBulkDeleteSchema = {
   catalogId: z.number().int().describe("Catalog ID"),
   subcatalogIds: z.array(z.number().int()).optional().describe("Folder IDs to delete"),
   elementIds: z.array(z.number().int()).optional().describe("Element IDs to delete"),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
 
 // --- Menu ---
@@ -169,6 +176,7 @@ export const catalogMenuAddSchema = {
 
 export const catalogMenuDeleteSchema = {
   catalogId: z.number().int().describe("Catalog or folder ID to remove from menu"),
-  danger_confirm: z.literal("CHANGE_EVENTICIOUS_CATALOG_ORDER").describe("Exact string required"),
+  danger_confirm: z.literal("CHANGE_EVENTICIOUS_CATALOG_ORDER").optional().describe("Exact string required for real deletion"),
   dry_run: z.boolean().default(true).describe("Preview only"),
+  confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };

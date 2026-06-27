@@ -36,7 +36,7 @@ export const sessionDeleteSchema = z.object({
   id: z.number().describe("Session ID in your external system"),
   dry_run: z.boolean().default(true),
   confirm: z.boolean().default(false),
-  danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSIONS").describe("Exact string required"),
+  danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSIONS").optional().describe("Exact string required for real deletion"),
 });
 
 export const sessionIdSchema = z.object({

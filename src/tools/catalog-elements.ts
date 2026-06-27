@@ -23,6 +23,10 @@ import {
 } from "../schemas/catalog-elements";
 import { convertMarkdownToGravityJson, validateGravityJson } from "./gravity-json";
 
+function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
+  return dangerConfirm === expected;
+}
+
 export function registerCatalogElementTools(
   server: McpServer,
   credentials: EventiciousCredentials,
@@ -35,9 +39,9 @@ export function registerCatalogElementTools(
     folderCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_folder", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to create folder");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to create folder");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -51,9 +55,9 @@ export function registerCatalogElementTools(
     folderUpdateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_folder", catalogId: params.catalogId, folderId: params.folderId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to update folder");
       const { dry_run, confirm, catalogId, folderId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, folderId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to update folder");
       try {
         const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders/${folderId}`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -68,6 +72,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_folder", catalogId: params.catalogId, folderId: params.folderId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, folderId: params.folderId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete folder");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_FOLDER")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_FOLDER' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/folders/${params.folderId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -82,9 +88,9 @@ export function registerCatalogElementTools(
     fileAddToCatalogSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_add_file_to_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to add file");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to add file");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/files`, body: { files: [body] }, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -99,6 +105,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_file_from_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, catalogElementId: params.catalogElementId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete file");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/files/${params.catalogElementId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -113,9 +121,9 @@ export function registerCatalogElementTools(
     linkCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_link", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to create link");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to create link");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/links`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -130,6 +138,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_link", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, catalogElementId: params.catalogElementId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete link");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/links/${params.catalogElementId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -144,7 +154,6 @@ export function registerCatalogElementTools(
     text2CreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_text2", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to create text2");
 
       let gravityJson: Record<string, unknown>;
       let gravityJsonString: string;
@@ -203,6 +212,8 @@ export function registerCatalogElementTools(
         };
       }
 
+      if (!confirm) return toolError("confirm=true required to create text2");
+
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/gravity-editor`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as Record<string, unknown>, warnings }) }] };
@@ -217,6 +228,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_text2", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, catalogElementId: params.catalogElementId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete text2");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/gravity-editor/${params.catalogElementId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -231,9 +244,9 @@ export function registerCatalogElementTools(
     videoAddToCatalogSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_add_video_to_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to add video");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to add video");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/videos`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -248,6 +261,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_video_from_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, catalogElementId: params.catalogElementId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete video");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/videos/${params.catalogElementId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -262,9 +277,9 @@ export function registerCatalogElementTools(
     catalogGroupAddSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_add_groups_to_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to add groups");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to add groups");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/groups`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -279,6 +294,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_group_from_catalog", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId, catalogElementId: params.catalogElementId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete group");
+      if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_GROUP")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_GROUP' required");
       try {
         const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/groups/${params.catalogElementId}`, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -293,9 +310,9 @@ export function registerCatalogElementTools(
     catalogOrderSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_set_catalog_order", dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to reorder catalogs");
       const { dry_run, confirm, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to reorder catalogs");
       try {
         const res = await eventiciousRequest({ method: "PUT", endpoint: "/api/external/v2/catalogs/order", body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
@@ -309,9 +326,9 @@ export function registerCatalogElementTools(
     catalogElementOrderSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_set_catalog_element_order", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to reorder elements");
       const { dry_run, confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!confirm) return toolError("confirm=true required to reorder elements");
       try {
         const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/order`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
@@ -328,6 +345,7 @@ export function registerCatalogElementTools(
       logger.info("tool_call", { tool: "eventicious_bulk_delete_catalog_elements", catalogId: params.catalogId, dry_run: params.dry_run });
       const { dry_run, danger_confirm, catalogId, ...body } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
+      if (!requireDangerConfirm(danger_confirm, "DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK' required");
       try {
         const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/deleteBulk`, body, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
@@ -342,9 +360,9 @@ export function registerCatalogElementTools(
     catalogMenuAddSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_add_to_menu", catalogId: params.catalogId, dry_run: params.dry_run });
-      if (!params.confirm) return toolError("confirm must be true to add to menu");
       const { dry_run, confirm, catalogId } = params;
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId }) }] };
+      if (!confirm) return toolError("confirm=true required to add to menu");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/menu/add`, body: {}, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
@@ -359,6 +377,8 @@ export function registerCatalogElementTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_from_menu", catalogId: params.catalogId, dry_run: params.dry_run });
       if (params.dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId: params.catalogId }) }] };
+      if (!params.confirm) return toolError("confirm=true required to delete from menu");
+      if (!requireDangerConfirm(params.danger_confirm, "CHANGE_EVENTICIOUS_CATALOG_ORDER")) return toolError("danger_confirm='CHANGE_EVENTICIOUS_CATALOG_ORDER' required");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${params.catalogId}/menu/delete`, body: {}, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };

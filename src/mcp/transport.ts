@@ -34,7 +34,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.4.0",
+    version: "0.4.1",
   });
 
   registerTools(server, credentials);
@@ -532,7 +532,7 @@ function registerTools(
       userIds: z.array(z.number()).min(1).max(maxUsers),
       dry_run: z.boolean().default(true),
       confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").describe("Exact string required"),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").optional().describe("Exact string required for real deletion"),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -653,7 +653,7 @@ function registerTools(
       id: z.number().describe("Group ID in your external system"),
       dry_run: z.boolean().default(true),
       confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").describe("Exact string required"),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").optional().describe("Exact string required for real deletion"),
     },
     async (params) => {
       logger.info("tool_call", {

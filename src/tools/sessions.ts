@@ -132,7 +132,7 @@ export function registerSessionTools(
       id: z.number().describe("Session ID"),
       dry_run: z.boolean().default(true),
       confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSIONS").describe("Exact string required"),
+      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSIONS").optional().describe("Exact string required for real deletion"),
     },
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_session", dry_run: params.dry_run, session_id: params.id });

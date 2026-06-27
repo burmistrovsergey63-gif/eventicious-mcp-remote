@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    v0.4 dry-run smoke tests for Eventicious MCP Remote Connector.
+    v0.4.1 dry-run smoke tests for Eventicious MCP Remote Connector.
 
 .DESCRIPTION
     Tests all v0.4 catalog tools via the MCP endpoint with dry_run=true.
+    Does NOT require confirm=true for dry_run previews.
     Does NOT make real Eventicious requests.
 
 .PARAMETER BaseUrl
@@ -67,7 +68,7 @@ function Invoke-McpTool {
 
 $BaseUrl = $BaseUrl.TrimEnd('/')
 
-Write-Host "`nv0.4 Dry-Run Smoke Tests: $BaseUrl`n" -ForegroundColor Cyan
+Write-Host "`nv0.4.1 Dry-Run Smoke Tests: $BaseUrl`n" -ForegroundColor Cyan
 
 # 1. Verify tool count >= 56
 Test-Step "tools/list => expected tools" {
@@ -99,7 +100,6 @@ Test-Step "eventicious_create_catalog dry_run" {
         name = "Smoke Test Catalog"
         externalId = "smoke-catalog-001"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -114,7 +114,6 @@ Test-Step "eventicious_update_catalog dry_run" {
         catalogId = 9999001
         name = "Updated Catalog"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -143,9 +142,9 @@ Test-Step "eventicious_create_folder dry_run" {
         catalogId = 9999001
         name = "Smoke Folder"
         description = "Test folder"
+        viewOptions = "textOnly"
         aclGroupsExternalIds = @(1001, 1002)
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -161,7 +160,6 @@ Test-Step "eventicious_update_folder dry_run" {
         folderId = 9999002
         name = "Updated Folder"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -193,7 +191,6 @@ Test-Step "eventicious_create_link dry_run" {
         url = "https://example.com"
         viewOptions = "textOnly"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -251,7 +248,6 @@ Test-Step "eventicious_create_text2 dry_run" {
         text = $gravityJson
         externalId = "smoke-text2-001"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -267,7 +263,6 @@ Test-Step "eventicious_create_text2 dry_run (markdown)" {
         text = "# Hello`n`nThis is a **test**."
         externalId = "smoke-text2-002"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true -and $text.gravityJsonPreview) {
@@ -298,7 +293,6 @@ Test-Step "eventicious_add_video_to_catalog dry_run" {
         videoId = 9999005
         name = "Test Video"
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -328,7 +322,6 @@ Test-Step "eventicious_add_groups_to_catalog dry_run" {
         catalogId = 9999001
         groups = @(@{ externalId = 1001; order = 1 })
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -357,7 +350,6 @@ Test-Step "eventicious_set_catalog_order dry_run" {
     $resp = Invoke-McpTool -BaseUrl $BaseUrl -McpAccessToken $McpAccessToken -ToolName "eventicious_set_catalog_order" -Arguments @{
         catalogIds = @(9999001, 9999002, 9999003)
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -375,7 +367,6 @@ Test-Step "eventicious_set_catalog_element_order dry_run" {
             @{ id = 9999004; type = "GravityEditorContent" }
         )
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
@@ -404,7 +395,6 @@ Test-Step "eventicious_add_to_menu dry_run" {
     $resp = Invoke-McpTool -BaseUrl $BaseUrl -McpAccessToken $McpAccessToken -ToolName "eventicious_add_to_menu" -Arguments @{
         catalogId = 9999001
         dry_run = $true
-        confirm = $true
     }
     $text = $resp.result.content[0].text | ConvertFrom-Json
     if ($text.dry_run -eq $true) {
