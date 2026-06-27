@@ -1,0 +1,22 @@
+{
+  "name": "Import Task Content",
+  "description": "Import task content with fields and settings",
+  "tool": "eventicious_import_task_content",
+  "input": {
+    "taskContentId": 600,
+    "title": "Составь маркетинговый план",
+    "description": "Составьте маркетинговый план для нового продукта",
+    "settings": {
+      "reviewInfo": { "isReviewRequired": true, "maxScore": 100 },
+      "screenInfo": { "completedTitle": "Задание принято", "rejectedTitle": "Задание возвращено на доработку" },
+      "notificationInfo": { "isEnabled": true, "sendToCurator": true, "text": "Новое задание на проверке" }
+    },
+    "fields": [
+      { "title": "Название продукта", "type": "String", "required": true },
+      { "title": "Описание", "type": "Text", "required": true },
+      { "title": "Ссылка на презентацию", "type": "Url" },
+      { "title": "Файл плана", "type": "Attachment", "required": true }
+    ],
+    "dry_run": true
+  }
+}

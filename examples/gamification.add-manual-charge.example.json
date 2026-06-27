@@ -1,0 +1,11 @@
+{
+  "name": "Add Manual Gamification Charge",
+  "description": "Manually add gamification points to a user",
+  "tool": "eventicious_add_manual_gamification_charge",
+  "input": {
+    "externalId": 456,
+    "scores": 100,
+    "reason": "Бонус за прохождение курса",
+    "dry_run": true
+  }
+}

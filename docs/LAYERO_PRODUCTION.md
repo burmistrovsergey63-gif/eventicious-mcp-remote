@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.4.1"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.5.0"}
 
 # 2. Auth protection
 POST /mcp without Authorization
@@ -51,7 +51,7 @@ POST /mcp with Authorization but without Eventicious headers
 
 # 4. Tools available
 POST /mcp tools/list
-# Expected: 56+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog)
+# Expected: 64+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog + 8 v0.5 course/gamification)
 ```
 
 ## v0.4 Dry-Run Smoke Test
@@ -86,6 +86,15 @@ This tests:
 - `confirm=true` is only required when `dry_run=false`
 - `danger_confirm` is only required when `dry_run=false` for destructive operations
 - Run `.\scripts\smoke-dryrun-no-confirm.ps1` to verify the regression fix
+
+## v0.5 Course Pack
+
+- 8 new tools: course import, finalize, image upload, poll import, task import, task attachment upload, SCORM upload, gamification charge
+- Course import pipeline: upload images → import structure → map IDs → fill content → ready check → finalize
+- Cover image required: `coverImageFileId` + `coverImageThumbnailFileId`
+- Finalize requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`
+- No real uploads/finalize in smoke tests
+- Run `.\scripts\smoke-v05-dryrun.ps1` after deploy
 
 ## First Real Write Test
 

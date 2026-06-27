@@ -1,0 +1,31 @@
+{
+  "name": "Import Test with Answers",
+  "description": "Import a TestWithAnswers type poll with correct answers",
+  "tool": "eventicious_import_poll_content",
+  "input": {
+    "pollId": 501,
+    "name": "Экзамен по маркетингу",
+    "type": "TestWithAnswers",
+    "showRightAnswerAfterAnswerComplete": true,
+    "shuffleQuestions": true,
+    "shuffleOptions": true,
+    "screens": [
+      {
+        "title": "Вопросы",
+        "questions": [
+          {
+            "text": "Что такое KPI?",
+            "type": "SingleSelect",
+            "options": [
+              { "optionData": { "text": "Ключевой показатель эффективности" }, "isRight": true, "rate": 10 },
+              { "optionData": { "text": "Компания производит инвестиции" }, "isRight": false },
+              { "optionData": { "text": "Краткосрочный план инвестирования" }, "isRight": false }
+            ]
+          }
+        ]
+      }
+    ],
+    "resultScreenSettings": { "showRates": true, "rateRanges": [{ "start": 0, "end": 5, "comment": "Нужно подучить" }, { "start": 6, "end": 10, "comment": "Отлично!" }] },
+    "dry_run": true
+  }
+}

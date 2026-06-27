@@ -1,0 +1,68 @@
+{
+  "name": "Course Import Structure",
+  "description": "Import a new course with mixed stage types",
+  "tool": "eventicious_import_course_structure",
+  "input": {
+    "name": "Введение в маркетинг",
+    "description": "Базовый курс по основам маркетинга",
+    "coverImageFileId": 186374,
+    "coverImageThumbnailFileId": 186377,
+    "settings": {
+      "progress": {
+        "isEnabled": true,
+        "hintText": "Пройдено {Progress}% курса"
+      },
+      "finalScreen": {
+        "isEnabled": true,
+        "title": "Поздравляем!",
+        "text": "Вы успешно завершили курс."
+      },
+      "deadline": {
+        "isEnabled": false
+      },
+      "isFreeOrderAllowed": false
+    },
+    "stages": [
+      {
+        "name": "Введение",
+        "type": "Common",
+        "settings": {
+          "finalMessage": {
+            "isEnabled": true,
+            "title": "Раздел пройден",
+            "text": "Переходите к следующему разделу"
+          }
+        }
+      },
+      {
+        "name": "Тест по теории",
+        "type": "Common",
+        "settings": {
+          "transition": {
+            "conditionType": "PassPoll",
+            "poll": { "name": "Тест по маркетингу" },
+            "pollButtonNameOverride": "Начать тест",
+            "pollPoints": 100
+          },
+          "finalMessage": {
+            "isEnabled": true,
+            "title": "Тест завершен"
+          }
+        }
+      },
+      {
+        "name": "Практическое задание",
+        "type": "Task",
+        "taskContent": {
+          "title": "Составь маркетинговый план"
+        }
+      },
+      {
+        "name": "Интерактивный модуль",
+        "type": "Scorm"
+      }
+    ],
+    "externalId": "marketing-course-001",
+    "dry_run": true
+  }
+}

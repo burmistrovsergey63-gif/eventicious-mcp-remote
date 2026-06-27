@@ -126,6 +126,44 @@ Never send raw data directly to Eventicious without preview.
 | eventicious_prepare_catalog_import | Build catalog import plan | helper |
 | eventicious_validate_catalog_plan | Validate catalog import plan | helper |
 
+### Course Import Tools (v0.5)
+
+| Tool | Description | Default |
+|------|-------------|---------|
+| eventicious_import_course_structure | Create course with stages | dry_run=true |
+| eventicious_finalize_course | Activate draft course | dry_run=true |
+| eventicious_upload_course_images | Upload cover images | dry_run=true |
+| eventicious_import_poll_content | Fill poll/test content | dry_run=true |
+| eventicious_import_task_content | Fill task content | dry_run=true |
+| eventicious_upload_task_attachments | Upload task attachments | dry_run=true |
+| eventicious_upload_scorm_to_stage | Upload SCORM zip | dry_run=true |
+| eventicious_add_manual_gamification_charge | Add gamification points | dry_run=true |
+| eventicious_prepare_course_import | Build course import plan | helper |
+| eventicious_validate_course_plan | Validate course plan | helper |
+| eventicious_map_course_import_response | Map IDs from import | helper |
+| eventicious_check_course_ready_to_finalize | Check finalize readiness | helper |
+
+### Course Import Workflow
+
+1. **Prepare**: `eventicious_prepare_course_import` — build execution plan
+2. **Validate**: `eventicious_validate_course_plan` — check plan validity
+3. **Upload cover**: `eventicious_upload_course_images` — get `coverImageFileId` + `coverImageThumbnailFileId`
+4. **Import structure**: `eventicious_import_course_structure` — returns stage/poll/task/scorm IDs
+5. **Map IDs**: `eventicious_map_course_import_response`
+6. **Fill catalogs**: use catalog tools for Common stages
+7. **Import polls**: `eventicious_import_poll_content`
+8. **Upload task attachments**: `eventicious_upload_task_attachments`
+9. **Import tasks**: `eventicious_import_task_content`
+10. **Upload SCORM**: `eventicious_upload_scorm_to_stage`
+11. **Check ready**: `eventicious_check_course_ready_to_finalize`
+12. **Finalize**: `eventicious_finalize_course` (requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`)
+
+### Gamification
+
+`eventicious_add_manual_gamification_charge` — manually add points to a user.
+Requires: `externalId`, `scores` (1-10000), `reason`.
+Real execution requires `dry_run=false` + `confirm=true`.
+
 ### Safety Limits
 
 - Max 200 users per batch operation

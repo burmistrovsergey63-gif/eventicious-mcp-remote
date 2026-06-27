@@ -1,0 +1,12 @@
+{
+  "name": "Upload SCORM to Stage",
+  "description": "Upload SCORM zip archive to course stage",
+  "tool": "eventicious_upload_scorm_to_stage",
+  "input": {
+    "courseId": 100,
+    "stageId": 303,
+    "scormId": 700,
+    "filePath": "/path/to/scorm-package.zip",
+    "dry_run": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Check Course Ready to Finalize",
+  "description": "Check if course is ready for finalization",
+  "tool": "eventicious_check_course_ready_to_finalize",
+  "input": {
+    "courseId": 100,
+    "coursePlan": { "name": "Test", "stages": [] },
+    "filledContentStatus": {
+      "catalogsFilled": true,
+      "pollsFilled": true,
+      "tasksFilled": true,
+      "scormUploaded": true,
+      "coverUploaded": true,
+      "attachmentsUploaded": true
+    }
+  }
+}

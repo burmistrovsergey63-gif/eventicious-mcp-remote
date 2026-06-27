@@ -1,0 +1,40 @@
+{
+  "name": "Course Import with Deadline Settings",
+  "description": "Import course with deadline and notification settings",
+  "tool": "eventicious_import_course_structure",
+  "input": {
+    "name": "Кибербезопасность",
+    "description": "Курс по основам информационной безопасности",
+    "coverImageFileId": 186374,
+    "coverImageThumbnailFileId": 186377,
+    "settings": {
+      "progress": { "isEnabled": true, "hintText": "Выполнено {Progress}%" },
+      "finalScreen": { "isEnabled": true, "title": "Курс завершен!", "text": "Спасибо за прохождение." },
+      "deadline": {
+        "isEnabled": true,
+        "relativeDeadlineUnits": "Months",
+        "relativeDeadlineValue": 3,
+        "notificationSettings": {
+          "isEnabled": true,
+          "localizedText": {
+            "ru-RU": "Приближается срок прохождения курса «{CourseName}». Успейте завершить к {DeadlineDate}.",
+            "en-US": "The deadline for the «{CourseName}» course is approaching. Complete it by {DeadlineDate}."
+          },
+          "duplicateInEmail": false,
+          "sendingPeriods": [
+            { "unit": "Months", "value": 1 },
+            { "unit": "Weeks", "value": 2 },
+            { "unit": "Days", "value": 1 }
+          ]
+        }
+      },
+      "isFreeOrderAllowed": true
+    },
+    "stages": [
+      { "name": "Теория", "type": "Common" },
+      { "name": "Тест", "type": "Common", "settings": { "transition": { "conditionType": "PassTest", "poll": { "name": "Экзамен" } }, "finalMessage": { "isEnabled": true, "title": "Тест сдан" } } }
+    ],
+    "externalId": "security-course-001",
+    "dry_run": true
+  }
+}

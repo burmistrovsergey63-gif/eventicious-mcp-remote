@@ -1,0 +1,9 @@
+{
+  "name": "Upload Course Images",
+  "description": "Upload course cover image and thumbnail",
+  "tool": "eventicious_upload_course_images",
+  "input": {
+    "filePaths": ["/path/to/cover.jpg", "/path/to/thumb.jpg"],
+    "dry_run": true
+  }
+}

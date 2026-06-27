@@ -1,0 +1,28 @@
+{
+  "name": "Import Test without Answers",
+  "description": "Import a TestWithoutAnswers type poll (no correct answers)",
+  "tool": "eventicious_import_poll_content",
+  "input": {
+    "pollId": 502,
+    "name": "Опрос без правильных ответов",
+    "type": "TestWithoutAnswers",
+    "screens": [
+      {
+        "title": "Мнение",
+        "questions": [
+          {
+            "text": "Какой формат обучения предпочитаете?",
+            "type": "MultiSelect",
+            "options": [
+              { "optionData": { "text": "Видео" } },
+              { "optionData": { "text": "Текст" } },
+              { "optionData": { "text": "Практика" } }
+            ]
+          }
+        ]
+      }
+    ],
+    "resultScreenSettings": { "showRates": false },
+    "dry_run": true
+  }
+}

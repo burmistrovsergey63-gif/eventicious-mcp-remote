@@ -45,7 +45,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.4.1"
+  "version": "0.5.0"
 }
 ```
 
@@ -258,6 +258,43 @@ Safe catalog import workflow:
 
 Helper tools never perform real writes.
 
+## v0.5 Course Pack + Gamification (8 tools)
+
+### Course Import Pipeline
+
+Course creation follows an import pipeline:
+1. **Upload cover image** → `eventicious_upload_course_images` → get `coverImageFileId` + `coverImageThumbnailFileId`
+2. **Import course structure** → `eventicious_import_course_structure` → returns `courseId`, `stageIds`, `pollIds`, `taskContentIds`, `scormIds`, `catalogIds`
+3. **Map returned IDs** → `eventicious_map_course_import_response`
+4. **Fill stage catalogs** via catalog tools
+5. **Import poll/test content** → `eventicious_import_poll_content`
+6. **Upload task attachments** → `eventicious_upload_task_attachments`
+7. **Import task content** → `eventicious_import_task_content`
+8. **Upload SCORM zip** → `eventicious_upload_scorm_to_stage`
+9. **Check ready** → `eventicious_check_course_ready_to_finalize`
+10. **Finalize course** → `eventicious_finalize_course` (requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`)
+
+### Cover Image Required
+
+Course creation requires both `coverImageFileId` and `coverImageThumbnailFileId`. Upload images first via `eventicious_upload_course_images`.
+
+### Course Settings
+
+- **progress**: `isEnabled`, `hintText`
+- **finalScreen**: `isEnabled`, `title`, `text`
+- **deadline**: `isEnabled`, `fixedDeadlineDate` or `relativeDeadlineUnits`+`relativeDeadlineValue`, `notificationSettings` with `localizedText` and `sendingPeriods`
+- **isFreeOrderAllowed**: allow arbitrary stage order
+
+### Stage Types
+
+- **Common**: info/catalog content stages
+- **Task**: task content with fields, review, attachments
+- **Scorm**: SCORM zip upload
+
+### Gamification
+
+- `eventicious_add_manual_gamification_charge`: manually add points to a user
+
 ## Safety model
 
 All write tools default to dry_run=true. Real execution requires:
@@ -275,7 +312,8 @@ All write tools default to dry_run=true. Real execution requires:
    - DELETE_EVENTICIOUS_CATALOG_CONTENT
    - DELETE_EVENTICIOUS_CATALOG_GROUP
    - DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK
-   - CHANGE_EVENTICIOUS_CATALOG_ORDER
+    - CHANGE_EVENTICIOUS_CATALOG_ORDER
+    - FINALIZE_EVENTICIOUS_COURSE
 
 ## Development Commands
 

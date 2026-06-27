@@ -1,0 +1,17 @@
+{
+  "name": "Map Course Import Response",
+  "description": "Map IDs from course import response",
+  "tool": "eventicious_map_course_import_response",
+  "input": {
+    "importResponse": {
+      "id": 100,
+      "courseCatalog": { "id": 200, "name": "Course Catalog" },
+      "stages": [
+        { "id": 300, "name": "Info", "type": "Common", "catalog": { "id": 400 } },
+        { "id": 301, "name": "Quiz", "type": "Common", "catalog": { "id": 401 }, "poll": { "id": 500, "name": "Quiz 1" } },
+        { "id": 302, "name": "Task", "type": "Task", "catalog": { "id": 402 }, "taskContent": { "id": 600, "title": "Assignment" } },
+        { "id": 303, "name": "SCORM", "type": "Scorm", "catalog": { "id": 403 }, "scormId": 700 }
+      ]
+    }
+  }
+}

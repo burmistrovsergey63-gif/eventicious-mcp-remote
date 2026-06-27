@@ -1,0 +1,14 @@
+{
+  "name": "Validate Course Plan",
+  "description": "Validate course plan before import",
+  "tool": "eventicious_validate_course_plan",
+  "input": {
+    "coursePlan": {
+      "name": "Тестовый курс",
+      "coverImageFileId": 12345,
+      "coverImageThumbnailFileId": 12346,
+      "stages": [{ "name": "Введение", "type": "Common" }],
+      "settings": { "progress": { "isEnabled": true, "hintText": "Прогресс" }, "finalScreen": { "isEnabled": true, "title": "Done" }, "deadline": { "isEnabled": false } }
+    }
+  }
+}

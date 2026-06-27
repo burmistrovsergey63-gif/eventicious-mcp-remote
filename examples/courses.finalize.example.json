@@ -1,0 +1,10 @@
+{
+  "name": "Finalize Course",
+  "description": "Finalize a draft course (requires danger_confirm)",
+  "tool": "eventicious_finalize_course",
+  "input": {
+    "courseId": 100,
+    "danger_confirm": "FINALIZE_EVENTICIOUS_COURSE",
+    "dry_run": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Upload Task Attachments",
+  "description": "Upload task attachment files",
+  "tool": "eventicious_upload_task_attachments",
+  "input": {
+    "filePaths": ["/path/to/brief.pdf", "/path/to/template.docx"],
+    "dry_run": true
+  }
+}

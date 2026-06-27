@@ -50,6 +50,7 @@ export interface EventiciousRequestOptions {
   endpoint: string;
   body?: unknown;
   credentials: EventiciousCredentials;
+  isMultipart?: boolean;
 }
 
 export interface EventiciousResponse {
@@ -60,19 +61,23 @@ export interface EventiciousResponse {
 export async function eventiciousRequest(
   opts: EventiciousRequestOptions
 ): Promise<EventiciousResponse> {
-  const { method, endpoint, body, credentials } = opts;
+  const { method, endpoint, body, credentials, isMultipart } = opts;
 
   const token = await fetchToken(credentials);
   const url = `${credentials.baseUrl}${endpoint}`;
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
   };
 
   const fetchOpts: RequestInit = { method, headers };
   if (body !== undefined && method !== "GET") {
-    fetchOpts.body = JSON.stringify(body);
+    if (isMultipart && body instanceof FormData) {
+      fetchOpts.body = body;
+    } else {
+      headers["Content-Type"] = "application/json";
+      fetchOpts.body = JSON.stringify(body);
+    }
   }
 
   const res = await fetch(url, fetchOpts);

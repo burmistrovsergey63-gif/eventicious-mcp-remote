@@ -1,0 +1,24 @@
+{
+  "name": "Prepare Course Import",
+  "description": "Normalize course plan and build execution plan",
+  "tool": "eventicious_prepare_course_import",
+  "input": {
+    "name": "Тестовый курс",
+    "description": "Описание курса",
+    "coverImageFileId": 12345,
+    "coverImageThumbnailFileId": 12346,
+    "stages": [
+      { "name": "Введение", "type": "Common" },
+      { "name": "Тест", "type": "Common", "settings": { "transition": { "conditionType": "PassPoll", "poll": { "name": "Опрос" } } } },
+      { "name": "Задание", "type": "Task", "taskContent": { "title": "Домашнее задание" } },
+      { "name": "SCORM модуль", "type": "Scorm" }
+    ],
+    "scormArchives": ["/path/to/scorm.zip"],
+    "settings": {
+      "progress": { "isEnabled": true, "hintText": "Пройдено {Progress}%" },
+      "finalScreen": { "isEnabled": true, "title": "Готово!" },
+      "deadline": { "isEnabled": false },
+      "isFreeOrderAllowed": true
+    }
+  }
+}

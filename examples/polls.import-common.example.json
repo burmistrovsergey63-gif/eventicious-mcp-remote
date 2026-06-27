@@ -1,0 +1,34 @@
+{
+  "name": "Import Common Poll",
+  "description": "Import a Common type poll with text questions",
+  "tool": "eventicious_import_poll_content",
+  "input": {
+    "pollId": 500,
+    "name": "Опрос удовлетворенности",
+    "type": "Common",
+    "canSkipQuestions": true,
+    "screens": [
+      {
+        "title": "Обратная связь",
+        "questions": [
+          {
+            "text": "Как вам курс?",
+            "type": "SingleSelect",
+            "options": [
+              { "optionData": { "text": "Отлично" }, "rate": 5 },
+              { "optionData": { "text": "Хорошо" }, "rate": 4 },
+              { "optionData": { "text": "Нормально" }, "rate": 3 },
+              { "optionData": { "text": "Плохо" }, "rate": 1 }
+            ]
+          },
+          {
+            "text": "Ваши комментарии",
+            "type": "FreeText"
+          }
+        ]
+      }
+    ],
+    "resultScreenSettings": { "topic": "Спасибо!", "showRates": false },
+    "dry_run": true
+  }
+}

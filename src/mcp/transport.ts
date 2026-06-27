@@ -18,6 +18,12 @@ import { registerCatalogTools } from "../tools/catalogs";
 import { registerCatalogElementTools } from "../tools/catalog-elements";
 import { registerGravityJsonTools } from "../tools/gravity-json";
 import { registerCatalogImportTools } from "../tools/catalog-import";
+import { registerCourseTools } from "../tools/courses";
+import { registerPollTools } from "../tools/polls";
+import { registerTaskContentTools } from "../tools/task-contents";
+import { registerScormTools } from "../tools/scorm";
+import { registerGamificationTools } from "../tools/gamification";
+import { registerCourseImportTools } from "../tools/course-import";
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
   logger.info("mcp_request_start", { method: request.method });
@@ -34,7 +40,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.4.1",
+    version: "0.5.0",
   });
 
   registerTools(server, credentials);
@@ -961,4 +967,10 @@ function registerTools(
   registerCatalogElementTools(server, credentials, toolError);
   registerGravityJsonTools(server, toolError);
   registerCatalogImportTools(server, toolError);
+  registerCourseTools(server, credentials, toolError);
+  registerPollTools(server, credentials, toolError);
+  registerTaskContentTools(server, credentials, toolError);
+  registerScormTools(server, credentials, toolError);
+  registerGamificationTools(server, credentials, toolError);
+  registerCourseImportTools(server, toolError);
 }
