@@ -46,11 +46,22 @@ function Invoke-McpRaw {
         $lines = $raw -split "`n"
         foreach ($line in $lines) {
             if ($line -match '^data:\s*(.+)$') {
-                return ($Matches[1] | ConvertFrom-Json)
+                $parsed = ($Matches[1] | ConvertFrom-Json)
+                # Check for isError responses (e.g. Zod validation errors)
+                if ($parsed.result -and $parsed.result.isError -eq $true) {
+                    $errText = $parsed.result.content[0].text
+                    return @{ isError = $true; errorText = $errText; result = $null }
+                }
+                return $parsed
             }
         }
         # Fallback: try parsing as plain JSON
-        return ($raw | ConvertFrom-Json)
+        $parsed = ($raw | ConvertFrom-Json)
+        if ($parsed.result -and $parsed.result.isError -eq $true) {
+            $errText = $parsed.result.content[0].text
+            return @{ isError = $true; errorText = $errText; result = $null }
+        }
+        return $parsed
     } catch {
         Write-Host "  ERROR calling ${ToolName}: $_" -ForegroundColor Red
         return $null
@@ -191,14 +202,18 @@ if ($r) {
     Test-Check "gamification_negative" ($d.valid -eq $true -and $d.operation -eq "write-off") "valid=$($d.valid), operation=$($d.operation)"
 }
 
-# === Test 9: gamification validate zero (must fail) ===
+# === Test 9: gamification validate zero (must fail with isError) ===
 Write-Host "`n--- Test 9: gamification validate (zero = invalid) ---" -ForegroundColor Yellow
 $r = Invoke-McpRaw -ToolName "eventicious_validate_gamification_charge" -Arguments @{
     externalId = 456; scores = 0; reason = "Test zero"
 }
-if ($r) {
+if ($r -and $r.isError -eq $true) {
+    Test-Check "gamification_zero_blocked" ($r.errorText -match "Scores cannot be zero") "rejected by Zod validation: $($r.errorText.Substring(0, [Math]::Min(80, $r.errorText.Length)))..."
+} elseif ($r) {
     $d = $r.result.content[0].text | ConvertFrom-Json
     Test-Check "gamification_zero_blocked" ($d.valid -eq $false) "valid=$($d.valid) (expected=false)"
+} else {
+    Test-Check "gamification_zero_blocked" $false "no response"
 }
 
 # === Test 10: gamification charge dry_run (positive) ===
