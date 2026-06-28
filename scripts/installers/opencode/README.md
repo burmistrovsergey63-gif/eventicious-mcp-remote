@@ -99,7 +99,10 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
 ### auth_check failed
 
 - Проверьте CLIENT_ID и CLIENT_SECRET.
-- Убедитесь, что EVENTICIOUS_BASE_URL корректен.
+- Убедитесь, что EVENTICIOUS_BASE_URL корректен:
+  - Правильно: `https://api-integration.eventicious.ru`
+  - Неправильно: `https://api-integration.eventicious.ru/connect/token`
+  - Неправильно: `https://api-integration.eventicious.ru/`
 - Проверьте MCP_ACCESS_TOKEN.
 
 ### OpenCode не видит MCP

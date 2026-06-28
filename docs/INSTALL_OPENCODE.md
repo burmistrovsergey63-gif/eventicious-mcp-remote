@@ -126,7 +126,10 @@ powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1 -TargetDir "C:
 ### auth_check failed
 
 - Проверьте CLIENT_ID и CLIENT_SECRET
-- Убедитесь, что BASE_URL корректен
+- Убедитесь, что BASE_URL корректен:
+  - Правильно: `https://api-integration.eventicious.ru`
+  - Неправильно: `https://api-integration.eventicious.ru/connect/token`
+  - Неправильно: `https://api-integration.eventicious.ru/`
 - Проверьте MCP_ACCESS_TOKEN
 
 ### OpenCode не видит MCP

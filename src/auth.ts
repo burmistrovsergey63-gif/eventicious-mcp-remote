@@ -23,9 +23,26 @@ export interface EventiciousCredentials {
   clientSecret: string;
 }
 
+/**
+ * Normalize Eventicious base URL:
+ * - trim spaces
+ * - trim leading/trailing quotes
+ * - remove trailing slash
+ * - validate it's not a token endpoint URL
+ */
+export function normalizeBaseUrl(url: string): string {
+  let normalized = url.trim();
+  // Remove leading/trailing double or single quotes
+  normalized = normalized.replace(/^["']+|["']+$/g, "");
+  // Remove trailing slash
+  normalized = normalized.replace(/\/+$/, "");
+  return normalized;
+}
+
 export function extractEventiciousCredentials(request: Request): EventiciousCredentials {
-  const baseUrl =
+  const rawBaseUrl =
     request.headers.get("x-eventicious-base-url") || config.defaultBaseUrl;
+  const baseUrl = normalizeBaseUrl(rawBaseUrl);
   const clientId = request.headers.get("x-eventicious-client-id") || "";
   const clientSecret = request.headers.get("x-eventicious-client-secret") || "";
 
@@ -50,6 +67,16 @@ export function validateEventiciousCredentials(
       ok: false,
       error:
         "No Eventicious base URL configured. Set EVENTICIOUS_DEFAULT_BASE_URL or pass x-eventicious-base-url header.",
+    };
+  }
+
+  // Warn if user passed token endpoint URL as base URL
+  if (creds.baseUrl.includes("/connect/token")) {
+    logger.warn("base_url_is_token_url", { baseUrl: creds.baseUrl });
+    return {
+      ok: false,
+      error:
+        "Base URL appears to be a token endpoint URL. Use the base URL (e.g., https://api-integration.eventicious.ru), not the full token endpoint.",
     };
   }
 

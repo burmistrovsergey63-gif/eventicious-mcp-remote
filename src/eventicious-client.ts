@@ -13,32 +13,45 @@ async function fetchToken(creds: EventiciousCredentials): Promise<string> {
   const cached = getCachedToken(creds.clientId, creds.baseUrl);
   if (cached) return cached;
 
-  const url = `${creds.baseUrl}/connect/token`;
+  const tokenUrl = `${creds.baseUrl}/connect/token`;
   const body = new URLSearchParams({
     grant_type: "client_credentials",
     client_id: creds.clientId,
     client_secret: creds.clientSecret,
   });
 
-  logger.info("token_request", { url, clientId: maskSecret(creds.clientId) });
+  logger.info("token_request", {
+    tokenUrl,
+    clientId: maskSecret(creds.clientId),
+    baseUrl: creds.baseUrl,
+  });
 
-  const res = await fetch(url, {
+  const res = await fetch(tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
   });
 
   if (!res.ok) {
-    logger.error("token_request_failed", { status: res.status, statusText: res.statusText });
+    const errorBody = await res.text().catch(() => "");
+    logger.error("token_request_failed", {
+      status: res.status,
+      statusText: res.statusText,
+      normalizedBaseUrl: creds.baseUrl,
+      tokenUrl,
+      method: "POST",
+      contentType: "application/x-www-form-urlencoded",
+      errorBody: errorBody.substring(0, 200),
+    });
     throw new AuthError(
-      url,
-      `Token request failed: ${res.status} ${res.statusText}`
+      tokenUrl,
+      `Token request failed: ${res.status} ${res.statusText}. URL: ${tokenUrl}`
     );
   }
 
   const data = (await res.json()) as { access_token: string };
   if (!data.access_token) {
-    throw new AuthError(url, "Token response missing access_token");
+    throw new AuthError(tokenUrl, "Token response missing access_token");
   }
 
   setCachedToken(creds.clientId, creds.baseUrl, data.access_token);
