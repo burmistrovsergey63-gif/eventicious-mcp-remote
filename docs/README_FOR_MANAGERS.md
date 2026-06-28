@@ -33,6 +33,18 @@ Add to your MCP client config:
 
 ### 3. Working with Tools
 
+## Подключение OpenCode через установщик
+
+Для пользователей OpenCode доступен автоматический установщик:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\installers\opencode\install-opencode.ps1
+```
+
+Скрипт запросит endpoint, токен и credentials, и настроит `opencode.json` автоматически.
+
+Подробности: [INSTALL_OPENCODE.md](INSTALL_OPENCODE.md)
+
 #### The Golden Rule: Always dry_run First
 
 Every write operation defaults to dry_run=true. This means:

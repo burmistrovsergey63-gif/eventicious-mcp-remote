@@ -85,6 +85,16 @@ For MCP requests (POST /mcp):
 | x-eventicious-client-secret | Yes | Your Eventicious project client_secret |
 | x-eventicious-base-url | No | Defaults to EVENTICIOUS_DEFAULT_BASE_URL |
 
+## OpenCode Installer
+
+Для подключения к OpenCode без ручного редактирования `opencode.json`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\installers\opencode\install-opencode.ps1
+```
+
+Подробности: [docs/INSTALL_OPENCODE.md](docs/INSTALL_OPENCODE.md)
+
 ## Security Model
 
 Eventicious credentials (client_id, client_secret) are NEVER stored on the server.
