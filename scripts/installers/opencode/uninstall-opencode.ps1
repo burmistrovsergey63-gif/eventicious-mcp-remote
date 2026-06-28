@@ -6,45 +6,102 @@
     Removes only the mcp.eventicious section from opencode.json.
     Preserves all other settings and MCP servers.
 
+.PARAMETER TargetDir
+    Path to the OpenCode project folder. Reads <TargetDir>\opencode.json.
+    Takes precedence over interactive prompt, but not over -TargetPath.
+
 .PARAMETER TargetPath
-    Path to opencode.json. Default: .\opencode.json
+    Full path to opencode.json. Takes precedence over -TargetDir.
+    Kept for backward compatibility.
 
 .EXAMPLE
+    # Interactive mode - installer asks for project folder
     powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1
+
+.EXAMPLE
+    # Specify project folder directly
+    powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1 -TargetDir "C:\Users\me\my-project"
 #>
 param(
-    [string]$TargetPath = ".\opencode.json"
+    [string]$TargetDir,
+    [string]$TargetPath
 )
 
 $ErrorActionPreference = "Stop"
+
+function Resolve-TargetFile {
+    if ($TargetPath) {
+        return $TargetPath
+    }
+
+    if ($TargetDir) {
+        return Join-Path $TargetDir "opencode.json"
+    }
+
+    # Interactive mode
+    $currentDir = Get-Location
+    $dirName = Split-Path $currentDir -Leaf
+    $parentDir = Split-Path $currentDir -Parent
+    $isInstallerFolder = $dirName -match "eventicious-mcp-opencode-setup|opencode"
+    $hasParent = -not [string]::IsNullOrEmpty($parentDir)
+
+    Write-Host ""
+    Write-Host "Select OpenCode project folder" -ForegroundColor Cyan
+    Write-Host "================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    $selectedDir = $null
+
+    if ($isInstallerFolder -and $hasParent) {
+        $defaultDir = $parentDir
+        Write-Host "Detected possible OpenCode project folder:" -ForegroundColor Yellow
+        Write-Host "  $defaultDir" -ForegroundColor White
+        Write-Host ""
+        $answer = Read-Host "Use this folder? [Y/n]"
+
+        if ($answer -eq "" -or $answer -eq "Y" -or $answer -eq "y") {
+            $selectedDir = $defaultDir
+        }
+    }
+
+    if (-not $selectedDir) {
+        $inputDir = Read-Host "Enter OpenCode project folder path"
+        if ($inputDir) {
+            $selectedDir = $inputDir.TrimEnd('\').TrimEnd('/')
+        }
+    }
+
+    if (-not $selectedDir) {
+        throw "No target folder specified. Use -TargetDir or -TargetPath parameter."
+    }
+
+    return Join-Path $selectedDir "opencode.json"
+}
 
 Write-Host ""
 Write-Host "Eventicious MCP Uninstaller for OpenCode" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# --- Resolve target path ---
+# --- Resolve target file ---
 
-$TargetPath = Resolve-Path -Path $TargetPath -ErrorAction SilentlyContinue
-if (-not $TargetPath) {
-    $TargetPath = Join-Path (Get-Location) "opencode.json"
-}
+$TargetFile = Resolve-TargetFile
 
-if (-not (Test-Path -LiteralPath $TargetPath)) {
-    Write-Host "opencode.json not found at: $TargetPath" -ForegroundColor Red
+if (-not (Test-Path -LiteralPath $TargetFile)) {
+    Write-Host "opencode.json not found at: $TargetFile" -ForegroundColor Red
     exit 1
 }
 
 # --- Backup ---
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$backupPath = "$TargetPath.bak.$timestamp"
-Copy-Item -LiteralPath $TargetPath -Destination $backupPath -Force
+$backupPath = "$TargetFile.bak.$timestamp"
+Copy-Item -LiteralPath $TargetFile -Destination $backupPath -Force
 Write-Host "Backup: $backupPath" -ForegroundColor Gray
 
 # --- Load and modify ---
 
-$existing = Get-Content -LiteralPath $TargetPath -Raw | ConvertFrom-Json
+$existing = Get-Content -LiteralPath $TargetFile -Raw | ConvertFrom-Json
 
 if (-not $existing.mcp -or -not $existing.mcp.eventicious) {
     Write-Host "mcp.eventicious not found. Nothing to remove." -ForegroundColor Yellow
@@ -66,7 +123,7 @@ if ($remainingProps.Count -eq 0) {
 # --- Write JSON ---
 
 $json = $existing | ConvertTo-Json -Depth 10
-[System.IO.File]::WriteAllText($TargetPath, $json, [System.Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllText($TargetFile, $json, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host ""
 Write-Host "Eventicious MCP removed from OpenCode config." -ForegroundColor Green

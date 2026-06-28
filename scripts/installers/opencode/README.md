@@ -3,21 +3,34 @@
 ## Быстрая установка
 
 1. Распакуйте архив `eventicious-mcp-opencode-setup.zip`.
-2. Откройте PowerShell в папке проекта, где будет использоваться OpenCode.
+2. Откройте PowerShell в папке архива.
 3. Запустите:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
 ```
 
-4. Введите данные подключения:
-   - MCP endpoint (по умолчанию: preview URL)
-   - MCP_ACCESS_TOKEN
+4. Когда installer спросит папку проекта OpenCode, укажите папку проекта.
+5. Введите данные подключения:
+   - MCP endpoint (Enter для default)
+   - MCP_ACCESS_TOKEN (секрет, маскируется)
    - Eventicious CLIENT_ID
-   - Eventicious CLIENT_SECRET
-   - Eventicious base URL (по умолчанию: `https://api-integration.eventicious.ru`)
+   - Eventicious CLIENT_SECRET (секрет, маскируется)
+   - Eventicious base URL (Enter для default)
+6. Откройте эту папку в OpenCode.
+7. Проверьте tools/list.
 
-5. Перезапустите OpenCode.
+### Где должен лежать opencode.json
+
+`opencode.json` должен лежать в корне проекта, который вы открываете в OpenCode.
+
+Пример:
+
+```
+C:\Users\Sergey\Desktop\my-project\opencode.json
+```
+
+Installer сам определит папку проекта и предложит её использовать.
 
 ## Проверка
 
@@ -40,13 +53,19 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
 powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1
 ```
 
-## Безопасность
+Скрипт спросит папку проекта и удалит только `mcp.eventicious`.
 
-- Не отправляйте скриншоты с токенами.
-- Не публикуйте `opencode.json`, если в нём есть secrets.
-- Не коммитьте `opencode.json` с реальными ключами в публичные репозитории.
-- Для реальных операций нужен `dry_run=false` + `confirm=true`.
-- Для finalize/delete нужен `danger_confirm`.
+## Прямое указание папки
+
+Если не хотите использовать интерактивный режим:
+
+```powershell
+# Указать папку проекта
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 -TargetDir "C:\Users\me\my-project"
+
+# Указать конкретный файл
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 -TargetPath "C:\Users\me\my-project\opencode.json"
+```
 
 ## Non-interactive режим
 
@@ -57,14 +76,23 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
     -NonInteractive `
     -McpToken "ваш_токен" `
     -EventiciousClientId "cl-xxx" `
-    -EventiciousClientSecret "cs-xxx"
+    -EventiciousClientSecret "cs-xxx" `
+    -TargetDir "C:\path\to\project"
 ```
+
+## Безопасность
+
+- Не отправляйте скриншоты с токенами.
+- Не публикуйте `opencode.json`, если в нём есть secrets.
+- Не коммитьте `opencode.json` с реальными ключами в публичные репозитории.
+- Для реальных операций нужен `dry_run=false` + `confirm=true`.
+- Для finalize/delete нужен `danger_confirm`.
 
 ## Troubleshooting
 
 ### tools/list < 68
 
-- Убедитесь, что OpenCode перезапущен после установки.
+- Перезапустите OpenCode после установки.
 - Проверьте, что `opencode.json` содержит секцию `mcp.eventicious`.
 - Убедитесь, что MCP endpoint доступен.
 
@@ -72,15 +100,17 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
 
 - Проверьте CLIENT_ID и CLIENT_SECRET.
 - Убедитесь, что EVENTICIOUS_BASE_URL корректен.
-- Проверьте, что MCP_ACCESS_TOKEN установлен.
+- Проверьте MCP_ACCESS_TOKEN.
 
 ### OpenCode не видит MCP
 
 - Перезапустите OpenCode полностью.
-- Проверьте `opencode.json` на валидный JSON.
-- Убедитесь, что поле `enabled: true`.
+- Проверьте, что `opencode.json` — валидный JSON.
+- Убедитесь, что `enabled: true`.
 
 ### opencode.json невалидный
 
-- Используйте бэкап: `opencode.json.bak.<timestamp>`
-- Проверьте JSON онлайн или через `Get-Content opencode.json | ConvertFrom-Json`
+Используйте бэкап:
+```powershell
+Copy-Item opencode.json.bak.* opencode.json
+```

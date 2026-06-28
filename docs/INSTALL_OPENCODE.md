@@ -9,18 +9,19 @@
 ### 2. Запустите установщик
 
 ```powershell
-cd path/to/your-project
+cd path/to/eventicious-mcp-opencode-setup
 powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
 ```
 
-Скрипт запросит:
-- MCP endpoint (Enter для default)
-- MCP_ACCESS_TOKEN (секрет, маскируется)
-- Eventicious CLIENT_ID
-- Eventicious CLIENT_SECRET (секрет, маскируется)
-- Eventicious base URL (Enter для default)
+Installer спросит:
+1. Папку проекта OpenCode (куда писать `opencode.json`)
+2. MCP endpoint (Enter для default)
+3. MCP_ACCESS_TOKEN (секрет, маскируется)
+4. Eventicious CLIENT_ID
+5. Eventicious CLIENT_SECRET (секрет, маскируется)
+6. Eventicious base URL (Enter для default)
 
-### 3. Перезапустите OpenCode
+### 3. Откройте папку проекта в OpenCode
 
 ### 4. Проверьте
 
@@ -33,13 +34,29 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
 
 ---
 
-## Через прямой запуск
+## Где должен лежать opencode.json
 
-Если архив недоступен, скрипты можно запустить из репозитория:
+`opencode.json` должен лежать в корне проекта, который вы открываете в OpenCode.
+
+Пример:
+```
+C:\Users\you\Desktop\my-project\opencode.json
+```
+
+Installer автоматически определит папку проекта и предложит её использовать.
+
+---
+
+## Прямое указание папки
+
+Если не хотите использовать интерактивный режим:
 
 ```powershell
-cd eventicious-mcp-remote
-powershell -ExecutionPolicy Bypass -File .\scripts\installers\opencode\install-opencode.ps1
+# Указать папку проекта
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 -TargetDir "C:\Users\me\my-project"
+
+# Указать конкретный файл
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 -TargetPath "C:\Users\me\my-project\opencode.json"
 ```
 
 ---
@@ -53,7 +70,8 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
     -NonInteractive `
     -McpToken "ваш_токен" `
     -EventiciousClientId "cl-xxx" `
-    -EventiciousClientSecret "cs-xxx"
+    -EventiciousClientSecret "cs-xxx" `
+    -TargetDir "C:\path\to\project"
 ```
 
 ---
@@ -64,7 +82,12 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
 powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1
 ```
 
-Скрипт удалит только `mcp.eventicious`, остальные MCP servers сохранит.
+Скрипт спросит папку проекта и удалит только `mcp.eventicious`.
+
+Прямое указание:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1 -TargetDir "C:\Users\me\my-project"
+```
 
 ---
 
@@ -117,11 +140,6 @@ powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1
 Используйте бэкап:
 ```powershell
 Copy-Item opencode.json.bak.* opencode.json
-```
-
-Проверьте JSON:
-```powershell
-Get-Content opencode.json | ConvertFrom-Json
 ```
 
 ---
