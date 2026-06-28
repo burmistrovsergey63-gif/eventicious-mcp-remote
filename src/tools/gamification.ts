@@ -14,14 +14,15 @@ export function registerGamificationTools(
     "Manually charge or write-off gamification points for a user. Positive scores = charge, negative scores = write-off. Requires dry_run=false + confirm=true for real execution.",
     gamificationManualChargeSchema,
     async (params) => {
-      logger.info("tool_call", { tool: "eventicious_add_manual_gamification_charge", dry_run: params.dry_run, externalId: params.externalId, scores: params.scores });
-      const operation = params.scores > 0 ? "charge" : "write-off";
+      const s = Number(params.scores);
+      logger.info("tool_call", { tool: "eventicious_add_manual_gamification_charge", dry_run: params.dry_run, externalId: params.externalId, scores: s });
+      const operation = s > 0 ? "charge" : "write-off";
       if (params.dry_run) {
-        return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, operation, preview: { externalId: params.externalId, scores: params.scores, reason: params.reason } }) }] };
+        return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, operation, preview: { externalId: params.externalId, scores: s, reason: params.reason } }) }] };
       }
       if (!params.confirm) return toolError("confirm=true required for gamification charge");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/gamification/add-manual-charge", body: { externalId: params.externalId, scores: params.scores, reason: params.reason }, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/gamification/add-manual-charge", body: { externalId: params.externalId, scores: s, reason: params.reason }, credentials });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -37,14 +38,15 @@ export function registerGamificationTools(
       const errors: string[] = [];
       const warnings: string[] = [];
 
-      if (params.scores === 0) {
+      const s = Number(params.scores);
+      if (s === 0 || isNaN(s)) {
         errors.push("Scores cannot be zero");
       }
-      if (Math.abs(params.scores) > 10000) {
-        warnings.push(`Scores absolute value (${Math.abs(params.scores)}) exceeds recommended limit of 10000`);
+      if (Math.abs(s) > 10000) {
+        warnings.push(`Scores absolute value (${Math.abs(s)}) exceeds recommended limit of 10000`);
       }
 
-      const operation = params.scores > 0 ? "charge" : "write-off";
+      const operation = s > 0 ? "charge" : "write-off";
 
       return {
         content: [{
