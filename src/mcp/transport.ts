@@ -24,6 +24,7 @@ import { registerTaskContentTools } from "../tools/task-contents";
 import { registerScormTools } from "../tools/scorm";
 import { registerGamificationTools } from "../tools/gamification";
 import { registerCourseImportTools } from "../tools/course-import";
+import { registerExpoTools } from "../tools/expo";
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
   logger.info("mcp_request_start", { method: request.method });
@@ -40,7 +41,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.5.1",
+    version: "0.6.0",
   });
 
   registerTools(server, credentials);
@@ -973,4 +974,5 @@ function registerTools(
   registerScormTools(server, credentials, toolError);
   registerGamificationTools(server, credentials, toolError);
   registerCourseImportTools(server, toolError);
+  registerExpoTools(server, credentials, toolError);
 }

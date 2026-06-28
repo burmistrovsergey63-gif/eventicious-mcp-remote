@@ -1,0 +1,12 @@
+{
+  "id": 900001,
+  "name": "MCP Test Exhibitor",
+  "address": "Test address",
+  "site": "https://example.com",
+  "email": "expo@example.com",
+  "phone": "+70000000000",
+  "details": "<p>Test company details</p>",
+  "externalImagePath": "https://example.com/logo.png",
+  "representativesIds": [1001, 1002],
+  "dry_run": true
+}

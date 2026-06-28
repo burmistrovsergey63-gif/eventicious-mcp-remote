@@ -1,0 +1,12 @@
+{
+  "id": 900001,
+  "name": "Updated Company Name",
+  "address": "New address",
+  "site": "https://updated-example.com",
+  "email": "updated@example.com",
+  "phone": "+70000000001",
+  "details": "<p>Updated company details</p>",
+  "externalImagePath": "https://updated-example.com/logo.png",
+  "representativesIds": [1001, 1003],
+  "dry_run": true
+}

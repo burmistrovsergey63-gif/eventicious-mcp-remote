@@ -1,0 +1,26 @@
+{
+  "exhibitors": [
+    {
+      "id": 900001,
+      "name": "Exhibitor One",
+      "address": "Address 1",
+      "site": "https://exhibitor1.com",
+      "email": "info@exhibitor1.com",
+      "phone": "+70000000001",
+      "details": "<p>First exhibitor</p>",
+      "externalImagePath": "https://exhibitor1.com/logo.png",
+      "representativesIds": [1001, 1002]
+    },
+    {
+      "id": 900002,
+      "name": "Exhibitor Two",
+      "address": "Address 2",
+      "site": "https://exhibitor2.com",
+      "email": "info@exhibitor2.com",
+      "phone": "+70000000002",
+      "details": "<p>Second exhibitor</p>",
+      "externalImagePath": "https://exhibitor2.com/logo.png",
+      "representativesIds": [1003]
+    }
+  ]
+}

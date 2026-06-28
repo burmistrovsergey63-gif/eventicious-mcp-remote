@@ -45,7 +45,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.5.0"
+  "version": "0.6.0"
 }
 ```
 
@@ -158,7 +158,7 @@ The .local.ps1 files are git-ignored.
 - [ ] Confirm that real writes require confirm=true
 - [ ] Check logs for any leaked secrets (should be masked)
 
-## Available Tools (56 total)
+## Available Tools (74 total)
 
 ### v0.1.0 core (8 tools)
 
@@ -303,7 +303,35 @@ Course creation requires both `coverImageFileId` and `coverImageThumbnailFileId`
 
 ### Gamification
 
-- `eventicious_add_manual_gamification_charge`: manually add points to a user
+- `eventicious_add_manual_gamification_charge`: manually charge or write-off points to a user (positive=charge, negative=write-off)
+
+## v0.6 Expo Pack + Gamification Fix (6 tools)
+
+### Exhibitor Management
+
+- `eventicious_create_exhibitor`: Create an exhibitor (company) in Eventicious
+- `eventicious_update_exhibitor`: Update an exhibitor (WARNING: null/empty fields may reset values in admin)
+- `eventicious_delete_exhibitor`: Delete an exhibitor (requires danger_confirm='DELETE_EVENTICIOUS_EXHIBITOR')
+
+### Exhibitor Import Helpers
+
+- `eventicious_prepare_exhibitors_import`: Prepare exhibitors import, normalize fields, detect duplicates
+- `eventicious_validate_exhibitor_plan`: Validate exhibitor import plan
+
+### Gamification Validation
+
+- `eventicious_validate_gamification_charge`: Validate gamification charge/write-off parameters
+
+### Gamification Fix
+
+- Scores can now be positive (charge) or negative (write-off)
+- Scores=0 is rejected by validation
+- Max absolute value: 10000 (soft limit with warning)
+
+### Notes
+
+- CSV sync is intentionally excluded from MCP tools
+- Callback endpoints are not exposed as MCP tools
 
 ## Safety model
 
@@ -324,6 +352,7 @@ All write tools default to dry_run=true. Real execution requires:
    - DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK
     - CHANGE_EVENTICIOUS_CATALOG_ORDER
     - FINALIZE_EVENTICIOUS_COURSE
+    - DELETE_EVENTICIOUS_EXHIBITOR
 
 ## Development Commands
 

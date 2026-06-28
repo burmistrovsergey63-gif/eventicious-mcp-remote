@@ -172,9 +172,11 @@ Never send raw data directly to Eventicious without preview.
 
 ### Gamification
 
-`eventicious_add_manual_gamification_charge` — manually add points to a user.
-Requires: `externalId`, `scores` (1-10000), `reason`.
-Real execution requires `dry_run=false` + `confirm=true`.
+`eventicious_add_manual_gamification_charge` — manually charge or write-off points to a user.
+- Positive scores = charge (начислить)
+- Negative scores = write-off (списать)
+- Requires: `externalId`, `scores` (max absolute value 10000), `reason`.
+- Real execution requires `dry_run=false` + `confirm=true`.
 
 ### Safety Limits
 
@@ -271,6 +273,41 @@ Safe catalog import workflow:
 5. **Approve**: Execute with `dry_run: false` + `confirm: true`
 
 Helper tools never perform real writes.
+
+## Экспоненты / Компании (v0.6)
+
+Управление экспонентами (компаниями-участниками) через MCP:
+
+| Tool | Description | Default |
+|------|-------------|---------|
+| eventicious_create_exhibitor | Создать экспонента (компанию) | dry_run=true |
+| eventicious_update_exhibitor | Обновить экспонента | dry_run=true |
+| eventicious_delete_exhibitor | Удалить экспонента | dry_run=true |
+| eventicious_prepare_exhibitors_import | Подготовить импорт экспонентов | helper |
+| eventicious_validate_exhibitor_plan | Валидировать план импорта | helper |
+
+**Поля экспонента:**
+- `id` — ID во внешней системе (обязательно)
+- `name` — название компании (обязательно)
+- `address` — адрес
+- `site` — сайт (URL)
+- `email` — email
+- `phone` — телефон
+- `details` — детали (поддерживает HTML)
+- `externalImagePath` — URL логотипа
+- `representativesIds` — ID пользователей-представителей компании
+
+**Важно:** При обновлении экспонента пустые/null поля могут сбросить значения в админке Eventicious.
+
+## Геймификация (v0.6)
+
+`eventicious_add_manual_gamification_charge` — начисление/списание баллов:
+- Положительные scores = начислить баллы
+- Отрицательные scores = списать баллы
+- scores=0 отклоняется валидацией
+- Максимальное абсолютное значение: 10000 (мягкое ограничение)
+
+`eventicious_validate_gamification_charge` — валидация параметров начисления (helper).
 
 ### Important Notes
 

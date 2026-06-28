@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.5.0"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.6.0"}
 
 # 2. Auth protection
 POST /mcp without Authorization
@@ -51,7 +51,7 @@ POST /mcp with Authorization but without Eventicious headers
 
 # 4. Tools available
 POST /mcp tools/list
-# Expected: 64+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog + 8 v0.5 course/gamification)
+# Expected: 74+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog + 12 v0.5 course + 6 v0.6 expo/gamification)
 ```
 
 ## v0.4 Dry-Run Smoke Test
@@ -95,6 +95,16 @@ This tests:
 - Finalize requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`
 - No real uploads/finalize in smoke tests
 - Run `.\scripts\smoke-v05-dryrun.ps1` after deploy
+
+## v0.6 Expo Pack + Gamification Fix
+
+- 5 new expo tools: create/update/delete exhibitor, prepare import, validate plan
+- 1 new gamification helper: validate charge
+- Gamification fix: scores can be positive (charge) or negative (write-off)
+- Gamification fix: scores=0 rejected
+- Delete exhibitor requires `danger_confirm='DELETE_EVENTICIOUS_EXHIBITOR'`
+- No real deletes/gamification in smoke tests
+- Run `.\scripts\smoke-v06-dryrun.ps1` after deploy
 
 ## First Real Write Test
 

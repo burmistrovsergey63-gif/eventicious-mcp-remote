@@ -1,0 +1,24 @@
+{
+  "plan": {
+    "create": [
+      {
+        "id": 900001,
+        "name": "New Exhibitor",
+        "address": "New Address",
+        "site": "https://new-exhibitor.com",
+        "email": "info@new-exhibitor.com"
+      }
+    ],
+    "update": [
+      {
+        "id": 900002,
+        "name": "Updated Name"
+      }
+    ],
+    "delete": [
+      {
+        "id": 900003
+      }
+    ]
+  }
+}
