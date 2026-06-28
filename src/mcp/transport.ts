@@ -40,7 +40,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.5.0",
+    version: "0.5.1",
   });
 
   registerTools(server, credentials);
