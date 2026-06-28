@@ -6,6 +6,6 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     service: "eventicious-mcp-remote",
-    version: "0.5.1",
+    version: "0.6.0",
   });
 }
