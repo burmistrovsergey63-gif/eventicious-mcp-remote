@@ -1,8 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
-import { config } from "../config";
+import {
+  createLocationShape,
+  updateLocationShape,
+  deleteLocationShape,
+} from "../schemas/locations";
 
 export function registerLocationTools(
   server: McpServer,
@@ -11,13 +14,7 @@ export function registerLocationTools(
   server.tool(
     "eventicious_create_location",
     "Create a location in Eventicious schedule. dry_run=true by default.",
-    {
-      id: z.number().describe("Location ID in your external system"),
-      name: z.string().describe("Location name"),
-      position: z.number().describe("Unique position number for display order"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    createLocationShape,
     async (params) => {
       logger.info("tool_call", {
         tool: "eventicious_create_location",
@@ -63,13 +60,7 @@ export function registerLocationTools(
   server.tool(
     "eventicious_update_location",
     "Update a location in Eventicious schedule. dry_run=true by default.",
-    {
-      id: z.number().describe("Location ID"),
-      name: z.string().describe("New location name"),
-      position: z.number().describe("Position number"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    updateLocationShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_location", dry_run: params.dry_run, location_id: params.id });
 
@@ -108,12 +99,7 @@ export function registerLocationTools(
   server.tool(
     "eventicious_delete_location",
     "Permanently delete a location from Eventicious schedule. Requires danger_confirm='DELETE_EVENTICIOUS_LOCATIONS'. dry_run=true by default.",
-    {
-      id: z.number().describe("Location ID"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_LOCATIONS").optional().describe("Exact string required for real deletion"),
-    },
+    deleteLocationShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_location", dry_run: params.dry_run, location_id: params.id });
 
