@@ -49,8 +49,21 @@
 1. **transport.ts** - users and groups tools can use schemas/users.ts and schemas/groups.ts
 2. **locations.ts** - has inline schemas, schemas/locations.ts exists with partial overlap
 
-## Higher Risk (not migrating now)
+## Migration Attempt Notes
 
-- `schedule-import.ts`, `catalog-import.ts` - helper tools for plan building
-- `session-attachments.ts` - complex dry_run/confirm logic
-- `gravity-json.ts` - helper tool without MCP tools
+**2026-06-29** - Migration attempt blocked by MCP SDK API limitation:
+
+- MCP SDK `server.tool()` expects `ZodRawShape` (inline object shape), not pre-built `ZodObject`
+- Cannot import ready-made `ZodObject` schemas directly to transport.ts tool registrations
+- Inline schemas must remain inline in transport.ts due to SDK constraint
+
+### Workaround
+
+Options:
+1. Keep inline schemas in transport.ts (current approach - no duplication removed)
+2. Use `.shape` property to extract shape from ZodObject (requires testing)
+3. Extract common field definitions to `src/schemas/` and rebuild inline in transport.ts
+
+Next steps:
+- Test `.shape` extraction approach
+- Or defer full migration to later MCP SDK version
