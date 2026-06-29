@@ -7,10 +7,7 @@ import {
   catalogUpdateSchema,
   catalogDeleteSchema,
 } from "../schemas/catalogs";
-
-function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
-  return dangerConfirm === expected;
-}
+import { requireDangerConfirm } from "../utils/confirm";
 
 export function registerCatalogTools(
   server: McpServer,

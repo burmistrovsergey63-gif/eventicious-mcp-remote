@@ -6,10 +6,7 @@ import {
   courseFinalizeSchema,
   courseImageUploadSchema,
 } from "../schemas/courses";
-
-function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
-  return dangerConfirm === expected;
-}
+import { requireDangerConfirm } from "../utils/confirm";
 
 export function registerCourseTools(
   server: McpServer,

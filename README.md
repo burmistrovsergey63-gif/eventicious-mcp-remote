@@ -361,3 +361,30 @@ npm run build        - Build for production
 npm run start        - Start production server
 npm run lint         - Run linter and typecheck
 npm run typecheck    - Check TypeScript types only
+npm run test         - Run unit tests
+npm run test:watch   - Run tests in watch mode
+npm run test:coverage - Run tests with coverage
+
+## Testing
+
+Tests use Vitest with Node environment. Run:
+
+```bash
+npm run test       # Run all tests
+npm run test:watch # Watch mode for development
+```
+
+Test files live next to source files (`*.test.ts`). Tests mock all external API calls.
+
+## CI/CD
+
+GitHub Actions workflow runs on pull_request and push to main:
+
+- Checkout code
+- Setup Node 20
+- npm ci
+- npm run typecheck
+- npm run test
+- npm run build
+
+Workflow file: `.github/workflows/ci.yml`

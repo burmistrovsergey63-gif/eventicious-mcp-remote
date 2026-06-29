@@ -8,10 +8,7 @@ import {
   prepareExhibitorsImportSchema,
   validateExhibitorPlanSchema,
 } from "../schemas/expo";
-
-function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
-  return dangerConfirm === expected;
-}
+import { requireDangerConfirm } from "../utils/confirm";
 
 export function registerExpoTools(
   server: McpServer,

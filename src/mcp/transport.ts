@@ -9,6 +9,7 @@ import {
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
 import { guardUserBatchSize, warnAutoPublishRateLimit } from "../rate-limit";
+import { requireDangerConfirm } from "../utils/confirm";
 import { registerLocationTools } from "../tools/locations";
 import { registerTagTools } from "../tools/tags";
 import { registerSessionTools } from "../tools/sessions";
@@ -52,7 +53,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   await server.connect(transport);
 
-  return await transport.handleRequest(request);
+return await transport.handleRequest(request);
 }
 
 function toolError(message: string) {
@@ -60,13 +61,6 @@ function toolError(message: string) {
     content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }],
     isError: true as const,
   };
-}
-
-function requireDangerConfirm(
-  dangerConfirm: string | undefined,
-  expected: string
-): boolean {
-  return dangerConfirm === expected;
 }
 
 function registerTools(

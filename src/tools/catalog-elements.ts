@@ -22,10 +22,7 @@ import {
   catalogMenuDeleteSchema,
 } from "../schemas/catalog-elements";
 import { convertMarkdownToGravityJson, validateGravityJson } from "./gravity-json";
-
-function requireDangerConfirm(dangerConfirm: string | undefined, expected: string): boolean {
-  return dangerConfirm === expected;
-}
+import { requireDangerConfirm } from "../utils/confirm";
 
 export function registerCatalogElementTools(
   server: McpServer,
