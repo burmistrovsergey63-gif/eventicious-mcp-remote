@@ -17,8 +17,8 @@
 | `src/tools/schedule-import.ts` | inline | partial (schedule-import schema exists but different) | medium | keep as is (helper tool) |
 | `src/tools/locations.ts` | imported from schemas/locations | yes | low | migrated |
 | `src/tools/sessions.ts` | imported from schemas/sessions | yes | low | migrated |
-| `src/tools/session-attachments.ts` | inline | partial (session-attachments schema exists) | medium | migrate later |
-| `src/tools/tags.ts` | inline | partial (tags schema exists) | medium | migrate later |
+| `src/tools/session-attachments.ts` | imported from schemas/session-attachments | yes | low | migrated |
+| `src/tools/tags.ts` | inline | partial (tags schema exists) | medium | keep as is |
 | `src/tools/catalog-import.ts` | inline (helper tool for plan building) | N/A | low | keep as is (helper tool) |
 | `src/tools/gravity-json.ts` | inline (helper tool) | N/A | low | keep as is (helper tool) |
 
@@ -30,6 +30,7 @@
 | `groups.ts` | raw shapes + ZodObject schemas | transport.ts |
 | `locations.ts` | locationCreateSchema, locationUpdateSchema, locationDeleteSchema, plus raw shapes | locations (used) |
 | `sessions.ts` | raw shapes + ZodObject schemas | sessions (used) |
+| `session-attachments.ts` | raw shapes + ZodObject schemas | session-attachments (used) |
 
 ## Migration Attempt Notes
 
@@ -74,3 +75,12 @@
 - `createSessionShape` - for eventicious_create_session tool
 - `updateSessionShape` - for eventicious_update_session tool
 - `deleteSessionShape` - for eventicious_delete_session tool
+
+### Session Attachments shapes added (Pass 4)
+- `createSessionAttachmentShape` - for eventicious_create_session_attachment tool
+- `updateSessionAttachmentShape` - for eventicious_update_session_attachment tool
+- `deleteSessionAttachmentShape` - for eventicious_delete_session_attachment tool
+
+### Remaining inline/special schemas
+- `schedule-import.ts` - helper tool, keep as is
+- `tags.ts` - inline, not critical for migration

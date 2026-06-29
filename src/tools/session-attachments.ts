@@ -1,7 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
+import {
+  createSessionAttachmentShape,
+  updateSessionAttachmentShape,
+  deleteSessionAttachmentShape,
+} from "../schemas/session-attachments";
 
 export function registerSessionAttachmentTools(
   server: McpServer,
@@ -10,14 +14,7 @@ export function registerSessionAttachmentTools(
   server.tool(
     "eventicious_create_session_attachment",
     "Create an attachment (link) for a schedule session. dry_run=true by default.",
-    {
-      sessionId: z.number().describe("Session ID"),
-      id: z.number().describe("Attachment ID in your external system"),
-      title: z.string().describe("Attachment title"),
-      url: z.string().describe("Attachment URL"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    createSessionAttachmentShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_session_attachment", dry_run: params.dry_run, session_id: params.sessionId, attachment_id: params.id });
 
@@ -49,14 +46,7 @@ export function registerSessionAttachmentTools(
   server.tool(
     "eventicious_update_session_attachment",
     "Update an attachment for a schedule session. dry_run=true by default.",
-    {
-      sessionId: z.number().describe("Session ID"),
-      attachmentId: z.number().describe("Attachment ID"),
-      title: z.string().optional(),
-      url: z.string().optional(),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    updateSessionAttachmentShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_session_attachment", dry_run: params.dry_run, session_id: params.sessionId, attachment_id: params.attachmentId });
 
@@ -90,13 +80,7 @@ export function registerSessionAttachmentTools(
   server.tool(
     "eventicious_delete_session_attachment",
     "Permanently delete an attachment from a session. Requires danger_confirm='DELETE_EVENTICIOUS_SESSION_ATTACHMENTS'. dry_run=true by default.",
-    {
-      sessionId: z.number().describe("Session ID"),
-      attachmentId: z.number().describe("Attachment ID"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSION_ATTACHMENTS").optional().describe("Exact string required for real deletion"),
-    },
+    deleteSessionAttachmentShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_session_attachment", dry_run: params.dry_run, session_id: params.sessionId, attachment_id: params.attachmentId });
 
