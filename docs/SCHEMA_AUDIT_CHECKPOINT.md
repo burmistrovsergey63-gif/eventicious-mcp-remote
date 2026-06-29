@@ -9,6 +9,7 @@
 | locations | src/tools/locations.ts | src/schemas/locations.ts | src/schemas/locations.test.ts | migrated (3 shapes) |
 | sessions | src/tools/sessions.ts | src/schemas/sessions.ts | src/schemas/sessions.test.ts | migrated (3 shapes) |
 | session-attachments | src/tools/session-attachments.ts | src/schemas/session-attachments.ts | src/schemas/session-attachments.test.ts | migrated (3 shapes) |
+| tags | src/tools/tags.ts | src/schemas/tags.ts | src/schemas/tags.test.ts | migrated (3 shapes) |
 
 ## Already using imported shapes (no action needed)
 
@@ -25,10 +26,9 @@
 
 ## Remaining inline schemas (do not migrate together)
 
-| Area | Tool file | Inline schema count/notes | Risk | Recommended pass |
+| Area | Tool file | Inline schema count/notes | Risk | Recommended action |
 |---|---|---|---|---|
 | schedule-import | src/tools/schedule-import.ts | 2 tools, complex nested row schemas | high | keep as is (helper tool) |
-| tags | src/tools/tags.ts | 3 tools, simple CRUD | low | Pass 5 |
 | catalog-import | src/tools/catalog-import.ts | helper tool for plan building | low | keep as is (helper tool) |
 | gravity-json | src/tools/gravity-json.ts | helper tool | low | keep as is (helper tool) |
 
@@ -55,11 +55,10 @@
 
 ## Recommended next migration order
 
-1. **Pass 5: tags** - Simple CRUD (create/update/delete), 3 tools, low risk
-2. **catalog-folders** - If separate from catalog-elements (verify isolation)
-3. **catalog order/menu** - Medium risk, separate pass
-4. **catalog bulk delete** - High risk, isolated operation
-5. **catalog text/video/group operations** - Medium risk each
+**Schema migration complete.** All simple CRUD tools have been migrated.
+
+Remaining inline tools are intentional helpers (schedule-import, catalog-import, gravity-json) 
+or already using imported shapes (catalogs, catalog-elements, courses, expo, polls, scorm, gamification).
 
 ## Do not migrate together
 

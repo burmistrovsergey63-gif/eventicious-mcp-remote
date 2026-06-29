@@ -1,7 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
+import {
+  createTagShape,
+  updateTagShape,
+  deleteTagShape,
+} from "../schemas/tags";
 
 export function registerTagTools(
   server: McpServer,
@@ -10,14 +14,7 @@ export function registerTagTools(
   server.tool(
     "eventicious_create_tag",
     "Create a tag (topic) in Eventicious schedule. dry_run=true by default.",
-    {
-      id: z.number().describe("Tag ID in your external system"),
-      name: z.string().describe("Tag name"),
-      color: z.string().optional().describe("Hex color e.g. #ABCDEF"),
-      visibilityFlag: z.number().optional().describe("0=hidden, 1=visible on session card"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    createTagShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_tag", dry_run: params.dry_run, tag_id: params.id });
 
@@ -51,14 +48,7 @@ export function registerTagTools(
   server.tool(
     "eventicious_update_tag",
     "Update a tag (topic) in Eventicious schedule. dry_run=true by default.",
-    {
-      id: z.number().describe("Tag ID"),
-      name: z.string().describe("New tag name"),
-      color: z.string().optional(),
-      visibilityFlag: z.number().optional(),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    updateTagShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_tag", dry_run: params.dry_run, tag_id: params.id });
 
@@ -92,12 +82,7 @@ export function registerTagTools(
   server.tool(
     "eventicious_delete_tag",
     "Permanently delete a tag from Eventicious schedule. Requires danger_confirm='DELETE_EVENTICIOUS_TAGS'. dry_run=true by default.",
-    {
-      id: z.number().describe("Tag ID"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_TAGS").optional().describe("Exact string required for real deletion"),
-    },
+    deleteTagShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_tag", dry_run: params.dry_run, tag_id: params.id });
 
