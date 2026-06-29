@@ -36,12 +36,16 @@ All smoke tests use `dry_run=true` by default. Never run with `confirm=true` on 
 
 ## Schema Audit
 
-See `docs/SCHEMA_AUDIT.md` for analysis of Zod schema usage across tools.
+See `docs/SCHEMA_AUDIT.md` and `docs/SCHEMA_AUDIT_CHECKPOINT.md` for analysis of Zod schema usage across tools.
 
-Current status:
-- 17 schema files in `src/schemas/`
-- Some tools use inline schemas (transport.ts, locations.ts, sessions.ts, etc.)
-- Schema migration can be done incrementally
+Current status after Pass 1-5:
+- 116 unit tests passing
+- 19 simple CRUD tools migrated to raw shape exports
+- Tags, locations, sessions, session-attachments, users/groups now use imported schemas
+- Remaining inline schemas are intentional helper tools:
+  - schedule-import (helper)
+  - catalog-import (helper)
+  - gravity-json (helper)
 
 ## Structured Errors
 
