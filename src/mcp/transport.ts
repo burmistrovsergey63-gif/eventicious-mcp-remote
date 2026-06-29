@@ -10,6 +10,23 @@ import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
 import { guardUserBatchSize, warnAutoPublishRateLimit } from "../rate-limit";
 import { requireDangerConfirm } from "../utils/confirm";
+import {
+  createUserShape,
+  updateUserShape,
+  blockUsersShape,
+  unblockUsersShape,
+  deleteUsersShape,
+  addMentorsShape,
+  removeMentorsShape,
+} from "../schemas/users";
+import {
+  createAclGroupShape,
+  updateAclGroupShape,
+  deleteAclGroupShape,
+  moveUsersShape,
+  addRolesShape,
+  removeRolesShape,
+} from "../schemas/groups";
 import { registerLocationTools } from "../tools/locations";
 import { registerTagTools } from "../tools/tags";
 import { registerSessionTools } from "../tools/sessions";
@@ -102,35 +119,8 @@ function registerTools(
     "eventicious_create_users",
     "Create users in Eventicious. dry_run=true by default. Max 200 users per request.",
     {
-      users: z
-        .array(
-          z.object({
-            id: z.number().describe("External system user ID"),
-            firstName: z.string().describe("First name"),
-            lastName: z.string().describe("Last name"),
-            email: z.string().optional(),
-            phone: z.string().optional(),
-            company: z.string().optional(),
-            division: z.string().optional(),
-            department: z.string().optional(),
-            position: z.string().optional(),
-            region: z.string().optional(),
-            location: z.string().optional(),
-            description: z.string().optional(),
-            externalImagePath: z.string().optional(),
-            aclGroupIds: z.array(z.number()).optional(),
-          })
-        )
-        .min(1)
-        .max(maxUsers),
-      dry_run: z
-        .boolean()
-        .default(true)
-        .describe("Preview only, do not execute"),
-      confirm: z
-        .boolean()
-        .default(false)
-        .describe("Must be true to execute when dry_run=false"),
+      ...createUserShape,
+      users: createUserShape.users.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -188,29 +178,8 @@ function registerTools(
     "eventicious_update_users",
     "Update existing users in Eventicious. dry_run=true by default. Max 200 users per request.",
     {
-      users: z
-        .array(
-          z.object({
-            id: z.number().describe("External system user ID"),
-            firstName: z.string().optional(),
-            lastName: z.string().optional(),
-            email: z.string().optional(),
-            phone: z.string().optional(),
-            company: z.string().optional(),
-            division: z.string().optional(),
-            department: z.string().optional(),
-            position: z.string().optional(),
-            region: z.string().optional(),
-            location: z.string().optional(),
-            description: z.string().optional(),
-            externalImagePath: z.string().optional(),
-            aclGroupIds: z.array(z.number()).optional(),
-          })
-        )
-        .min(1)
-        .max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...updateUserShape,
+      users: updateUserShape.users.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -268,9 +237,8 @@ function registerTools(
     "eventicious_block_users",
     "Block users in Eventicious. dry_run=true by default. Max 200 users.",
     {
-      userIds: z.array(z.number()).min(1).max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...blockUsersShape,
+      userIds: blockUsersShape.userIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -324,9 +292,8 @@ function registerTools(
     "eventicious_unblock_users",
     "Unblock users in Eventicious. dry_run=true by default. Max 200 users.",
     {
-      userIds: z.array(z.number()).min(1).max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...unblockUsersShape,
+      userIds: unblockUsersShape.userIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -406,12 +373,7 @@ function registerTools(
   server.tool(
     "eventicious_create_acl_group",
     "Create an ACL group in Eventicious. dry_run=true by default.",
-    {
-      id: z.number().describe("Group ID in your external system"),
-      name: z.string().describe("Group name"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    createAclGroupShape,
     async (params) => {
       logger.info("tool_call", {
         tool: "eventicious_create_acl_group",
@@ -464,11 +426,8 @@ function registerTools(
     "eventicious_move_users_to_groups",
     "Move users between ACL groups. All three arrays are required even if empty. dry_run=true by default.",
     {
-      userIds: z.array(z.number()).min(1),
-      groupIdsAddTo: z.array(z.number()),
-      groupIdsRemoveFrom: z.array(z.number()),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...moveUsersShape,
+      userIds: moveUsersShape.userIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -530,10 +489,8 @@ function registerTools(
     "eventicious_delete_users",
     "Permanently delete users from Eventicious. Requires danger_confirm='DELETE_EVENTICIOUS_USERS' and confirm=true. dry_run=true by default.",
     {
-      userIds: z.array(z.number()).min(1).max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_USERS").optional().describe("Exact string required for real deletion"),
+      ...deleteUsersShape,
+      userIds: deleteUsersShape.userIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -593,12 +550,7 @@ function registerTools(
   server.tool(
     "eventicious_update_acl_group",
     "Rename an ACL group in Eventicious. dry_run=true by default.",
-    {
-      id: z.number().describe("Group ID in your external system"),
-      name: z.string().describe("New group name"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    updateAclGroupShape,
     async (params) => {
       logger.info("tool_call", {
         tool: "eventicious_update_acl_group",
@@ -650,12 +602,7 @@ function registerTools(
   server.tool(
     "eventicious_delete_acl_group",
     "Permanently delete an ACL group from Eventicious. Requires danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP' and confirm=true. dry_run=true by default.",
-    {
-      id: z.number().describe("Group ID in your external system"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_ACL_GROUP").optional().describe("Exact string required for real deletion"),
-    },
+    deleteAclGroupShape,
     async (params) => {
       logger.info("tool_call", {
         tool: "eventicious_delete_acl_group",
@@ -711,18 +658,8 @@ function registerTools(
     "eventicious_add_user_roles",
     "Assign roles (Curator=1, Supervisor=2) to users within ACL groups. dry_run=true by default.",
     {
-      roleInfo: z
-        .array(
-          z.object({
-            groupId: z.number().describe("Group ID in your external system"),
-            userId: z.number().describe("User ID in your external system"),
-            roleIds: z.array(z.number()).min(1).describe("Role IDs: 1=Curator, 2=Supervisor"),
-          })
-        )
-        .min(1)
-        .max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...addRolesShape,
+      roleInfo: addRolesShape.roleInfo.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -776,18 +713,8 @@ function registerTools(
     "eventicious_remove_user_roles",
     "Remove roles from users within ACL groups. dry_run=true by default.",
     {
-      roleInfo: z
-        .array(
-          z.object({
-            groupId: z.number().describe("Group ID in your external system"),
-            userId: z.number().describe("User ID in your external system"),
-            roleIds: z.array(z.number()).min(1).describe("Role IDs: 1=Curator, 2=Supervisor"),
-          })
-        )
-        .min(1)
-        .max(maxUsers),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...removeRolesShape,
+      roleInfo: removeRolesShape.roleInfo.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -841,10 +768,8 @@ function registerTools(
     "eventicious_add_user_mentors",
     "Assign a mentor to mentees in Eventicious. dry_run=true by default.",
     {
-      mentorId: z.number().describe("External system user ID of the mentor"),
-      menteeIds: z.array(z.number()).min(1).max(maxUsers).describe("External system user IDs of mentees"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...addMentorsShape,
+      menteeIds: addMentorsShape.menteeIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {
@@ -899,10 +824,8 @@ function registerTools(
     "eventicious_remove_user_mentors",
     "Remove a mentor from mentees in Eventicious. dry_run=true by default.",
     {
-      mentorId: z.number().describe("External system user ID of the mentor"),
-      menteeIds: z.array(z.number()).min(1).max(maxUsers).describe("External system user IDs of mentees"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
+      ...removeMentorsShape,
+      menteeIds: removeMentorsShape.menteeIds.max(maxUsers),
     },
     async (params) => {
       logger.info("tool_call", {

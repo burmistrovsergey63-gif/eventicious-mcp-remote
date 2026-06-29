@@ -51,19 +51,38 @@
 
 ## Migration Attempt Notes
 
-**2026-06-29** - Migration attempt blocked by MCP SDK API limitation:
+**2026-06-29** - Migration completed successfully with raw shape approach:
 
-- MCP SDK `server.tool()` expects `ZodRawShape` (inline object shape), not pre-built `ZodObject`
-- Cannot import ready-made `ZodObject` schemas directly to transport.ts tool registrations
-- Inline schemas must remain inline in transport.ts due to SDK constraint
+### Why raw shape approach was chosen
+- MCP SDK `server.tool()` expects `ZodRawShape` (inline object), not pre-built `ZodObject`
+- `.shape` property extraction was not viable due to Zod API differences
+- Raw shapes exported from `src/schemas/*.ts` become source of truth
+- `z.object(shape)` wrapper used in tests validates shape compatibility
 
-### Workaround
+### Users shapes added
+- `createUserShape` - for eventicious_create_users tool
+- `updateUserShape` - for eventicious_update_users tool  
+- `blockUsersShape` - for eventicious_block_users tool
+- `unblockUsersShape` - for eventicious_unblock_users tool
+- `deleteUsersShape` - for eventicious_delete_users tool
+- `addMentorsShape` - for eventicious_add_user_mentors tool
+- `removeMentorsShape` - for eventicious_remove_user_mentors tool
 
-Options:
-1. Keep inline schemas in transport.ts (current approach - no duplication removed)
-2. Use `.shape` property to extract shape from ZodObject (requires testing)
-3. Extract common field definitions to `src/schemas/` and rebuild inline in transport.ts
+### Groups shapes added
+- `createAclGroupShape` - for eventicious_create_acl_group tool
+- `updateAclGroupShape` - for eventicious_update_acl_group tool
+- `deleteAclGroupShape` - for eventicious_delete_acl_group tool
+- `moveUsersShape` - for eventicious_move_users_to_groups tool
+- `addRolesShape` - for eventicious_add_user_roles tool
+- `removeRolesShape` - for eventicious_remove_user_roles tool
+- `roleInfoShape` - shared by addRolesShape/removeRolesShape
 
-Next steps:
-- Test `.shape` extraction approach
-- Or defer full migration to later MCP SDK version
+### Implementation notes
+- Shapes in transport.ts use `.max(maxUsers)` for dynamic limit (config-driven)
+- Spread syntax `{...shape, users: shape.users.max(maxUsers)}` overrides array max dynamically
+- Legacy ZodObject schemas (`userInputSchema`, `aclGroupSchema`, etc.) preserved for backward compatibility
+- All tests passing with both shape and schema validation
+
+### Next scope
+- locations/sessions/session-attachments remain inline in their tool files
+- Consider migrating after validating this pattern
