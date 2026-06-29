@@ -82,5 +82,11 @@
 - `deleteSessionAttachmentShape` - for eventicious_delete_session_attachment tool
 
 ### Remaining inline/special schemas
-- `schedule-import.ts` - helper tool, keep as is
-- `tags.ts` - inline, not critical for migration
+- `schedule-import.ts` - helper tool, keep as is (high risk)
+- `tags.ts` - inline, ready for migration (low risk)
+- `catalog-import.ts` - helper tool, keep as is
+- `gravity-json.ts` - helper tool, keep as is
+
+## Schema Audit Checkpoint (Pass 4)
+
+See `docs/SCHEMA_AUDIT_CHECKPOINT.md` for the full migration status and recommendations.
