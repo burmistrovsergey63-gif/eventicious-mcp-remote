@@ -4,7 +4,7 @@
 
 | Tool file | Current schema source | Existing src/schemas match | Risk | Recommendation |
 |---|---|---|---|---|
-| `src/mcp/transport.ts` | inline | partial (sessions, schedule-import) | low | users/groups migrated |
+| `src/mcp/transport.ts` | inline | partial (schedule-import) | low | users/groups migrated |
 | `src/tools/catalog-elements.ts` | imported from schemas/catalog-elements | yes | low | keep as is |
 | `src/tools/catalogs.ts` | imported from schemas/catalogs | yes | low | keep as is |
 | `src/tools/courses.ts` | imported from schemas/courses | yes | low | keep as is |
@@ -16,7 +16,7 @@
 | `src/tools/course-import.ts` | imported from schemas/course-import | yes | low | keep as is |
 | `src/tools/schedule-import.ts` | inline | partial (schedule-import schema exists but different) | medium | keep as is (helper tool) |
 | `src/tools/locations.ts` | imported from schemas/locations | yes | low | migrated |
-| `src/tools/sessions.ts` | inline | partial (sessions schema exists) | medium | migrate later |
+| `src/tools/sessions.ts` | imported from schemas/sessions | yes | low | migrated |
 | `src/tools/session-attachments.ts` | inline | partial (session-attachments schema exists) | medium | migrate later |
 | `src/tools/tags.ts` | inline | partial (tags schema exists) | medium | migrate later |
 | `src/tools/catalog-import.ts` | inline (helper tool for plan building) | N/A | low | keep as is (helper tool) |
@@ -29,6 +29,7 @@
 | `users.ts` | raw shapes + ZodObject schemas | transport.ts |
 | `groups.ts` | raw shapes + ZodObject schemas | transport.ts |
 | `locations.ts` | locationCreateSchema, locationUpdateSchema, locationDeleteSchema, plus raw shapes | locations (used) |
+| `sessions.ts` | raw shapes + ZodObject schemas | sessions (used) |
 
 ## Migration Attempt Notes
 
@@ -68,3 +69,8 @@
 - `createLocationShape` - for eventicious_create_location tool
 - `updateLocationShape` - for eventicious_update_location tool
 - `deleteLocationShape` - for eventicious_delete_location tool
+
+### Sessions shapes added (Pass 3)
+- `createSessionShape` - for eventicious_create_session tool
+- `updateSessionShape` - for eventicious_update_session tool
+- `deleteSessionShape` - for eventicious_delete_session tool

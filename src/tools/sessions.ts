@@ -1,7 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
+import {
+  createSessionShape,
+  updateSessionShape,
+  deleteSessionShape,
+} from "../schemas/sessions";
 
 export function registerSessionTools(
   server: McpServer,
@@ -10,22 +14,7 @@ export function registerSessionTools(
   server.tool(
     "eventicious_create_session",
     "Create a schedule session (event) in Eventicious. dry_run=true by default. Note: API uses speakersIds (not speakerIds) and locationsIds (not locationIds).",
-    {
-      id: z.number().describe("Session ID in your external system"),
-      title: z.string().describe("Session title"),
-      description: z.string().optional().describe("HTML supported"),
-      startTime: z.string().describe("ISO 8601 e.g. 2026-09-01T10:00"),
-      endTime: z.string().describe("ISO 8601"),
-      tagIds: z.array(z.number()).optional().describe("Array of tag IDs"),
-      speakersIds: z.array(z.number()).optional().describe("Array of speaker (user) IDs — docs use speakersIds"),
-      locationsIds: z.array(z.number()).optional().describe("Array of location IDs — docs use locationsIds"),
-      aclGroupsIds: z.array(z.number()).optional().describe("Array of ACL group IDs for visibility"),
-      type: z.number().optional().describe("0=speech, 1=coffee-break, 2=filler"),
-      color: z.string().optional().describe("Hex color"),
-      externalImagePath: z.string().optional().describe("URL to session image"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    createSessionShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_session", dry_run: params.dry_run, session_id: params.id });
 
@@ -70,22 +59,7 @@ export function registerSessionTools(
   server.tool(
     "eventicious_update_session",
     "Update a schedule session in Eventicious. dry_run=true by default.",
-    {
-      id: z.number().describe("Session ID"),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      startTime: z.string().optional(),
-      endTime: z.string().optional(),
-      tagIds: z.array(z.number()).optional(),
-      speakersIds: z.array(z.number()).optional(),
-      locationsIds: z.array(z.number()).optional(),
-      aclGroupsIds: z.array(z.number()).optional(),
-      type: z.number().optional(),
-      color: z.string().optional(),
-      externalImagePath: z.string().optional(),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-    },
+    updateSessionShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_session", dry_run: params.dry_run, session_id: params.id });
 
@@ -128,12 +102,7 @@ export function registerSessionTools(
   server.tool(
     "eventicious_delete_session",
     "Permanently delete a schedule session from Eventicious. Requires danger_confirm='DELETE_EVENTICIOUS_SESSIONS'. dry_run=true by default.",
-    {
-      id: z.number().describe("Session ID"),
-      dry_run: z.boolean().default(true),
-      confirm: z.boolean().default(false),
-      danger_confirm: z.literal("DELETE_EVENTICIOUS_SESSIONS").optional().describe("Exact string required for real deletion"),
-    },
+    deleteSessionShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_delete_session", dry_run: params.dry_run, session_id: params.id });
 
