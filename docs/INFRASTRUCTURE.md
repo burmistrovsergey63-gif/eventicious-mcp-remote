@@ -63,4 +63,4 @@ Functions:
 
 ## Layero Branch Status
 
-Default branch on GitHub is `main`. However, Layero production may still be on `master`. See `docs/LAYERO_BRANCH_MIGRATION.md` for migration instructions. Do NOT delete `origin/master` until production is switched to `main`.
+Default branch on GitHub is `main`. Layero production has been migrated to `main`. See `docs/LAYERO_BRANCH_MIGRATION.md` for migration history.
