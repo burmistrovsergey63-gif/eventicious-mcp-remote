@@ -333,6 +333,103 @@ Course creation requires both `coverImageFileId` and `coverImageThumbnailFileId`
 - CSV sync is intentionally excluded from MCP tools
 - Callback endpoints are not exposed as MCP tools
 
+## v0.6.2 Stateless MCP Token Exchange
+
+### Why Token Exchange?
+
+Managers no longer need to insert Eventicious credentials directly in `.mcp.json`. Instead, use encrypted MCP tokens obtained via the token exchange endpoint.
+
+### Token Exchange Flow
+
+1. Call `POST /auth/exchange` with Eventicious credentials (one-time)
+2. Receive encrypted MCP token
+3. Use MCP token in Authorization header: `Bearer mcp_evt_...`
+4. MCP token is valid for 30 days by default
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /auth/exchange | POST | Exchange Eventicious credentials for MCP token |
+| /auth/verify | GET | Verify MCP token and get tool count |
+
+### POST /auth/exchange
+
+Request body:
+```json
+{
+  "baseUrl": "https://api-integration.eventicious.ru",
+  "clientId": "your_client_id",
+  "clientSecret": "your_client_secret"
+}
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "mcpToken": "mcp_evt_...",
+  "mcpUrl": "https://...",
+  "expiresAt": "2026-07-30T...",
+  "toolsCount": 74
+}
+```
+
+### GET /auth/verify
+
+Headers: `Authorization: Bearer mcp_evt_...`
+
+Response:
+```json
+{
+  "ok": true,
+  "toolsCount": 74
+}
+```
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| MCP_TOKEN_ENCRYPTION_KEY | Yes | - | 64-char hex key for AES-256-GCM encryption |
+| MCP_TOKEN_TTL_DAYS | No | 30 | Token validity period in days |
+| MCP_TOKEN_ISSUER | No | eventicious-mcp-remote | Token issuer identifier |
+
+### MCP Configuration (.mcp.json)
+
+```json
+{
+  "mcpServers": {
+    "eventicious": {
+      "type": "http",
+      "url": "https://your-instance.layero.ru/mcp",
+      "authorization": {
+        "type": "bearer",
+        "token": "mcp_evt_..."
+      }
+    }
+  }
+}
+```
+
+### Backward Compatibility
+
+Legacy header authentication (`x-eventicious-client-id`, `x-eventicious-client-secret`, `x-eventicious-base-url`) is preserved for existing integrations.
+
+### Security Notes
+
+- MCP token contains encrypted Eventicious credentials (AES-256-GCM)
+- Token prefix: `mcp_evt_`
+- Secrets are never logged
+- No server-side token storage
+
+### Related Files
+
+- src/auth/mcp-token.ts: Token encryption/decryption utility
+- src/auth/eventicious-credentials.ts: Credential validation
+- app/auth/exchange/route.ts: Exchange endpoint
+- app/auth/verify/route.ts: Verify endpoint
+
 ## Safety model
 
 All write tools default to dry_run=true. Real execution requires:
@@ -392,6 +489,16 @@ For remote smoke check with MCP access token:
 $env:MCP_REMOTE_URL="https://your-instance.layero.ru"
 $env:MCP_ACCESS_TOKEN="your-token"
 .\scripts\smoke-remote.ps1
+```
+
+For full auth exchange smoke test:
+
+```powershell
+$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
+$env:EVENTICIOUS_BASE_URL="https://api-integration.eventicious.ru"
+$env:EVENTICIOUS_CLIENT_ID="your_client_id"
+$env:EVENTICIOUS_CLIENT_SECRET="your_client_secret"
+npm run smoke:auth
 ```
 
 ## CI/CD

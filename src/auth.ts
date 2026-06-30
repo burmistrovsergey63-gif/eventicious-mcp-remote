@@ -1,5 +1,25 @@
 import { config } from "./config";
 import { logger } from "./logger";
+import { decryptMcpToken } from "./auth/mcp-token";
+
+export interface EventiciousCredentials {
+  baseUrl: string;
+  clientId: string;
+  clientSecret: string;
+}
+
+/**
+ * Normalize Eventicious base URL:
+ * - trim spaces
+ * - trim leading/trailing quotes
+ * - remove trailing slash
+ */
+export function normalizeBaseUrl(url: string): string {
+  let normalized = url.trim();
+  normalized = normalized.replace(/^["']+|["']+$/g, "");
+  normalized = normalized.replace(/\/+$/, "");
+  return normalized;
+}
 
 export function validateMcpToken(request: Request): boolean {
   if (!config.mcpAccessToken) {
@@ -14,32 +34,38 @@ export function validateMcpToken(request: Request): boolean {
   }
 
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  // Check if it's our MCP token format
+  if (token.startsWith("mcp_evt_")) {
+    const payload = decryptMcpToken(token);
+    return payload !== null;
+  }
+
   return token === config.mcpAccessToken;
 }
 
-export interface EventiciousCredentials {
-  baseUrl: string;
-  clientId: string;
-  clientSecret: string;
-}
-
 /**
- * Normalize Eventicious base URL:
- * - trim spaces
- * - trim leading/trailing quotes
- * - remove trailing slash
- * - validate it's not a token endpoint URL
+ * Extract Eventicious credentials from request.
+ * Supports both legacy headers and new MCP token format.
  */
-export function normalizeBaseUrl(url: string): string {
-  let normalized = url.trim();
-  // Remove leading/trailing double or single quotes
-  normalized = normalized.replace(/^["']+|["']+$/g, "");
-  // Remove trailing slash
-  normalized = normalized.replace(/\/+$/, "");
-  return normalized;
-}
-
 export function extractEventiciousCredentials(request: Request): EventiciousCredentials {
+  // First check if we have MCP token with embedded credentials
+  const authHeader = request.headers.get("authorization");
+  if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token.startsWith("mcp_evt_")) {
+      const payload = decryptMcpToken(token);
+      if (payload) {
+        return {
+          baseUrl: payload.baseUrl,
+          clientId: payload.clientId,
+          clientSecret: payload.clientSecret,
+        };
+      }
+    }
+  }
+
+  // Legacy: extract from headers
   const rawBaseUrl =
     request.headers.get("x-eventicious-base-url") || config.defaultBaseUrl;
   const baseUrl = normalizeBaseUrl(rawBaseUrl);

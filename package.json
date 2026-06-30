@@ -1,10 +1,10 @@
 {
   "name": "eventicious-mcp-remote",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Remote MCP connector for Eventicious External API v2",
   "private": true,
   "main": "dist/index.js",
-"scripts": {
+  "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -15,7 +15,8 @@
     "test:coverage": "vitest run --coverage",
     "smoke:list": "node scripts/list-smoke-tests.js",
     "smoke:tools": "node scripts/smoke-tools.js",
-    "smoke:remote": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-remote.ps1"
+    "smoke:remote": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-remote.ps1",
+    "smoke:auth": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-auth-exchange.ps1"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

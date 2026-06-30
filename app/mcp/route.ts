@@ -27,6 +27,6 @@ export async function GET() {
     service: "eventicious-mcp-remote",
     protocol: "mcp",
     endpoint: "POST /mcp",
-    version: "0.6.0",
+    version: "0.6.2",
   });
 }
