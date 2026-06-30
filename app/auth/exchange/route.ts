@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { logger } from "@/logger";
 import { checkEventiciousCredentials, normalizeAndValidateBaseUrl } from "@/auth/eventicious-credentials";
-import { issueMcpToken } from "@/auth/mcp-token";
+import { issueMcpToken, validateEncryptionKey } from "@/auth/mcp-token";
 
 const exchangeSchema = z.object({
   baseUrl: z.string().min(1),
@@ -24,6 +24,24 @@ export async function POST(request: Request) {
     }
 
     const { baseUrl, clientId, clientSecret, label } = parsed.data;
+
+    // Check encryption key config before validating Eventicious credentials
+    const keyPresent = !!process.env.MCP_TOKEN_ENCRYPTION_KEY;
+    if (!validateEncryptionKey()) {
+      const keyHex = process.env.MCP_TOKEN_ENCRYPTION_KEY?.trim() ?? "";
+      return NextResponse.json(
+        {
+          error: "Server configuration error",
+          details: {
+            keyPresent,
+            keyLength: keyHex.length,
+            keyLooksHex64: /^[a-f0-9]{64}$/i.test(keyHex),
+            expected: "MCP_TOKEN_ENCRYPTION_KEY must be 64-char hex string",
+          },
+        },
+        { status: 500 }
+      );
+    }
 
     const urlValidation = normalizeAndValidateBaseUrl(baseUrl);
     if (!urlValidation.ok) {

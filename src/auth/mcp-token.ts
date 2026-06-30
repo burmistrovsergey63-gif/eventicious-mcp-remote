@@ -31,8 +31,11 @@ interface ErrorResult {
 }
 
 function getEncryptionKey(): Buffer | null {
-  const keyHex = process.env.MCP_TOKEN_ENCRYPTION_KEY;
+  const keyHex = process.env.MCP_TOKEN_ENCRYPTION_KEY?.trim();
   if (!keyHex || keyHex.length !== 64) {
+    return null;
+  }
+  if (!/^[a-f0-9]{64}$/i.test(keyHex)) {
     return null;
   }
   try {
