@@ -30,6 +30,30 @@ Steps:
 - `npm run smoke:tools` - Verify exactly 74 MCP tools are registered (local static check)
 - `npm run smoke:remote` - Test remote deployment health and MCP endpoint
 
+### Remote Smoke Check
+
+To verify remote Layero deployment:
+
+```powershell
+$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
+$env:MCP_ACCESS_TOKEN="your-mcp-token"
+npm run smoke:remote
+```
+
+Or with fake Eventicious credentials (safe for smoke check):
+
+```powershell
+$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
+$env:MCP_ACCESS_TOKEN="your-mcp-token"
+npm run smoke:remote
+```
+
+The script checks:
+1. GET /healthz endpoint returns `{ok: true, service: "eventicious-mcp-remote"}`
+2. POST /mcp with tools/list returns 74 tools (if MCP_ACCESS_TOKEN provided)
+
+Last verified: Layero preview at https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru - 74 tools confirmed.
+
 Smoke tests should only run in dry-run mode. Never run with `confirm=true` on production without explicit intent.
 
 ## Schema Audit

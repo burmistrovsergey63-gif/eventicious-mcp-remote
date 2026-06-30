@@ -36,11 +36,11 @@ function Test-Step {
     }
 }
 
+$clientId = if ($env:EVENTICIOUS_CLIENT_ID) { $env:EVENTICIOUS_CLIENT_ID } else { "smoke-test" }
+$clientSecret = if ($env:EVENTICIOUS_CLIENT_SECRET) { $env:EVENTICIOUS_CLIENT_SECRET } else { "smoke-test-secret" }
 $headers = @{}
 if ($env:MCP_ACCESS_TOKEN) {
     $headers["Authorization"] = "Bearer $env:MCP_ACCESS_TOKEN"
-    $clientId = if ($env:EVENTICIOUS_CLIENT_ID) { $env:EVENTICIOUS_CLIENT_ID } else { "smoke-test" }
-    $clientSecret = if ($env:EVENTICIOUS_CLIENT_SECRET) { $env:EVENTICIOUS_CLIENT_SECRET } else { "smoke-test-secret" }
     $headers["x-eventicious-client-id"] = $clientId
     $headers["x-eventicious-client-secret"] = $clientSecret
 }
@@ -63,13 +63,29 @@ Test-Step "GET /healthz - health endpoint" {
 # 2. MCP endpoint - requires auth token
 if ($env:MCP_ACCESS_TOKEN) {
     Test-Step "POST /mcp with auth - tools/list" {
-        $body = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-        $resp = Invoke-RestMethod -Uri "$BaseUrl/mcp" -Method POST -ContentType "application/json" -Body $body -Headers $headers
-        $toolCount = ($resp.result.tools | Measure-Object).Count
-        if ($toolCount -eq $expectedToolCount) {
-            return "200 OK, $toolCount tools found (matches expected)"
+        $mcpHeaders = @{
+            "Authorization" = "Bearer $env:MCP_ACCESS_TOKEN"
+            "x-eventicious-client-id" = $clientId
+            "x-eventicious-client-secret" = $clientSecret
+            "Content-Type" = "application/json"
+            "Accept" = "application/json, text/event-stream"
         }
-        throw "Expected $expectedToolCount tools, got $toolCount"
+        try {
+            $resp = Invoke-WebRequest -Uri "$BaseUrl/mcp" -Method POST -Headers $mcpHeaders -Body '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+            $content = $resp.Content
+            # Parse SSE format: "data: {...}" lines
+            $toolCount = ($content -split "`n" | Where-Object { $_ -match '"name":"eventicious_' } | Measure-Object).Count
+            if ($toolCount -eq $expectedToolCount) {
+                return "200 OK, $toolCount tools found (matches expected)"
+            }
+            throw "Expected $expectedToolCount tools, got $toolCount (check MCP_ACCEPT format)"
+        } catch {
+            $err = $_
+            if ($err.Exception.Response -and [int]$err.Exception.Response.StatusCode -eq 401) {
+                throw "401 Unauthorized - check MCP_ACCESS_TOKEN"
+            }
+            throw $err.Exception.Message
+        }
     }
 } else {
     Write-Host "  Skipping MCP endpoint test (no MCP_ACCESS_TOKEN provided)" -ForegroundColor Yellow
