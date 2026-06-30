@@ -2,38 +2,40 @@
 
 ## Quick Start
 
-### 1. Get Eventicious API Keys
+### 1. Prepare Eventicious API Credentials
 
-Contact your Eventicious account manager to get:
-- client_id - Your project identifier
-- client_secret - Your project secret key
+Подготовьте ваши Eventicious API credentials:
+- Eventicious Base URL
+- Client ID
+- Client Secret
 
-IMPORTANT: Each project has its own client_id/client_secret.
+IMPORTANT: Each project has its own Client ID/Client Secret.
 Never use credentials from one project in another.
 
 ### 2. Configure MCP Connection
 
-Add to your MCP client config:
+Для подключения через MCP Token (рекомендуется):
 
-```json
-{
-  "mcpServers": {
-    "eventicious": {
-      "type": "http",
-      "url": "https://your-app.run.layero.app/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_MCP_ACCESS_TOKEN",
-        "x-eventicious-client-id": "YOUR_CLIENT_ID",
-        "x-eventicious-client-secret": "YOUR_CLIENT_SECRET"
-      }
-    }
-  }
-}
+```powershell
+$env:EVENTICIOUS_BASE_URL="https://api-integration.eventicious.ru/"
+$env:EVENTICIOUS_CLIENT_ID="<your-client-id>"
+$env:EVENTICIOUS_CLIENT_SECRET="<your-client-secret>"
+
+$exchange = @{
+    baseUrl = $env:EVENTICIOUS_BASE_URL
+    clientId = $env:EVENTICIOUS_CLIENT_ID
+    clientSecret = $env:EVENTICIOUS_CLIENT_SECRET
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod -Uri "https://your-endpoint.layero.ru/auth/exchange" -Method POST -ContentType "application/json" -Body $exchange
+
+# Set token in environment
+$env:EVENTICIOUS_MCP_TOKEN = $response.mcpToken
 ```
 
-### 3. Working with Tools
+Then configure your MCP client with the returned MCP token.
 
-## Подключение OpenCode через установщик
+Подробности по настройке клиентов: [MCP_CLIENTS.md](MCP_CLIENTS.md)
 
 Для пользователей OpenCode доступен автоматический установщик:
 
