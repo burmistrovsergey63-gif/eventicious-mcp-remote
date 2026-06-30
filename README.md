@@ -45,7 +45,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.6.0"
+  "version": "0.6.1"
 }
 ```
 
@@ -375,6 +375,24 @@ npm run test:watch # Watch mode for development
 ```
 
 Test files live next to source files (`*.test.ts`). Tests mock all external API calls.
+
+## Smoke Checks
+
+Smoke checks verify basic functionality without real API calls:
+
+```bash
+npm run smoke:list   # List available smoke test scripts
+npm run smoke:tools  # Verify exactly 74 MCP tools are registered
+npm run smoke:remote # Test remote deployment (requires MCP_REMOTE_URL env)
+```
+
+For remote smoke check with MCP access token:
+
+```powershell
+$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
+$env:MCP_ACCESS_TOKEN="your-token"
+.\scripts\smoke-remote.ps1
+```
 
 ## CI/CD
 

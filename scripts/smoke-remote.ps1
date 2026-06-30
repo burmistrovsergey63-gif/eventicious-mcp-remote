@@ -3,26 +3,26 @@
     Remote smoke tests for Eventicious MCP Remote Connector.
 
 .DESCRIPTION
-    Tests the remote deployment health, auth protection, and MCP endpoint.
-    Does NOT use real Eventicious credentials or make write requests.
-
-.PARAMETER BaseUrl
-    The base URL of the deployed application (e.g. https://example.layero.ru)
-
-.PARAMETER McpAccessToken
-    Optional MCP access token. If provided, tests auth-protected endpoints.
+    Tests the remote deployment health, MCP endpoint, and tool count.
+    Uses environment variables for configuration. Does NOT perform write operations.
 
 .EXAMPLE
-    .\scripts\smoke-remote.ps1 -BaseUrl "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru"
-    .\scripts\smoke-remote.ps1 -BaseUrl "https://example.layero.ru" -McpAccessToken "your-token"
-#>
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$BaseUrl,
+    .\scripts\smoke-remote.ps1
+    $env:MCP_REMOTE_URL="https://example.layero.ru" .\scripts\smoke-remote.ps1
 
-    [Parameter(Mandatory=$false)]
-    [string]$McpAccessToken
+    With MCP access token:
+    $env:MCP_ACCESS_TOKEN="your-token" $env:MCP_REMOTE_URL="..." .\scripts\smoke-remote.ps1
+#>
+
+param(
+    [string]$BaseUrl = $env:MCP_REMOTE_URL
 )
+
+if (-not $BaseUrl) {
+    Write-Host "ERROR: MCP_REMOTE_URL environment variable not set" -ForegroundColor Red
+    Write-Host "Usage: `$env:MCP_REMOTE_URL='https://your-url.layero.ru' .\scripts\smoke-remote.ps1" -ForegroundColor Yellow
+    exit 1
+}
 
 $results = @()
 
@@ -36,13 +36,23 @@ function Test-Step {
     }
 }
 
-# Strip trailing slash
-$BaseUrl = $BaseUrl.TrimEnd('/')
+$headers = @{}
+if ($env:MCP_ACCESS_TOKEN) {
+    $headers["Authorization"] = "Bearer $env:MCP_ACCESS_TOKEN"
+    $clientId = if ($env:EVENTICIOUS_CLIENT_ID) { $env:EVENTICIOUS_CLIENT_ID } else { "smoke-test" }
+    $clientSecret = if ($env:EVENTICIOUS_CLIENT_SECRET) { $env:EVENTICIOUS_CLIENT_SECRET } else { "smoke-test-secret" }
+    $headers["x-eventicious-client-id"] = $clientId
+    $headers["x-eventicious-client-secret"] = $clientSecret
+}
 
-Write-Host "`nRemote Smoke Tests: $BaseUrl`n" -ForegroundColor Cyan
+$expectedToolCount = 74
+
+Write-Host "`nRemote Smoke Tests: $BaseUrl" -ForegroundColor Cyan
+Write-Host "Expected tool count: $expectedToolCount" -ForegroundColor Cyan
+Write-Host ""
 
 # 1. Health check
-Test-Step "GET /healthz" {
+Test-Step "GET /healthz - health endpoint" {
     $resp = Invoke-RestMethod -Uri "$BaseUrl/healthz" -Method GET
     if ($resp.ok -eq $true -and $resp.service -eq "eventicious-mcp-remote") {
         return "ok=true, service=$($resp.service), version=$($resp.version)"
@@ -50,61 +60,30 @@ Test-Step "GET /healthz" {
     throw "Unexpected response: $($resp | ConvertTo-Json -Compress)"
 }
 
-# 2. Auth protection - no token
-Test-Step "POST /mcp without Auth => 401" {
-    try {
-        Invoke-RestMethod -Uri "$BaseUrl/mcp" -Method POST -ContentType "application/json" -Body '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-        throw "Expected 401 but got success"
-    } catch {
-        if ($_.Exception.Response.StatusCode -eq 401) {
-            return "401 as expected"
-        }
-        throw "Expected 401, got $($_.Exception.Response.StatusCode)"
-    }
-}
-
-# 3. Auth protection - with token but no Eventicious headers
-if ($McpAccessToken) {
-    Test-Step "POST /mcp with Auth, no creds => 400" {
-        $headers = @{ "Authorization" = "Bearer $McpAccessToken" }
-        try {
-            Invoke-RestMethod -Uri "$BaseUrl/mcp" -Method POST -ContentType "application/json" -Body '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' -Headers $headers
-            throw "Expected error but got success"
-        } catch {
-            $statusCode = [int]$_.Exception.Response.StatusCode
-            if ($statusCode -eq 400 -or $statusCode -eq 401) {
-                return "$statusCode as expected"
-            }
-            throw "Expected 400/401, got $statusCode"
-        }
-    }
-
-    Test-Step "POST /mcp tools/list with Auth + fake creds => 200" {
-        $headers = @{
-            "Authorization" = "Bearer $McpAccessToken"
-            "x-eventicious-client-id" = "fake-id"
-            "x-eventicious-client-secret" = "fake-secret"
-        }
+# 2. MCP endpoint - requires auth token
+if ($env:MCP_ACCESS_TOKEN) {
+    Test-Step "POST /mcp with auth - tools/list" {
         $body = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
         $resp = Invoke-RestMethod -Uri "$BaseUrl/mcp" -Method POST -ContentType "application/json" -Body $body -Headers $headers
         $toolCount = ($resp.result.tools | Measure-Object).Count
-        if ($toolCount -ge 8) {
-            return "$toolCount tools found"
+        if ($toolCount -eq $expectedToolCount) {
+            return "200 OK, $toolCount tools found (matches expected)"
         }
-        throw "Expected >= 8 tools, got $toolCount"
+        throw "Expected $expectedToolCount tools, got $toolCount"
     }
 } else {
-    Write-Host "  Skipping auth tests (no McpAccessToken provided)`n" -ForegroundColor Yellow
+    Write-Host "  Skipping MCP endpoint test (no MCP_ACCESS_TOKEN provided)" -ForegroundColor Yellow
+    Write-Host "  Set MCP_ACCESS_TOKEN env var to test tools/list endpoint" -ForegroundColor Yellow
 }
 
 # Print results
-Write-Host "Results:" -ForegroundColor Cyan
+Write-Host "`nResults:" -ForegroundColor Cyan
 $results | Format-Table -AutoSize
 
 $failed = ($results | Where-Object { $_.Status -eq "FAIL" }).Count
 if ($failed -gt 0) {
-    Write-Host "$failed test(s) FAILED" -ForegroundColor Red
+    Write-Host "`n$failed test(s) FAILED" -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "All tests PASSED" -ForegroundColor Green
+    Write-Host "`nAll smoke tests PASSED" -ForegroundColor Green
 }

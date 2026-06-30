@@ -16,7 +16,7 @@
 | Area | Tool file | Schema file | Tests | Status |
 |---|---|---|---|---|
 | catalogs | src/tools/catalogs.ts | src/schemas/catalogs.ts | - | already using shapes |
-| catalog-elements | src/tools/catalog-elements.ts | src/schemas/catalog-elements.ts | - | already using shapes |
+| catalog-elements | src/tools/catalog-elements.ts | src/schemas/catalog-elements.ts | src/schemas/catalog-elements.test.ts | already using shapes |
 | courses | src/tools/courses.ts | src/schemas/courses.ts | - | already using shapes |
 | expo | src/tools/expo.ts | src/schemas/expo.ts | - | already using shapes |
 | polls | src/tools/polls.ts | src/schemas/polls.ts | - | already using shapes |
@@ -28,7 +28,7 @@
 
 | Area | Tool file | Inline schema count/notes | Risk | Recommended action |
 |---|---|---|---|---|
-| schedule-import | src/tools/schedule-import.ts | 2 tools, complex nested row schemas | high | keep as is (helper tool) |
+| schedule-import | src/tools/schedule-import.ts | 2 tools, complex nested row schemas | high | keep as is (helper tool). Next hardening candidate. |
 | catalog-import | src/tools/catalog-import.ts | helper tool for plan building | low | keep as is (helper tool) |
 | gravity-json | src/tools/gravity-json.ts | helper tool | low | keep as is (helper tool) |
 
@@ -55,10 +55,22 @@
 
 ## Recommended next migration order
 
-**Schema migration complete.** All simple CRUD tools have been migrated.
+**Schema migration complete.** All simple CRUD tools have been migrated and hardened.
 
-Remaining inline tools are intentional helpers (schedule-import, catalog-import, gravity-json) 
-or already using imported shapes (catalogs, catalog-elements, courses, expo, polls, scorm, gamification).
+### Hardening Release 0.6.1
+
+This release adds:
+- Tool-count smoke check (`npm run smoke:tools`) verifying 74 tools registered
+- Tests for catalog-elements.ts schema shapes (29 tests)
+- Remote smoke check (`npm run smoke:remote`) for Layero preview
+
+Remaining inline tools are intentional helpers (schedule-import, catalog-import, gravity-json)
+or already using imported shapes (catalogs, catalog-elements, courses, expo, polls, scorm, gamification, course-import).
+
+### Next Hardening Candidate
+
+`schedule-import` is the next high-risk candidate for separate hardening. It contains complex nested row schemas
+for schedule import plan building and should be migrated in isolation.
 
 ## Do not migrate together
 

@@ -26,24 +26,22 @@ Steps:
 
 ## Smoke Tests
 
-Smoke tests are PowerShell scripts in `scripts/`. They should only run in dry-run mode:
+- `npm run smoke:list` - List available smoke test scripts
+- `npm run smoke:tools` - Verify exactly 74 MCP tools are registered (local static check)
+- `npm run smoke:remote` - Test remote deployment health and MCP endpoint
 
-- `scripts/smoke-health.ps1` - Basic health check
-- `scripts/smoke-mcp-info.ps1` - MCP endpoint info
-- `scripts/smoke-v*-dryrun.ps1` - Version-specific dry run tests
-
-All smoke tests use `dry_run=true` by default. Never run with `confirm=true` on production without explicit intent.
+Smoke tests should only run in dry-run mode. Never run with `confirm=true` on production without explicit intent.
 
 ## Schema Audit
 
 See `docs/SCHEMA_AUDIT.md` and `docs/SCHEMA_AUDIT_CHECKPOINT.md` for analysis of Zod schema usage across tools.
 
-Current status after Pass 1-5:
-- 116 unit tests passing
-- 19 simple CRUD tools migrated to raw shape exports
-- Tags, locations, sessions, session-attachments, users/groups now use imported schemas
+Current status after hardening release 0.6.1:
+- 156 unit tests passing
+- 74 MCP tools registered
+- Schema shapes verified compatible with server.tool()
 - Remaining inline schemas are intentional helper tools:
-  - schedule-import (helper)
+  - schedule-import (helper, high-risk candidate for future hardening)
   - catalog-import (helper)
   - gravity-json (helper)
 
