@@ -83,3 +83,12 @@ Pass credentials directly in each request:
 - Tokens expire automatically
 - Access revocation via Eventicious credentials on Eventicious side
 - Emergency reset via server MCP_TOKEN_ENCRYPTION_KEY rotation
+
+## Manual QA
+
+Manager onboarding manual QA passed:
+- server: eventicious-mcp-remote v0.6.2;
+- transport: MCP 2024-11-05 / SSE;
+- token validation: Credentials valid;
+- tools visible: 74;
+- first read-only check passed.
