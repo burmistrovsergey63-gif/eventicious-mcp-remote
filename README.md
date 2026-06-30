@@ -55,6 +55,34 @@ Expected response:
 
 Prerequisites: Node.js 20+, Eventicious API credentials
 
+### MCP Token Onboarding (Recommended)
+
+Подготовьте ваши Eventicious API credentials:
+- Eventicious Base URL
+- Client ID
+- Client Secret
+
+1. Exchange credentials for MCP token:
+   ```powershell
+   $env:EVENTICIOUS_BASE_URL="https://api-integration.eventicious.ru/"
+   $env:EVENTICIOUS_CLIENT_ID="<your-client-id>"
+   $env:EVENTICIOUS_CLIENT_SECRET="<your-client-secret>"
+
+   $exchange = @{ baseUrl = $env:EVENTICIOUS_BASE_URL; clientId = $env:EVENTICIOUS_CLIENT_ID; clientSecret = $env:EVENTICIOUS_CLIENT_SECRET } | ConvertTo-Json
+   $response = Invoke-RestMethod -Uri "https://your-endpoint.layero.ru/auth/exchange" -Method POST -ContentType "application/json" -Body $exchange
+   ```
+
+2. Configure your MCP client with the returned `mcpToken`:
+   - Claude Code: see `examples/claude-code.mcp.example.json`
+   - OpenCode: see `examples/opencode.mcp.example.json`
+
+3. Verify connection:
+   ```bash
+   curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/auth/verify
+   ```
+
+### Local Development
+
 1. Clone and install:
    npm install
 
@@ -69,21 +97,22 @@ Prerequisites: Node.js 20+, Eventicious API credentials
    .\scripts\smoke-health.ps1
    .\scripts\smoke-mcp-info.ps1
 
-5. Test endpoints:
-   Landing page: http://localhost:3000
-   Health check: http://localhost:3000/healthz
-   MCP endpoint: POST http://localhost:3000/mcp
-
 ## Required Headers
 
-For MCP requests (POST /mcp):
+For MCP requests (POST /mcp), use either:
 
-| Header | Required | Description |
-|--------|----------|-------------|
-| Authorization | If MCP_ACCESS_TOKEN set | Bearer {MCP_ACCESS_TOKEN} |
-| x-eventicious-client-id | Yes | Your Eventicious project client_id |
-| x-eventicious-client-secret | Yes | Your Eventicious project client_secret |
-| x-eventicious-base-url | No | Defaults to EVENTICIOUS_DEFAULT_BASE_URL |
+**Option A: MCP Token (recommended)**
+```
+Authorization: Bearer mcp_evt_...
+```
+
+**Option B: Legacy headers**
+```
+Authorization: Bearer <MCP_ACCESS_TOKEN>
+x-eventicious-client-id: <your-client-id>
+x-eventicious-client-secret: <your-client-secret>
+x-eventicious-base-url: https://api-integration.eventicious.ru
+```
 
 ## OpenCode Installer
 

@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "eventicious": {
+      "type": "remote",
+      "url": "https://your-endpoint.layero.ru/mcp",
+      "enabled": true,
+      "timeout": 120000,
+      "authorization": {
+        "type": "bearer",
+        "token": "<your-mcp-token>"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "eventicious": {
+      "type": "http",
+      "url": "https://your-endpoint.layero.ru/mcp",
+      "authorization": {
+        "type": "bearer",
+        "token": "<your-mcp-token>"
+      }
+    }
+  }
+}
