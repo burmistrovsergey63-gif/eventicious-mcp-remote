@@ -95,4 +95,13 @@ Manager onboarding manual QA passed:
 
 ## Agent Guidelines
 
-For connected AI agents, guidelines are available through MCP tool `eventicious_get_agent_instructions`. This includes UTF-8 handling rules, dry_run workflow, and safety rules.
+For connected AI agents, guidelines are available through MCP tool `eventicious_get_agent_instructions`. This includes UTF-8 handling rules, dry_run workflow, safety rules, and schedule-import workflow (prepare → validate → review → create/update).
+
+## Schedule Import Workflow
+
+For mass-importing sessions from Excel/CSV:
+1. `eventicious_prepare_schedule_import` — build import plan from rows
+2. `eventicious_validate_schedule_plan` — validate plan (no API calls)
+3. Review errors/warnings, fix data if needed
+4. Use `eventicious_create_session` / `eventicious_update_session` with `dry_run=true`
+5. After preview, execute with `dry_run=false` + `confirm=true`

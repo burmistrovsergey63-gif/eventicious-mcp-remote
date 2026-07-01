@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { logger } from "../logger";
+import { detectLikelyMojibake } from "../utils/text-encoding";
 
 interface NormalizedRow {
   title: string;
@@ -43,6 +44,42 @@ function normalizeDateTime(dateStr?: string, timeStr?: string, isoStr?: string):
   return undefined;
 }
 
+function checkRowEncodingWarnings(row: NormalizedRow, rowIndex: number): { field: string; message: string }[] {
+  const warnings: { field: string; message: string }[] = [];
+  const fields: [string, string | undefined][] = [
+    ["title", row.title],
+    ["locationName", row.locationName],
+    ["description", row.description],
+  ];
+
+  if (row.tagNames) {
+    for (let i = 0; i < row.tagNames.length; i++) {
+      fields.push([`tagNames[${i}]`, row.tagNames[i]]);
+    }
+  }
+  if (row.speakerNames) {
+    for (let i = 0; i < row.speakerNames.length; i++) {
+      fields.push([`speakerNames[${i}]`, row.speakerNames[i]]);
+    }
+  }
+  if (row.aclGroupNames) {
+    for (let i = 0; i < row.aclGroupNames.length; i++) {
+      fields.push([`aclGroupNames[${i}]`, row.aclGroupNames[i]]);
+    }
+  }
+
+  for (const [field, value] of fields) {
+    if (value && detectLikelyMojibake(value)) {
+      warnings.push({
+        field: `Row ${rowIndex + 1}.${field}`,
+        message: `Possible mojibake detected in "${field}". Ensure text is UTF-8 encoded.`,
+      });
+    }
+  }
+
+  return warnings;
+}
+
 function matchByName<T extends { id: number; name: string }>(items: T[], name: string): T | undefined {
   return items.find(i => i.name.toLowerCase() === name.toLowerCase());
 }
@@ -57,7 +94,7 @@ export function registerScheduleImportTools(
 ) {
   server.tool(
     "eventicious_prepare_schedule_import",
-    "Build a safe import plan from schedule rows (Excel/JSON). Pure helper — no Eventicious API calls. Use before real schedule import. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
+    "Builds an import plan only. Does not write to Eventicious. Pure helper — no Eventicious API calls. Use before real schedule import. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     {
       rows: z.array(z.object({
         title: z.string(),
@@ -105,6 +142,7 @@ export function registerScheduleImportTools(
 
       const warnings: string[] = [];
       const errors: string[] = [];
+      const encodingWarnings: { field: string; message: string }[] = [];
       const normalizedRows: NormalizedRow[] = [];
       const locationsToCreate = new Map<string, { name: string; suggestedId: number }>();
       const tagsToCreate = new Map<string, { name: string; suggestedId: number }>();
@@ -195,7 +233,7 @@ export function registerScheduleImportTools(
 
         const sessionId = row.externalId ? parseInt(row.externalId, 10) || nextId++ : nextId++;
 
-        normalizedRows.push({
+        const normalizedRow: NormalizedRow = {
           title: row.title,
           description: row.description,
           startTime: startIso || "",
@@ -212,7 +250,10 @@ export function registerScheduleImportTools(
           attachments: row.attachments,
           externalId: row.externalId,
           type: row.type,
-        });
+        };
+
+        normalizedRows.push(normalizedRow);
+        encodingWarnings.push(...checkRowEncodingWarnings(normalizedRow, i));
 
         sessionsToCreate.push({
           id: sessionId,
@@ -232,7 +273,7 @@ export function registerScheduleImportTools(
         }
       }
 
-      const plan: SchedulePlan = {
+      const plan: SchedulePlan & { encodingWarnings: { field: string; message: string }[] } = {
         normalizedRows,
         locationsToCreate: Array.from(locationsToCreate.values()),
         tagsToCreate: Array.from(tagsToCreate.values()),
@@ -244,6 +285,7 @@ export function registerScheduleImportTools(
         attachmentsToCreate,
         warnings,
         errors,
+        encodingWarnings,
         recommendedExecutionOrder: [
           "1. Create locations (if createMissingLocations=true)",
           "2. Create tags (if createMissingTags=true)",
@@ -262,7 +304,7 @@ export function registerScheduleImportTools(
 
   server.tool(
     "eventicious_validate_schedule_plan",
-    "Validate a schedule import plan before real execution. Checks for conflicts, missing fields, and warnings. Pure helper — no Eventicious API calls. For Russian text use UTF-8.",
+    "Validates an import plan only. Does not write to Eventicious. Checks for conflicts, missing fields, and warnings. Pure helper — no Eventicious API calls. For Russian text use UTF-8.",
     {
       plan: z.any().describe("Output from eventicious_prepare_schedule_import"),
     },
