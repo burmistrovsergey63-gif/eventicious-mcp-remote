@@ -54,7 +54,7 @@ export function registerCatalogTools(
 
   server.tool(
     "eventicious_create_catalog",
-    "Create a new root catalog.",
+    "Create a new root catalog. For Russian text use UTF-8.",
     catalogCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_catalog", dry_run: params.dry_run });
@@ -81,7 +81,7 @@ export function registerCatalogTools(
 
   server.tool(
     "eventicious_update_catalog",
-    "Update an existing catalog.",
+    "Update an existing catalog. For Russian text use UTF-8.",
     catalogUpdateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_catalog", catalogId: params.catalogId, dry_run: params.dry_run });

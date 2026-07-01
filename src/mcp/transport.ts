@@ -59,7 +59,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.6.2",
+    version: "0.6.3",
   });
 
   registerTools(server, credentials);
@@ -102,7 +102,17 @@ function registerTools(
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify({ success: true, message: "Credentials valid" }),
+              text: JSON.stringify({
+                success: true,
+                message: "Credentials valid",
+                agentGuidance: {
+                  toolsAvailable: 75,
+                  useUtf8ForRussianText: true,
+                  startWithReadOnlyTools: true,
+                  useDryRunBeforeWrites: true,
+                  directPowerShellHttpJsonMustUseUtf8Bytes: true,
+                },
+              }),
             },
           ],
         };
@@ -112,6 +122,56 @@ function registerTools(
         });
         return toolError(e instanceof Error ? e.message : "Unknown error");
       }
+    }
+  );
+
+  server.tool(
+    "eventicious_get_agent_instructions",
+    "Read-only helper: returns guidelines for AI agents working with Eventicious MCP. Use this tool first to understand safety rules, UTF-8 handling, and dry_run workflow.",
+    {},
+    async () => {
+      logger.info("tool_call", { tool: "eventicious_get_agent_instructions" });
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({
+              mcpVersion: "0.6.3",
+              expectedToolsCount: 75,
+              safetyRules: {
+                startWithReadOnlyChecks: true,
+                useDryRunBeforeWrites: true,
+                realChangesOnlyAfterDryRunFalseAndConfirmTrue: true,
+                destructiveOperationsRequireDangerConfirm: true,
+              },
+              russianTextRules: {
+                useUtf8: true,
+                preserveCyrillic: true,
+                neverProduceMojibake: true,
+                doNotUsePowerShell51BodyAsStringForJsonWithCyrillic: true,
+                forDirectHttpRequestsUseUtf8ByteArray: true,
+                contentTypeHeader: "application/json; charset=utf-8",
+              },
+              markdownGravityJsonRules: {
+                preserveRussianTextAsUnicodeUtf8: true,
+                alwaysPreviewWithDryRunFirst: true,
+              },
+              safeReadOnlyCategories: [
+                "auth/check",
+                "get/list",
+                "validate",
+                "check",
+              ],
+              clarifyTools: {
+                prepareToolsAreSafe:
+                  "Prepare tools build a plan or structure without writing to Eventicious.",
+                writeToolsNeedPreviewAndConfirmation:
+                  "create/update/delete/import/upload/block/unblock tools must not run without preview (dry_run=true) and explicit confirmation.",
+              },
+            }),
+          },
+        ],
+      };
     }
   );
 

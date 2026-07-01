@@ -8,7 +8,7 @@ export function registerCourseImportTools(
 ) {
   server.tool(
     "eventicious_prepare_course_import",
-    "Normalize a course plan into Eventicious import payload with execution plan. No Eventicious writes.",
+    "Normalize a course plan into Eventicious import payload with execution plan. No Eventicious writes. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     courseImportPlanInputSchema.shape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_prepare_course_import", name: params.name });
@@ -84,7 +84,7 @@ export function registerCourseImportTools(
 
   server.tool(
     "eventicious_validate_course_plan",
-    "Validate a course plan before import. Checks required fields, settings validity, stage structure, and readiness.",
+    "Validate a course plan before import. Checks required fields, settings validity, stage structure, and readiness. For Russian text use UTF-8.",
     coursePlanValidationSchema.shape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_validate_course_plan" });

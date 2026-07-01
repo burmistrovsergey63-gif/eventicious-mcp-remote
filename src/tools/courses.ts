@@ -15,7 +15,7 @@ export function registerCourseTools(
 ) {
   server.tool(
     "eventicious_import_course_structure",
-    "Create a new course with stages. Returns IDs for polls, tasks, SCORM placeholders, and catalogs. Requires pre-uploaded cover image IDs.",
+    "Create a new course with stages. Returns IDs for polls, tasks, SCORM placeholders, and catalogs. Requires pre-uploaded cover image IDs. For Russian text use UTF-8.",
     courseImportSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_import_course_structure", dry_run: params.dry_run, name: params.name });

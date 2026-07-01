@@ -18,7 +18,7 @@ export function registerExpoTools(
   // --- eventicious_create_exhibitor ---
   server.tool(
     "eventicious_create_exhibitor",
-    "Create an exhibitor (company) in Eventicious. dry_run=true by default. WARNING: null/empty fields may reset values in admin.",
+    "Create an exhibitor (company) in Eventicious. dry_run=true by default. WARNING: null/empty fields may reset values in admin. For Russian text use UTF-8.",
     exhibitorCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_exhibitor", dry_run: params.dry_run, id: params.id, name: params.name });
@@ -59,7 +59,7 @@ export function registerExpoTools(
   // --- eventicious_update_exhibitor ---
   server.tool(
     "eventicious_update_exhibitor",
-    "Update an exhibitor (company) in Eventicious. dry_run=true by default. WARNING: included null/empty fields may reset values in Eventicious admin. Only include fields you want to change.",
+    "Update an exhibitor (company) in Eventicious. dry_run=true by default. WARNING: included null/empty fields may reset values in Eventicious admin. Only include fields you want to change. For Russian text use UTF-8.",
     exhibitorUpdateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_exhibitor", dry_run: params.dry_run, id: params.id });

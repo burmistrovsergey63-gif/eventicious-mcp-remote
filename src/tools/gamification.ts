@@ -11,7 +11,7 @@ export function registerGamificationTools(
   // --- eventicious_add_manual_gamification_charge ---
   server.tool(
     "eventicious_add_manual_gamification_charge",
-    "Manually charge or write-off gamification points for a user. Positive scores = charge, negative scores = write-off. Requires dry_run=false + confirm=true for real execution.",
+    "Manually charge or write-off gamification points for a user. Positive scores = charge, negative scores = write-off. Requires dry_run=false + confirm=true for real execution. For Russian text use UTF-8.",
     gamificationManualChargeSchema,
     async (params) => {
       const s = Number(params.scores);

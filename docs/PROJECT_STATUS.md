@@ -52,7 +52,7 @@
 
 2. **catalog-elements.ts:** Already uses shapes but not tested. Uses `folderCreateSchema` et al. as raw shapes directly.
 
-3. **No tool-count smoke check:** Recommended to add smoke check that verifies 74 MCP tools are registered.
+3. **No tool-count smoke check:** Recommended to add smoke check that verifies 75 MCP tools are registered.
 
 ---
 

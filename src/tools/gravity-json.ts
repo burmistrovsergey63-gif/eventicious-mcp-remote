@@ -232,7 +232,7 @@ export function registerGravityJsonTools(
 ) {
   server.tool(
     "eventicious_convert_markdown_to_gravity_json",
-    "Convert markdown or plain text to GravityJson (ProseMirror) format for Text 2.0 catalog elements. Never performs API calls.",
+    "Convert markdown or plain text to GravityJson (ProseMirror) format for Text 2.0 catalog elements. Never performs API calls. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     convertSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_convert_markdown_to_gravity_json" });
@@ -256,7 +256,7 @@ export function registerGravityJsonTools(
 
   server.tool(
     "eventicious_validate_gravity_json",
-    "Validate a GravityJson object for Text 2.0 catalog elements. Never performs API calls.",
+    "Validate a GravityJson object for Text 2.0 catalog elements. Never performs API calls. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     validateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_validate_gravity_json" });

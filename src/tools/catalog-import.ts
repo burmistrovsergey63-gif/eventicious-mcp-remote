@@ -94,7 +94,7 @@ export function registerCatalogImportTools(
 ) {
   server.tool(
     "eventicious_prepare_catalog_import",
-    "Prepare a catalog import plan from a JSON/tree structure. Normalizes the tree, builds an execution plan. Never performs API calls. Use text2[] for text content (legacy texts[] is NOT supported).",
+    "Prepare a catalog import plan from a JSON/tree structure. Normalizes the tree, builds an execution plan. Never performs API calls. Use text2[] for text content (legacy texts[] is NOT supported). For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     prepareSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_prepare_catalog_import" });
@@ -222,7 +222,7 @@ export function registerCatalogImportTools(
 
   server.tool(
     "eventicious_validate_catalog_plan",
-    "Validate a catalog import plan from eventicious_prepare_catalog_import. Checks required fields, duplicate externalIds, folder references, link URLs, GravityJson shapes, and more. Never performs API calls.",
+    "Validate a catalog import plan from eventicious_prepare_catalog_import. Checks required fields, duplicate externalIds, folder references, link URLs, GravityJson shapes, and more. Never performs API calls. For Russian text use UTF-8.",
     validateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_validate_catalog_plan" });

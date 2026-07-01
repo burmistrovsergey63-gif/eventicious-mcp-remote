@@ -13,7 +13,7 @@ export function registerTagTools(
 ) {
   server.tool(
     "eventicious_create_tag",
-    "Create a tag (topic) in Eventicious schedule. dry_run=true by default.",
+    "Create a tag (topic) in Eventicious schedule. dry_run=true by default. For Russian text use UTF-8.",
     createTagShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_tag", dry_run: params.dry_run, tag_id: params.id });
@@ -47,7 +47,7 @@ export function registerTagTools(
 
   server.tool(
     "eventicious_update_tag",
-    "Update a tag (topic) in Eventicious schedule. dry_run=true by default.",
+    "Update a tag (topic) in Eventicious schedule. dry_run=true by default. For Russian text use UTF-8.",
     updateTagShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_tag", dry_run: params.dry_run, tag_id: params.id });

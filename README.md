@@ -187,7 +187,7 @@ The .local.ps1 files are git-ignored.
 - [ ] Confirm that real writes require confirm=true
 - [ ] Check logs for any leaked secrets (should be masked)
 
-## Available Tools (74 total)
+## Available Tools (75 total)
 
 ### v0.1.0 core (8 tools)
 
@@ -508,7 +508,7 @@ Smoke checks verify basic functionality without real API calls:
 
 ```bash
 npm run smoke:list   # List available smoke test scripts
-npm run smoke:tools  # Verify exactly 74 MCP tools are registered
+npm run smoke:tools  # Verify exactly 75 MCP tools are registered
 npm run smoke:remote # Test remote deployment (requires MCP_REMOTE_URL env)
 ```
 

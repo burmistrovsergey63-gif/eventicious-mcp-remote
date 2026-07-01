@@ -11,7 +11,7 @@ smokeScripts.forEach((script, i) => {
 });
 console.log("\nnpm scripts:");
 console.log("  npm run smoke:list    - List available smoke test scripts");
-console.log("  npm run smoke:tools   - Verify exactly 74 MCP tools are registered");
+  console.log("  npm run smoke:tools   - Verify exactly 75 MCP tools are registered");
 console.log("  npm run smoke:remote  - Test remote deployment (requires MCP_REMOTE_URL env)");
 console.log("  npm run smoke:auth    - Test auth exchange (requires Eventicious credentials)");
 console.log("\nNote: Tests use dry_run=true by default. Review scripts before running with real credentials.");

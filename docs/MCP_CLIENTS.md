@@ -87,8 +87,12 @@ Pass credentials directly in each request:
 ## Manual QA
 
 Manager onboarding manual QA passed:
-- server: eventicious-mcp-remote v0.6.2;
+- server: eventicious-mcp-remote v0.6.3;
 - transport: MCP 2024-11-05 / SSE;
 - token validation: Credentials valid;
-- tools visible: 74;
+- tools visible: 75;
 - first read-only check passed.
+
+## Agent Guidelines
+
+For connected AI agents, guidelines are available through MCP tool `eventicious_get_agent_instructions`. This includes UTF-8 handling rules, dry_run workflow, and safety rules.

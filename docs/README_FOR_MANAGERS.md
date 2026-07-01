@@ -1,328 +1,445 @@
-# Eventicious MCP Remote Connector - Manager Guide
+# Инструкция по подключению Eventicious MCP к AI-агенту
 
-## Quick Start
+Эта инструкция для менеджера или клиента, который хочет подключить AI-агента к Eventicious.
 
-### 1. Prepare Eventicious API Credentials
+Eventicious MCP позволяет агенту безопасно работать с данными Eventicious: пользователями, группами, каталогами, расписанием, курсами, экспонентами и другими разделами.
 
-Подготовьте ваши Eventicious API credentials:
-- Eventicious Base URL
-- Client ID
-- Client Secret
+Главное правило: сначала всегда делайте preview. Реальные изменения выполняются только после отдельного подтверждения.
 
-IMPORTANT: Each project has its own Client ID/Client Secret.
-Never use credentials from one project in another.
+---
 
-### 2. Configure MCP Connection
+## Что понадобится
 
-Для подключения через MCP Token (рекомендуется):
+Перед началом подготовьте:
 
-```powershell
-$env:EVENTICIOUS_BASE_URL="https://api-integration.eventicious.ru/"
-$env:EVENTICIOUS_CLIENT_ID="<your-client-id>"
-$env:EVENTICIOUS_CLIENT_SECRET="<your-client-secret>"
+1. Рабочий компьютер.
+2. Один из AI-клиентов:
+   - OpenCode;
+   - Claude Code;
+   - Codex.
+3. Ваши Eventicious API credentials:
+   - Eventicious Base URL;
+   - Client ID;
+   - Client Secret.
+4. MCP endpoint:
 
-$exchange = @{
-    baseUrl = $env:EVENTICIOUS_BASE_URL
-    clientId = $env:EVENTICIOUS_CLIENT_ID
-    clientSecret = $env:EVENTICIOUS_CLIENT_SECRET
-} | ConvertTo-Json
-
-$response = Invoke-RestMethod -Uri "https://your-endpoint.layero.ru/auth/exchange" -Method POST -ContentType "application/json" -Body $exchange
-
-# Set token in environment
-$env:EVENTICIOUS_MCP_TOKEN = $response.mcpToken
+```text
+https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp
 ```
 
-Then configure your MCP client with the returned MCP token.
+В этой инструкции не описывается, где брать Client ID и Client Secret. Предполагается, что они у вас уже есть.
 
-Подробности по настройке клиентов: [MCP_CLIENTS.md](MCP_CLIENTS.md)
+---
 
-Для пользователей OpenCode доступен автоматический установщик:
+## Шаг 1. Установите AI-клиент
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\installers\opencode\install-opencode.ps1
+Выберите один клиент, с которым будете работать.
+
+### Вариант А. OpenCode
+
+1. Скачайте и установите OpenCode по официальной инструкции.
+2. Откройте OpenCode.
+3. Убедитесь, что можете открыть рабочую папку и начать новый чат.
+
+### Вариант Б. Claude Code
+
+1. Скачайте и установите Claude Code по официальной инструкции.
+2. Откройте Claude Code.
+3. Убедитесь, что можете открыть рабочую папку и начать новый чат.
+
+### Вариант В. Codex
+
+1. Скачайте и установите Codex по официальной инструкции.
+2. Откройте Codex.
+3. Убедитесь, что можете открыть рабочую папку и начать новый чат.
+
+Если установка клиента уже выполнена, переходите к следующему шагу.
+
+---
+
+## Шаг 2. Создайте рабочую папку
+
+Создайте отдельную папку для подключения Eventicious MCP.
+
+Пример для Windows:
+
+1. Откройте Рабочий стол.
+2. Создайте папку:
+
+```text
+Eventicious MCP
 ```
 
-Скрипт запросит endpoint, токен и credentials, и настроит `opencode.json` автоматически.
+Пример пути:
 
-Подробности: [INSTALL_OPENCODE.md](INSTALL_OPENCODE.md)
+```text
+C:\Users\<ваш_пользователь>\Desktop\Eventicious MCP
+```
 
-#### The Golden Rule: Always dry_run First
+Дальше все файлы нужно создавать именно в этой папке.
 
-Every write operation defaults to dry_run=true. This means:
-- You see a preview of what WOULD happen
-- Nothing actually changes in Eventicious
-- You can review the payload before committing
+---
 
-#### Step-by-Step Workflow
+## Шаг 3. Создайте файл `.env`
 
-1. Test connection: Use eventicious_auth_check tool
-2. Preview changes: Run any tool with dry_run: true (default)
-3. Review the preview: Check that users/groups look correct
-4. Execute: Set dry_run: false AND confirm: true
+Файл `.env` нужен, чтобы хранить ваши локальные ключи и токен подключения.
 
-#### Why confirm=true is Required
+### Как создать файл через Блокнот
 
-The confirm flag is a safety mechanism. It prevents accidental execution.
-Even if you set dry_run: false, the tool will refuse to run without confirm: true.
+1. Откройте папку `Eventicious MCP`.
+2. Нажмите правой кнопкой мыши внутри папки.
+3. Выберите **Создать → Текстовый документ**.
+4. Откройте файл.
+5. Вставьте шаблон ниже.
+6. Сохраните файл с названием:
 
-**Important:** dry_run=true (the default) never requires confirm. Managers can ask for previews without confirmations. Real execution (dry_run=false) requires explicit approval via confirm=true.
+```text
+.env
+```
 
-### Handling Excel/CSV Data from Clients
+Важно: файл должен называться именно `.env`, а не `.env.txt`.
 
-When a client sends user data in Excel or CSV:
+Если Windows скрывает расширения файлов, включите отображение расширений в Проводнике. Иначе файл может случайно сохраниться как `.env.txt`.
 
-1. First, parse the file into JSON format
-2. Use the tool with dry_run: true to preview
-3. Review the preview carefully
-4. Only then execute with dry_run: false + confirm: true
+### Что вставить в `.env`
 
-Never send raw data directly to Eventicious without preview.
+```env
+EVENTICIOUS_BASE_URL=https://api-integration.eventicious.ru/
+EVENTICIOUS_CLIENT_ID=вставьте_ваш_client_id
+EVENTICIOUS_CLIENT_SECRET=вставьте_ваш_client_secret
+```
 
-### Available Tools
+Замените значения:
 
-| Tool | Description | Default |
-|------|-------------|---------|
-| eventicious_auth_check | Verify credentials work | Read-only |
-| eventicious_create_users | Create new users | dry_run=true |
-| eventicious_update_users | Update existing users | dry_run=true |
-| eventicious_block_users | Block users | dry_run=true |
-| eventicious_unblock_users | Unblock users | dry_run=true |
-| eventicious_get_acl_groups | List all groups | Read-only |
-| eventicious_create_acl_group | Create a new group | dry_run=true |
-| eventicious_move_users_to_groups | Move users between groups | dry_run=true |
-| eventicious_delete_users | Delete users permanently | dry_run=true |
-| eventicious_update_acl_group | Rename a group | dry_run=true |
-| eventicious_delete_acl_group | Delete a group permanently | dry_run=true |
-| eventicious_add_user_roles | Assign Curator/Supervisor | dry_run=true |
-| eventicious_remove_user_roles | Remove roles | dry_run=true |
-| eventicious_add_user_mentors | Assign mentor to mentees | dry_run=true |
-| eventicious_remove_user_mentors | Remove mentor from mentees | dry_run=true |
-| eventicious_create_location | Create schedule location | dry_run=true |
-| eventicious_update_location | Update schedule location | dry_run=true |
-| eventicious_delete_location | Delete schedule location permanently | dry_run=true |
-| eventicious_create_tag | Create schedule tag/topic | dry_run=true |
-| eventicious_update_tag | Update schedule tag | dry_run=true |
-| eventicious_delete_tag | Delete schedule tag permanently | dry_run=true |
-| eventicious_create_session | Create schedule session/event | dry_run=true |
-| eventicious_update_session | Update schedule session | dry_run=true |
-| eventicious_delete_session | Delete schedule session permanently | dry_run=true |
-| eventicious_create_session_attachment | Create session attachment/link | dry_run=true |
-| eventicious_update_session_attachment | Update session attachment | dry_run=true |
-| eventicious_delete_session_attachment | Delete session attachment permanently | dry_run=true |
-| eventicious_prepare_schedule_import | Build import plan from Excel/JSON | helper |
-| eventicious_validate_schedule_plan | Validate import plan | helper |
-| eventicious_list_catalogs | List all root catalogs | Read-only |
-| eventicious_get_catalog | Get catalog/folder with elements | Read-only |
-| eventicious_create_catalog | Create root catalog | dry_run=true |
-| eventicious_update_catalog | Update catalog | dry_run=true |
-| eventicious_delete_catalog | Delete catalog permanently | dry_run=true |
-| eventicious_create_folder | Create folder with optional ACL visibility | dry_run=true |
-| eventicious_update_folder | Update folder with optional ACL visibility | dry_run=true |
-| eventicious_delete_folder | Delete folder permanently | dry_run=true |
-| eventicious_add_file_to_catalog | Add uploaded file to catalog | dry_run=true |
-| eventicious_delete_file_from_catalog | Delete file permanently | dry_run=true |
-| eventicious_create_link | Create link element | dry_run=true |
-| eventicious_delete_link | Delete link permanently | dry_run=true |
-| eventicious_create_text2 | Create Text 2.0 / GravityJson element | dry_run=true |
-| eventicious_delete_text2 | Delete Text 2.0 element permanently | dry_run=true |
-| eventicious_add_video_to_catalog | Add uploaded video | dry_run=true |
-| eventicious_delete_video_from_catalog | Delete video permanently | dry_run=true |
-| eventicious_add_groups_to_catalog | Add ACL groups to catalog | dry_run=true |
-| eventicious_delete_group_from_catalog | Delete group permanently | dry_run=true |
-| eventicious_set_catalog_order | Reorder root catalogs | dry_run=true |
-| eventicious_set_catalog_element_order | Reorder elements within catalog | dry_run=true |
-| eventicious_bulk_delete_catalog_elements | Bulk delete folders and elements | dry_run=true |
-| eventicious_add_to_menu | Add catalog/folder to menu | dry_run=true |
-| eventicious_delete_from_menu | Remove from menu | dry_run=true |
-| eventicious_convert_markdown_to_gravity_json | Convert markdown to GravityJson | helper |
-| eventicious_validate_gravity_json | Validate GravityJson object | helper |
-| eventicious_prepare_catalog_import | Build catalog import plan | helper |
-| eventicious_validate_catalog_plan | Validate catalog import plan | helper |
+```text
+вставьте_ваш_client_id
+вставьте_ваш_client_secret
+```
 
-### Course Import Tools (v0.5)
+на ваши реальные Eventicious API credentials.
 
-| Tool | Description | Default |
-|------|-------------|---------|
-| eventicious_import_course_structure | Create course with stages | dry_run=true |
-| eventicious_finalize_course | Activate draft course | dry_run=true |
-| eventicious_upload_course_images | Upload cover images | dry_run=true |
-| eventicious_import_poll_content | Fill poll/test content | dry_run=true |
-| eventicious_import_task_content | Fill task content | dry_run=true |
-| eventicious_upload_task_attachments | Upload task attachments | dry_run=true |
-| eventicious_upload_scorm_to_stage | Upload SCORM zip | dry_run=true |
-| eventicious_add_manual_gamification_charge | Add gamification points | dry_run=true |
-| eventicious_prepare_course_import | Build course import plan | helper |
-| eventicious_validate_course_plan | Validate course plan | helper |
-| eventicious_map_course_import_response | Map IDs from import | helper |
-| eventicious_check_course_ready_to_finalize | Check finalize readiness | helper |
+Не отправляйте `EVENTICIOUS_CLIENT_SECRET` в общий чат. Не публикуйте файл `.env`. Не добавляйте его в GitHub.
 
-### Course Import Workflow
+---
 
-1. **Prepare**: `eventicious_prepare_course_import` — build execution plan
-2. **Validate**: `eventicious_validate_course_plan` — check plan validity
-3. **Upload cover**: `eventicious_upload_course_images` — get `coverImageFileId` + `coverImageThumbnailFileId`
-4. **Import structure**: `eventicious_import_course_structure` — returns stage/poll/task/scorm IDs
-5. **Map IDs**: `eventicious_map_course_import_response`
-6. **Fill catalogs**: use catalog tools for Common stages
-7. **Import polls**: `eventicious_import_poll_content`
-8. **Upload task attachments**: `eventicious_upload_task_attachments`
-9. **Import tasks**: `eventicious_import_task_content`
-10. **Upload SCORM**: `eventicious_upload_scorm_to_stage`
-11. **Check ready**: `eventicious_check_course_ready_to_finalize`
-12. **Finalize**: `eventicious_finalize_course` (requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`)
+## Шаг 4. Откройте новый чат внутри этой папки
 
-### Gamification
+Откройте ваш AI-клиент и выберите папку:
 
-`eventicious_add_manual_gamification_charge` — manually charge or write-off points to a user.
-- Positive scores = charge (начислить)
-- Negative scores = write-off (списать)
-- Requires: `externalId`, `scores` (max absolute value 10000), `reason`.
-- Real execution requires `dry_run=false` + `confirm=true`.
+```text
+Eventicious MCP
+```
 
-### Safety Limits
+Важно, чтобы новый чат был открыт именно внутри этой папки. Агент должен видеть файл `.env`.
 
-- Max 200 users per batch operation
-- Rate limit: 10 requests/minute for user operations (when auto-publish is enabled)
-- All operations are logged for audit
-- Credentials are never stored on server
+---
 
-### Destructive Operations
+## Шаг 5. Отправьте промт для получения MCP token
 
-Multiple tools require an extra safety string beyond confirm=true:
+Скопируйте и отправьте агенту этот промт:
 
-**User/group operations:**
-- eventicious_delete_users: Requires `danger_confirm='DELETE_EVENTICIOUS_USERS'`
-- eventicious_delete_acl_group: Requires `danger_confirm='DELETE_EVENTICIOUS_ACL_GROUP'`
+```text
+Ты находишься в папке, где лежит файл .env с моими Eventicious API credentials.
 
-**Schedule operations:**
-- eventicious_delete_location: Requires `danger_confirm='DELETE_EVENTICIOUS_LOCATIONS'`
-- eventicious_delete_tag: Requires `danger_confirm='DELETE_EVENTICIOUS_TAGS'`
-- eventicious_delete_session: Requires `danger_confirm='DELETE_EVENTICIOUS_SESSIONS'`
-- eventicious_delete_session_attachment: Requires `danger_confirm='DELETE_EVENTICIOUS_SESSION_ATTACHMENTS'`
+Задача:
+1. Прочитай значения из файла .env:
+   - EVENTICIOUS_BASE_URL
+   - EVENTICIOUS_CLIENT_ID
+   - EVENTICIOUS_CLIENT_SECRET
 
-**Catalog operations:**
-- eventicious_delete_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG'`
-- eventicious_delete_folder: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_FOLDER'`
-- eventicious_delete_file_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
-- eventicious_delete_link: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
-- eventicious_delete_text2: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
-- eventicious_delete_video_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT'`
-- eventicious_delete_group_from_catalog: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_GROUP'`
-- eventicious_bulk_delete_catalog_elements: Requires `danger_confirm='DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK'`
-- eventicious_set_catalog_order: Requires `confirm=true`
-- eventicious_set_catalog_element_order: Requires `confirm=true`
-- eventicious_delete_from_menu: Requires `danger_confirm='CHANGE_EVENTICIOUS_CATALOG_ORDER'`
+2. Отправь POST-запрос на:
+   https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/auth/exchange
 
-### Program Schedule Workflow (v0.3)
+3. В JSON body передай:
+   - baseUrl = EVENTICIOUS_BASE_URL
+   - clientId = EVENTICIOUS_CLIENT_ID
+   - clientSecret = EVENTICIOUS_CLIENT_SECRET
 
-Import schedule from Excel/JSON:
+4. Получи из ответа поле mcpToken.
 
-1. **Prepare**: Use `eventicious_prepare_schedule_import` with your schedule rows
-2. **Validate**: Use `eventicious_validate_schedule_plan` to check for errors
-3. **Review**: Check warnings and resolved IDs
-4. **Dry-run**: Use `eventicious_create_location`, `eventicious_create_tag`, `eventicious_create_session` with `dry_run: true`
-5. **Approve**: Execute with `dry_run: false` + `confirm: true`
+5. Добавь в файл .env новую строку:
+   EVENTICIOUS_MCP_TOKEN=<полученный_mcp_token>
 
-Required columns for schedule import:
-- **title** — session title (required)
-- **startDate + startTime** or **startsAt** — when it starts (required)
-- **endDate + endTime** or **endsAt** — when it ends (required)
-- **locationName** or **locationId** — where it happens
-- **tagNames** or **tagIds** — topics/categories
-- **speakerNames** or **speakerIds** — who presents (must exist as users)
-- **aclGroupNames** or **aclGroupsIds** — visibility control (must exist as ACL groups)
+6. Не удаляй старые строки из .env.
 
-Speakers must exist as Eventicious users (created via `eventicious_create_users`) or be auto-created if `createMissingSpeakersAsUsers=true` in import options.
+7. Создай в этой же папке файл .mcp.json со следующим содержимым:
 
-ACL groups must exist or be created first if `createMissingAclGroups=true` in import options.
+{
+  "mcpServers": {
+    "eventicious": {
+      "type": "http",
+      "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}"
+      },
+      "timeout": 120000
+    }
+  }
+}
 
-### Catalog Content Workflow (v0.4)
+Важно:
+- не выводи EVENTICIOUS_CLIENT_SECRET в ответ;
+- не выводи полный MCP token в ответ;
+- не отправляй содержимое .env в чат;
+- если нужно показать токен, покажи только первые и последние 6 символов;
+- после выполнения напиши только краткий отчёт:
+  "MCP token получен, .env обновлён, .mcp.json создан".
+```
 
-#### Text Content
+После успешного выполнения в файле `.env` должна появиться строка:
 
-All catalog text content uses **Text 2.0 / GravityJson** format exclusively. Legacy `/elements/texts` endpoints are intentionally NOT exposed.
+```env
+EVENTICIOUS_MCP_TOKEN=mcp_evt_...
+```
 
-Text input methods:
-- **GravityJson object**: ProseMirror document format
-- **JSON string**: Parsed and validated as GravityJson
-- **Markdown or plain text**: Auto-converted to GravityJson
+А в папке должен появиться файл:
 
-Use `eventicious_convert_markdown_to_gravity_json` helper to preview markdown conversion.
+```text
+.mcp.json
+```
 
-Text 2.0 update is not available in current API docs. Safe update strategy: delete old + create new, only after explicit approval.
+---
 
-#### Folder Visibility
+## Шаг 6. Перезапустите чат
 
-Folders support `aclGroupsExternalIds` to restrict content visibility by ACL groups:
+После создания `.mcp.json` лучше закрыть текущий чат и открыть новый чат в этой же папке.
+
+Это нужно, чтобы AI-клиент заново прочитал MCP-настройки.
+
+Проверьте:
+
+1. Папка всё ещё та же:
+
+```text
+Eventicious MCP
+```
+
+2. В папке есть файл:
+
+```text
+.env
+```
+
+3. В папке есть файл:
+
+```text
+.mcp.json
+```
+
+4. В `.env` есть строка:
+
+```env
+EVENTICIOUS_MCP_TOKEN=mcp_evt_...
+```
+
+---
+
+## Шаг 7. Отправьте первый проверочный промт
+
+В новом чате отправьте:
+
+```text
+Проверь подключение к Eventicious MCP.
+
+Сделай только безопасные read-only проверки:
+1. Проверь, что MCP-сервер доступен.
+2. Проверь, что MCP token валиден.
+3. Проверь, что доступно 75 MCP tools.
+4. Не выполняй create/update/delete операции.
+5. Не запускай операции с dry_run=false.
+6. Не выводи секреты из .env.
+7. Не выводи полный MCP token.
+
+В ответ напиши:
+- подключение работает или нет;
+- сколько tools доступно;
+- какие read-only tools можно использовать для первой проверки.
+```
+
+Ожидаемый результат:
+
+```text
+Подключение работает.
+Доступно 75 MCP tools.
+```
+
+Если агент пишет, что tools не видны, перейдите к разделу “Частые ошибки”.
+
+---
+
+## Шаг 8. Сделайте первый безопасный запрос
+
+После проверки подключения отправьте:
+
+```text
+Сделай безопасную проверку Eventicious.
+
+Используй только read-only tools.
+Ничего не создавай, не обновляй и не удаляй.
+
+Проверь:
+1. Валидны ли credentials.
+2. Можно ли получить список ACL-групп.
+3. Можно ли получить список каталогов.
+
+В ответ дай краткий отчёт.
+```
+
+Это безопасная проверка. Она не должна менять данные в Eventicious.
+
+---
+
+## Шаг 9. Как безопасно работать с изменениями
+
+Не просите агента сразу “создать”, “обновить” или “удалить” данные.
+
+Сначала просите preview.
+
+Пример:
+
+```text
+Подготовь preview создания пользователей из этого файла.
+
+Важно:
+- используй dry_run=true;
+- ничего реально не создавай;
+- покажи, какие пользователи будут созданы;
+- покажи ошибки и предупреждения;
+- не выполняй операцию без моего отдельного подтверждения.
+```
+
+Проверьте preview. Если всё правильно, можно дать отдельное подтверждение:
+
+```text
+Я проверил preview.
+
+Выполни операцию реально:
+dry_run=false
+confirm=true
+```
+
+Для опасных операций агент может попросить дополнительную строку подтверждения `danger_confirm`. Это нормально. Такая защита нужна, чтобы случайно не удалить или не изменить данные.
+
+---
+
+## Шаг 10. Что можно делать через Eventicious MCP
+
+Eventicious MCP помогает с такими задачами:
+
+- проверка подключения к Eventicious;
+- работа с пользователями;
+- работа с ACL-группами;
+- перенос пользователей между группами;
+- работа с каталогами и материалами;
+- работа с расписанием;
+- работа с курсами;
+- работа с экспонентами;
+- работа с геймификацией;
+- подготовка import-планов;
+- preview изменений перед выполнением.
+
+Полный список tools не нужен для первого подключения. Агент сам увидит доступные tools после подключения.
+
+---
+
+## Шаг 11. Частые ошибки
+
+| Ошибка | Что значит | Что сделать |
+|---|---|---|
+| Файл получился `.env.txt` | Windows добавил расширение `.txt` | Переименуйте файл в `.env` |
+| Файл получился `.mcp.json.txt` | Windows добавил расширение `.txt` | Переименуйте файл в `.mcp.json` |
+| Агент не видит `.env` | Чат открыт не в той папке | Откройте новый чат внутри папки `Eventicious MCP` |
+| Агент не видит `.mcp.json` | Файл создан не в той папке или с неправильным названием | Проверьте название и расположение файла |
+| `401 invalid credentials` | Eventicious credentials неверные или отозваны | Проверьте Base URL, Client ID и Client Secret |
+| `401 invalid MCP token` | MCP token неверный, повреждён или устарел | Получите новый MCP token через `/auth/exchange` |
+| `404 endpoint not found` | Указан неправильный endpoint | Проверьте адрес MCP-сервера |
+| `500 server config error` | Ошибка настройки сервера MCP | Передайте ошибку техническому специалисту |
+| Tools не видны | AI-клиент не подхватил MCP-конфиг | Перезапустите чат или клиент |
+| Агент просит Client Secret повторно | Он не прочитал `.env` | Проверьте, что `.env` лежит в рабочей папке |
+| Доступ был отозван | Eventicious credentials больше не работают | Получите актуальные credentials и выпустите новый MCP token |
+
+---
+
+## Шаг 12. Безопасность
+
+Соблюдайте правила:
+
+1. Не отправляйте `Client Secret` в общий чат.
+2. Не публикуйте файл `.env`.
+3. Не добавляйте `.env` в GitHub.
+4. Не пересылайте `EVENTICIOUS_MCP_TOKEN` посторонним.
+5. Не вставляйте полный MCP token в публичные сообщения.
+6. Если доступ нужно отозвать, отзовите или перевыпустите credentials на стороне Eventicious.
+7. Если MCP token попал не туда, получите новый token после обновления Eventicious credentials.
+8. Всегда начинайте с `dry_run=true`.
+9. Реальные изменения выполняйте только после проверки preview.
+
+---
+
+## Шаг 13. Что делать, если ничего не работает
+
+Передайте техническому специалисту:
+
+1. Какой клиент используете:
+   - OpenCode;
+   - Claude Code;
+   - Codex.
+2. На каком шаге остановились.
+3. Скриншот ошибки.
+4. Что показывает адрес:
+
+```text
+https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/healthz
+```
+
+5. Видит ли агент файлы:
+   - `.env`;
+   - `.mcp.json`.
+
+Не передавайте техническому специалисту в открытом виде:
+
+- `EVENTICIOUS_CLIENT_SECRET`;
+- полный `EVENTICIOUS_MCP_TOKEN`.
+
+---
+
+## Быстрая проверка для технического специалиста
+
+Этот раздел нужен только для диагностики.
+
+Проверить health endpoint:
+
+```text
+https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/healthz
+```
+
+Ожидаемый ответ:
+
 ```json
 {
-  "name": "VIP Speakers",
-  "aclGroupsExternalIds": [1001, 1002]
+  "ok": true,
+  "service": "eventicious-mcp-remote",
+  "version": "0.6.3"
 }
 ```
 
-Groups must exist before using their external IDs in folder payload.
+Проверить, что в проекте доступно 75 MCP tools.
 
-#### Catalog Import Workflow
+Реальные изменения в Eventicious не выполнять без `dry_run=false` и `confirm=true`.
 
-Safe catalog import workflow:
+---
 
-1. **Prepare**: Use `eventicious_prepare_catalog_import` with JSON/tree structure
-2. **Validate**: Use `eventicious_validate_catalog_plan` to check for errors
-3. **Review**: Check warnings and execution plan
-4. **Dry-run**: Preview each operation with `dry_run: true`
-5. **Approve**: Execute with `dry_run: false` + `confirm: true`
+## Короткая памятка
 
-Helper tools never perform real writes.
+1. Установите OpenCode, Claude Code или Codex.
+2. Создайте папку `Eventicious MCP`.
+3. Создайте `.env`.
+4. Вставьте Eventicious API credentials.
+5. Откройте чат внутри этой папки.
+6. Отправьте промт для получения MCP token.
+7. Убедитесь, что создан `.mcp.json`.
+8. Перезапустите чат.
+9. Отправьте проверочный промт.
+10. Работайте сначала через preview.
 
-## Экспоненты / Компании (v0.6)
-
-Управление экспонентами (компаниями-участниками) через MCP:
-
-| Tool | Description | Default |
-|------|-------------|---------|
-| eventicious_create_exhibitor | Создать экспонента (компанию) | dry_run=true |
-| eventicious_update_exhibitor | Обновить экспонента | dry_run=true |
-| eventicious_delete_exhibitor | Удалить экспонента | dry_run=true |
-| eventicious_prepare_exhibitors_import | Подготовить импорт экспонентов | helper |
-| eventicious_validate_exhibitor_plan | Валидировать план импорта | helper |
-
-**Поля экспонента:**
-- `id` — ID во внешней системе (обязательно)
-- `name` — название компании (обязательно)
-- `address` — адрес
-- `site` — сайт (URL)
-- `email` — email
-- `phone` — телефон
-- `details` — детали (поддерживает HTML)
-- `externalImagePath` — URL логотипа
-- `representativesIds` — ID пользователей-представителей компании
-
-**Важно:** При обновлении экспонента пустые/null поля могут сбросить значения в админке Eventicious.
-
-## Геймификация (v0.6)
-
-`eventicious_add_manual_gamification_charge` — начисление/списание баллов:
-- Положительные scores = начислить баллы
-- Отрицательные scores = списать баллы
-- scores=0 отклоняется валидацией
-- Максимальное абсолютное значение: 10000 (мягкое ограничение)
-
-`eventicious_validate_gamification_charge` — валидация параметров начисления (helper).
-
-### Important Notes
-
-- Never share your client_secret
-- Credentials are passed via headers, not stored on server
-- Always preview with dry_run before executing
-- Each project should have its own credentials
-- Contact support if you encounter errors
-
-## First safe test
-
-1. Check tools/list - verify all 56 tools are available
-2. Run eventicious_auth_check with your project keys - should return "Credentials valid"
-3. Create a dry_run preview of any write operation (e.g. create_users with dry_run: true)
-4. Review the preview payload carefully
-5. Only then execute a real action with dry_run: false AND confirm: true
+Для подключённых AI-агентов правила доступны через MCP tool `eventicious_get_agent_instructions`.

@@ -57,7 +57,7 @@ export function registerScheduleImportTools(
 ) {
   server.tool(
     "eventicious_prepare_schedule_import",
-    "Build a safe import plan from schedule rows (Excel/JSON). Pure helper — no Eventicious API calls. Use before real schedule import.",
+    "Build a safe import plan from schedule rows (Excel/JSON). Pure helper — no Eventicious API calls. Use before real schedule import. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     {
       rows: z.array(z.object({
         title: z.string(),
@@ -262,7 +262,7 @@ export function registerScheduleImportTools(
 
   server.tool(
     "eventicious_validate_schedule_plan",
-    "Validate a schedule import plan before real execution. Checks for conflicts, missing fields, and warnings. Pure helper — no Eventicious API calls.",
+    "Validate a schedule import plan before real execution. Checks for conflicts, missing fields, and warnings. Pure helper — no Eventicious API calls. For Russian text use UTF-8.",
     {
       plan: z.any().describe("Output from eventicious_prepare_schedule_import"),
     },

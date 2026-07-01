@@ -104,7 +104,7 @@ try {
 
     $toolCount = $listJson.result.tools.Count
     $toolNames = $listJson.result.tools | ForEach-Object { $_.name }
-    Test-Check "tools_count" ($toolCount -eq 74) "count=$toolCount (expected=74)"
+    Test-Check "tools_count" ($toolCount -eq 75) "count=$toolCount (expected=75)"
 
     $v06Names = @(
         "eventicious_create_exhibitor",

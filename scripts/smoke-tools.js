@@ -1,4 +1,4 @@
-const EXPECTED_TOOL_COUNT = 74;
+const EXPECTED_TOOL_COUNT = 75;
 
 function countToolCalls(content) {
   const matches = content.match(/server\.tool\(/g);

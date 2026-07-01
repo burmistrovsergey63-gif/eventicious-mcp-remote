@@ -13,7 +13,7 @@ export function registerLocationTools(
 ) {
   server.tool(
     "eventicious_create_location",
-    "Create a location in Eventicious schedule. dry_run=true by default.",
+    "Create a location in Eventicious schedule. dry_run=true by default. For Russian text use UTF-8.",
     createLocationShape,
     async (params) => {
       logger.info("tool_call", {
@@ -59,7 +59,7 @@ export function registerLocationTools(
 
   server.tool(
     "eventicious_update_location",
-    "Update a location in Eventicious schedule. dry_run=true by default.",
+    "Update a location in Eventicious schedule. dry_run=true by default. For Russian text use UTF-8.",
     updateLocationShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_location", dry_run: params.dry_run, location_id: params.id });

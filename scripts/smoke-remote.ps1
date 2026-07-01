@@ -45,7 +45,7 @@ if ($env:MCP_ACCESS_TOKEN) {
     $headers["x-eventicious-client-secret"] = $clientSecret
 }
 
-$expectedToolCount = 74
+$expectedToolCount = 75
 
 Write-Host "`nRemote Smoke Tests: $BaseUrl" -ForegroundColor Cyan
 Write-Host "Expected tool count: $expectedToolCount" -ForegroundColor Cyan

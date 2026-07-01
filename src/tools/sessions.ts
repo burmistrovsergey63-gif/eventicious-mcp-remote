@@ -13,7 +13,7 @@ export function registerSessionTools(
 ) {
   server.tool(
     "eventicious_create_session",
-    "Create a schedule session (event) in Eventicious. dry_run=true by default. Note: API uses speakersIds (not speakerIds) and locationsIds (not locationIds).",
+    "Create a schedule session (event) in Eventicious. dry_run=true by default. Note: API uses speakersIds (not speakerIds) and locationsIds (not locationIds). For Russian text use UTF-8.",
     createSessionShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_session", dry_run: params.dry_run, session_id: params.id });
@@ -58,7 +58,7 @@ export function registerSessionTools(
 
   server.tool(
     "eventicious_update_session",
-    "Update a schedule session in Eventicious. dry_run=true by default.",
+    "Update a schedule session in Eventicious. dry_run=true by default. For Russian text use UTF-8.",
     updateSessionShape,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_session", dry_run: params.dry_run, session_id: params.id });

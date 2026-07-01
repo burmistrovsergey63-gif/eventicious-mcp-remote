@@ -32,7 +32,7 @@ export function registerCatalogElementTools(
   // --- Folders ---
   server.tool(
     "eventicious_create_folder",
-    "Create a folder (sub-catalog) inside a catalog. Supports aclGroupsExternalIds for folder-level visibility.",
+    "Create a folder (sub-catalog) inside a catalog. Supports aclGroupsExternalIds for folder-level visibility. For Russian text use UTF-8.",
     folderCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_folder", catalogId: params.catalogId, dry_run: params.dry_run });
@@ -48,7 +48,7 @@ export function registerCatalogElementTools(
 
   server.tool(
     "eventicious_update_folder",
-    "Update a folder in a catalog. Supports aclGroupsExternalIds for folder-level visibility.",
+    "Update a folder in a catalog. Supports aclGroupsExternalIds for folder-level visibility. For Russian text use UTF-8.",
     folderUpdateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_update_folder", catalogId: params.catalogId, folderId: params.folderId, dry_run: params.dry_run });
@@ -114,7 +114,7 @@ export function registerCatalogElementTools(
   // --- Links ---
   server.tool(
     "eventicious_create_link",
-    "Create a link element in a catalog.",
+    "Create a link element in a catalog. For Russian text use UTF-8.",
     linkCreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_link", catalogId: params.catalogId, dry_run: params.dry_run });
@@ -147,7 +147,7 @@ export function registerCatalogElementTools(
   // --- Text 2.0 / GravityJson ---
   server.tool(
     "eventicious_create_text2",
-    "Add a Text 2.0 (GravityJson/ProseMirror) element to a catalog. Accepts GravityJson object, JSON string, or markdown/plain text (auto-converted).",
+    "Add a Text 2.0 (GravityJson/ProseMirror) element to a catalog. Accepts GravityJson object, JSON string, or markdown/plain text (auto-converted). For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     text2CreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_text2", catalogId: params.catalogId, dry_run: params.dry_run });

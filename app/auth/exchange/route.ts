@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       mcpToken,
       mcpUrl: process.env.MCP_PUBLIC_BASE_URL || "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      toolsCount: 74,
+      toolsCount: 75,
     });
   } catch (e) {
     logger.error("auth_exchange_error", { error: e instanceof Error ? e.message : "unknown" });
