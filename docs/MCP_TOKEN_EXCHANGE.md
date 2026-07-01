@@ -40,7 +40,7 @@ Response:
   "mcpToken": "mcp_evt_...",
   "mcpUrl": "https://your-endpoint.layero.ru/mcp",
   "expiresAt": "2026-07-30T...",
-  "toolsCount": 74
+  "toolsCount": 75
 }
 ```
 
@@ -57,7 +57,7 @@ Response:
 ```json
 {
   "ok": true,
-  "toolsCount": 74
+  "toolsCount": 75
 }
 ```
 
@@ -111,7 +111,7 @@ curl https://your-endpoint.layero.ru/healthz
 curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-# Expected: 74 tools in response
+# Expected: 75 tools in response
 ```
 
 ### Test Read-Only Tool

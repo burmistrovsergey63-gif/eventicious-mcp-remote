@@ -69,7 +69,7 @@ In OpenCode, ask:
 Check eventicious MCP - run tools/list and eventicious_auth_check
 ```
 
-Expected: 74 tools available, auth_check returns success.
+Expected: 75 tools available, auth_check returns success.
 
 ## Using .env File
 
@@ -99,7 +99,7 @@ curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/mcp 
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| tools/list < 74 | Wrong token or endpoint | Verify MCP token via /auth/verify |
+| tools/list < 75 | Wrong token or endpoint | Verify MCP token via /auth/verify |
 | auth_check failed | Expired credentials | Exchange fresh token via /auth/exchange |
 | 401 Invalid token | Bad MCP token format | Get fresh token, check prefix `mcp_evt_` |
 | Connection timeout | Wrong endpoint | Check MCP endpoint URL with admin |

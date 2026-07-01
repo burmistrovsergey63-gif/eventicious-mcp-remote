@@ -60,7 +60,7 @@
 ### Hardening Release 0.6.1
 
 This release adds:
-- Tool-count smoke check (`npm run smoke:tools`) verifying 74 tools registered
+- Tool-count smoke check (`npm run smoke:tools`) verifying 75 tools registered
 - Tests for catalog-elements.ts schema shapes (29 tests)
 - Remote smoke check (`npm run smoke:remote`) for Layero preview
 

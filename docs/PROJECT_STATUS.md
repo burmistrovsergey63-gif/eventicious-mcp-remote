@@ -58,7 +58,7 @@
 
 ## 📊 Key Metrics
 
-- Total MCP tools: 74
+- Total MCP tools: 75
 - Migrated tools (simple CRUD): 19
 - Tests: 127 passing
 - Production branch: main (Layero)
@@ -68,7 +68,7 @@
 
 ## 🔜 Next Phase Recommendations
 
-1. **Tool-count smoke check** - Add validation that all 74 tools are registered
+1. **Tool-count smoke check** - Add validation that all 75 tools are registered
 2. **UI / manager workflows** - Proceed with user interface work
 3. **Production healthz verification** - Manual check on Layero preview
 
@@ -78,4 +78,4 @@
 
 - `docs/SCHEMA_AUDIT_CHECKPOINT.md` - Full migration status
 - `docs/INFRASTRUCTURE.md` - Current infrastructure state
-- `README.md` - 74 tools documented with contracts
+- `README.md` - 75 tools documented with contracts

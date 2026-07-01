@@ -49,7 +49,7 @@ In Claude Code, ask:
 Check eventicious MCP connection
 ```
 
-The assistant should see 74 tools available.
+The assistant should see 75 tools available.
 
 ## Alternative: Direct Headers
 
@@ -80,13 +80,13 @@ curl https://your-endpoint.layero.ru/healthz
 
 # Verify MCP token
 curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/auth/verify
-# Expected: {"ok":true,"toolsCount":74}
+# Expected: {"ok":true,"toolsCount":75}
 
 # List tools
 curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-# Expected: 74 tools in response
+# Expected: 75 tools in response
 ```
 
 ## Security Notes

@@ -400,7 +400,7 @@ Response:
   "mcpToken": "mcp_evt_...",
   "mcpUrl": "https://...",
   "expiresAt": "2026-07-30T...",
-  "toolsCount": 74
+  "toolsCount": 75
 }
 ```
 
@@ -412,7 +412,7 @@ Response:
 ```json
 {
   "ok": true,
-  "toolsCount": 74
+  "toolsCount": 75
 }
 ```
 

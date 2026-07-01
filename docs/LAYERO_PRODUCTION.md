@@ -51,7 +51,7 @@ POST /mcp with Authorization but without Eventicious headers
 
 # 4. Tools available
 POST /mcp tools/list
-# Expected: 74+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog + 12 v0.5 course + 6 v0.6 expo/gamification)
+# Expected: 75+ tools (15 v0.1/v0.2 + 14 v0.3 schedule + 27 v0.4 catalog + 12 v0.5 course + 6 v0.6 expo/gamification)
 ```
 
 ## v0.4 Dry-Run Smoke Test

@@ -66,4 +66,60 @@ describe("auth_check agentGuidance", () => {
     expect(content).toContain("toolsAvailable");
     expect(content).toContain("directPowerShellHttpJsonMustUseUtf8Bytes");
   });
+
+  it("auth_check success response has backward-compatible fields", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("success: true");
+    expect(content).toContain('"Credentials valid"');
+    expect(content).toContain("toolsAvailable: 75");
+  });
+
+  it("auth_check returns toolError on failure", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("auth_check_failed");
+    expect(content).toContain("toolError");
+  });
+});
+
+describe("eventicious_get_agent_instructions content", () => {
+  it("contains UTF-8 and PowerShell warnings", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("useUtf8: true");
+    expect(content).toContain("doNotUsePowerShell51BodyAsStringForJsonWithCyrillic");
+    expect(content).toContain("forDirectHttpRequestsUseUtf8ByteArray");
+    expect(content).toContain("contentTypeHeader");
+  });
+
+  it("contains dry_run and confirm rules", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("useDryRunBeforeWrites: true");
+    expect(content).toContain("realChangesOnlyAfterDryRunFalseAndConfirmTrue");
+    expect(content).toContain("destructiveOperationsRequireDangerConfirm: true");
+  });
+
+  it("clarifies prepare tools are safe", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("prepareToolsAreSafe");
+    expect(content).toContain("Prepare tools build a plan or structure without writing to Eventicious");
+  });
+
+  it("is read-only (no parameters)", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    const match = content.match(
+      /server\.tool\(\s*"eventicious_get_agent_instructions"[\s\S]*?\{\},\s*async/
+    );
+    expect(match).toBeTruthy();
+  });
 });
