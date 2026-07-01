@@ -79,7 +79,7 @@ export function issueMcpToken(
     createdAt: now.toISOString(),
     expiresAt: expiresAt.toISOString(),
     issuer,
-    version: "0.6.3",
+    version: "0.6.4",
   };
 
   try {
@@ -144,7 +144,7 @@ export function verifyMcpToken(token: string): TokenResult | ErrorResult {
       return { ok: false, error: "invalid_issuer" };
     }
 
-    if (payload.version !== "0.6.3") {
+    if (payload.version !== "0.6.4") {
       return { ok: false, error: "invalid_token" };
     }
 

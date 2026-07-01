@@ -73,7 +73,7 @@ describe("mcp-token crypto utility", () => {
         expect(result.payload.clientId).toBe("test-client");
         expect(result.payload.clientSecret).toBe("test-secret");
         expect(result.payload.issuer).toBe("eventicious-mcp-remote");
-        expect(result.payload.version).toBe("0.6.3");
+        expect(result.payload.version).toBe("0.6.4");
       }
     });
 

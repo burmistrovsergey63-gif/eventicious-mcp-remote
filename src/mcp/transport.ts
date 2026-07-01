@@ -59,7 +59,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.6.3",
+    version: "0.6.4",
   });
 
   registerTools(server, credentials);
@@ -136,7 +136,7 @@ function registerTools(
           {
             type: "text" as const,
             text: JSON.stringify({
-              mcpVersion: "0.6.3",
+              mcpVersion: "0.6.4",
               expectedToolsCount: 75,
               safetyRules: {
                 startWithReadOnlyChecks: true,

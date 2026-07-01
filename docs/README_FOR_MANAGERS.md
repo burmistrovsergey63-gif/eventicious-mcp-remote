@@ -419,7 +419,7 @@ https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/healthz
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.6.3"
+  "version": "0.6.4"
 }
 ```
 

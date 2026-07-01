@@ -63,7 +63,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     service: "eventicious-mcp-remote",
-    version: "0.6.3",
+    version: "0.6.4",
     toolsCount: 75,
     eventiciousBaseUrl: baseUrl,
     clientIdMasked: maskSecret(clientId),
