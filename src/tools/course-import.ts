@@ -48,6 +48,15 @@ export function registerCourseImportTools(
       if (!params.coverImageThumbnailFileId) warnings.push("coverImageThumbnailFileId missing - must upload thumbnail first");
       if (stages.length === 0) warnings.push("no stages defined");
 
+      const imageUploadGuidance = !params.coverImageFileId
+        ? {
+            required: true,
+            remoteMcpNote: "Remote MCP cannot use local file paths. Use imageUrl (public URL), fileBase64 (base64 string), dataUri (data:image/...), or provide existing coverImageFileId+coverImageThumbnailFileId.",
+            acceptedModes: ["imageUrl", "fileBase64", "dataUri", "existing coverImageFileId+coverImageThumbnailFileId"],
+            localOnly: ["filePaths (only works if server has access to local files)"],
+          }
+        : { required: false, note: "Image IDs provided. No upload needed." };
+
       const recommendedExecutionOrder = [
         "1. Upload cover image / thumbnail (if not provided)",
         "2. Import course structure via eventicious_import_course_structure",
@@ -75,6 +84,7 @@ export function registerCourseImportTools(
             catalogContentPlan,
             warnings,
             errors: [],
+            imageUploadGuidance,
             recommendedExecutionOrder,
           }),
         }],
@@ -93,8 +103,8 @@ export function registerCourseImportTools(
       const warnings: string[] = [];
 
       if (!plan.name) errors.push("name is required");
-      if (!plan.coverImageFileId) errors.push("coverImageFileId is required");
-      if (!plan.coverImageThumbnailFileId) errors.push("coverImageThumbnailFileId is required");
+      if (!plan.coverImageFileId) errors.push("coverImageFileId is required. Use eventicious_upload_course_images with imageUrl, fileBase64, dataUri, or provide existing IDs.");
+      if (!plan.coverImageThumbnailFileId) errors.push("coverImageThumbnailFileId is required. Use eventicious_upload_course_images with imageUrl, fileBase64, dataUri, or provide existing IDs.");
       if (!plan.stages || plan.stages.length === 0) errors.push("at least 1 stage is required");
 
       if (plan.settings) {

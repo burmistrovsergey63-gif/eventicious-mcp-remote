@@ -105,3 +105,16 @@ For mass-importing sessions from Excel/CSV:
 3. Review errors/warnings, fix data if needed
 4. Use `eventicious_create_session` / `eventicious_update_session` with `dry_run=true`
 5. After preview, execute with `dry_run=false` + `confirm=true`
+
+## Course Image Upload (Remote MCP)
+
+Remote MCP servers cannot access local file paths. `eventicious_upload_course_images` supports four input modes — use exactly one:
+
+| Mode | Field(s) | Description |
+|------|----------|-------------|
+| Public URL | `imageUrl` | Server downloads image (jpg/png, max 10 MB) |
+| Base64 | `fileBase64` + optional `fileName`/`mimeType` | Base64-encoded image data |
+| Data URI | `dataUri` | `data:image/jpeg;base64,...` or `data:image/png;base64,...` |
+| Existing IDs | `coverImageFileId` + `coverImageThumbnailFileId` | Skip upload, use pre-uploaded IDs |
+
+`filePaths` (local) only works if the server has filesystem access — not recommended for remote MCP.

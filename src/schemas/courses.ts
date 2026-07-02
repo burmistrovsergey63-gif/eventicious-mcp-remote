@@ -103,7 +103,14 @@ export const courseFinalizeSchema = {
 
 // --- Image Upload Schema ---
 export const courseImageUploadSchema = {
-  filePaths: z.array(z.string()).min(1).max(10).describe("Local file paths to upload (max 10, jpg/png)"),
+  filePaths: z.array(z.string()).min(1).max(10).optional().describe("Local file paths to upload (max 10, jpg/png). Only works if files are accessible to the server."),
+  imageUrl: z.string().url().optional().describe("Public image URL to download (jpg/png, max 10 MB). Server downloads and uploads."),
+  fileBase64: z.string().optional().describe("Base64-encoded image data (jpg/png). Use with optional fileName and mimeType."),
+  dataUri: z.string().regex(/^data:image\//).optional().describe("Data URI with embedded image (e.g. data:image/png;base64,...)."),
+  fileName: z.string().optional().describe("Filename for base64/dataUri upload (default: cover.jpg)"),
+  mimeType: z.enum(["image/jpeg", "image/png"]).optional().describe("MIME type for base64 upload (auto-detected from dataUri if omitted)"),
+  coverImageFileId: z.number().int().optional().describe("Already-uploaded cover image ID. If provided with coverImageThumbnailFileId, skips upload."),
+  coverImageThumbnailFileId: z.number().int().optional().describe("Already-uploaded thumbnail ID. If provided with coverImageFileId, skips upload."),
   dry_run: z.boolean().default(true).describe("Preview only"),
   confirm: z.boolean().default(false).describe("Must be true to execute when dry_run=false"),
 };
