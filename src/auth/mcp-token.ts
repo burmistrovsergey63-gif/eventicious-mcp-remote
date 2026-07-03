@@ -3,6 +3,13 @@ import { logger } from "../logger";
 
 const TOKEN_PREFIX = "mcp_evt_";
 
+interface EventiciousRequestInfo {
+  eventId: string;
+  applicationId: string;
+  languageId: string;
+  appLanguageId: string;
+}
+
 interface McpTokenPayload {
   baseUrl: string;
   clientId: string;
@@ -11,6 +18,8 @@ interface McpTokenPayload {
   expiresAt: string;
   issuer: string;
   version: string;
+  requestInfo?: EventiciousRequestInfo;
+  acceptLanguage?: string;
 }
 
 type TokenError =
@@ -58,6 +67,8 @@ export function issueMcpToken(
   options?: {
     issuer?: string;
     ttlDays?: number;
+    requestInfo?: EventiciousRequestInfo;
+    acceptLanguage?: string;
   }
 ): string | ErrorResult {
   const key = getEncryptionKey();
@@ -81,6 +92,14 @@ export function issueMcpToken(
     issuer,
     version: "0.6.4",
   };
+
+  if (options?.requestInfo) {
+    payload.requestInfo = options.requestInfo;
+  }
+
+  if (options?.acceptLanguage) {
+    payload.acceptLanguage = options.acceptLanguage;
+  }
 
   try {
     const iv = randomBytes(16);

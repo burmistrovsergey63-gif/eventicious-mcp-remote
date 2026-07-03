@@ -3,12 +3,25 @@ import { z } from "zod";
 import { logger } from "@/logger";
 import { checkEventiciousCredentials, normalizeAndValidateBaseUrl } from "@/auth/eventicious-credentials";
 import { issueMcpToken, validateEncryptionKey } from "@/auth/mcp-token";
+import { eventiciousRequestInfoSchema, normalizeRequestInfo } from "@/auth/request-context";
 
 const exchangeSchema = z.object({
   baseUrl: z.string().min(1),
   clientId: z.string().min(1),
   clientSecret: z.string().min(1),
   label: z.string().optional(),
+  requestInfo: z.union([
+    z.object({
+      eventId: z.string().min(1),
+      applicationId: z.string().min(1),
+      languageId: z.string().min(1),
+      appLanguageId: z.string().min(1),
+    }),
+    z.string().refine((val) => {
+      try { JSON.parse(val); return true; } catch { return false; }
+    }, "Must be valid JSON"),
+  ]).optional(),
+  acceptLanguage: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -23,7 +36,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const { baseUrl, clientId, clientSecret, label } = parsed.data;
+    const { baseUrl, clientId, clientSecret, label, requestInfo, acceptLanguage } = parsed.data;
+
+    // Validate Eventicious requestInfo if provided
+    let normalizedRequestInfo;
+    if (requestInfo) {
+      try {
+        normalizedRequestInfo = normalizeRequestInfo(requestInfo);
+      } catch (e) {
+        return NextResponse.json(
+          { error: "Invalid requestInfo", details: (e as Error).message },
+          { status: 400 }
+        );
+      }
+    }
 
     // Check encryption key config before validating Eventicious credentials
     const keyPresent = !!process.env.MCP_TOKEN_ENCRYPTION_KEY;
@@ -70,11 +96,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const tokenResult = issueMcpToken({
-      baseUrl: urlValidation.normalized,
-      clientId,
-      clientSecret,
-    });
+    const tokenOptions: Parameters<typeof issueMcpToken>[1] = {
+      issuer: label || (process.env.MCP_TOKEN_ISSUER ?? "eventicious-mcp-remote"),
+    };
+
+    if (normalizedRequestInfo) {
+      tokenOptions.requestInfo = normalizedRequestInfo;
+    }
+    if (acceptLanguage) {
+      tokenOptions.acceptLanguage = acceptLanguage;
+    }
+
+    const tokenResult = issueMcpToken(
+      {
+        baseUrl: urlValidation.normalized,
+        clientId,
+        clientSecret,
+      },
+      tokenOptions,
+    );
 
     if (typeof tokenResult === "object" && "error" in tokenResult) {
       logger.warn("mcp_token_issue_failed", { reason: "crypto_error" });

@@ -1,6 +1,6 @@
 import { getCachedToken, setCachedToken } from "./token-cache";
 import { AuthError, EventiciousError } from "./errors";
-import { maskSecret } from "./auth";
+import { maskSecret, NormalizedRequestContext, EventiciousRequestInfo } from "./auth";
 import { logger } from "./logger";
 
 export interface EventiciousCredentials {
@@ -64,6 +64,8 @@ export interface EventiciousRequestOptions {
   body?: unknown;
   credentials: EventiciousCredentials;
   isMultipart?: boolean;
+  requestContext?: EventiciousRequestInfo;
+  acceptLanguage?: string;
 }
 
 export interface EventiciousResponse {
@@ -74,7 +76,7 @@ export interface EventiciousResponse {
 export async function eventiciousRequest(
   opts: EventiciousRequestOptions
 ): Promise<EventiciousResponse> {
-  const { method, endpoint, body, credentials, isMultipart } = opts;
+  const { method, endpoint, body, credentials, isMultipart, requestContext, acceptLanguage } = opts;
 
   const token = await fetchToken(credentials);
   const url = `${credentials.baseUrl}${endpoint}`;
@@ -82,6 +84,14 @@ export async function eventiciousRequest(
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
   };
+
+  if (requestContext) {
+    headers["EventiciousRequestInfo"] = JSON.stringify(requestContext);
+  }
+
+  if (acceptLanguage) {
+    headers["Accept-Language"] = acceptLanguage;
+  }
 
   const fetchOpts: RequestInit = { method, headers };
   if (body !== undefined && method !== "GET") {
@@ -110,6 +120,10 @@ export async function eventiciousRequest(
     logger.error("eventicious_api_error_detail", {
       endpoint,
       status: res.status,
+      error: msg,
+      hasRequestInfo: !!requestContext,
+      acceptLanguage: acceptLanguage,
+      eventId: requestContext?.eventId,
     });
     throw new EventiciousError(msg, res.status, endpoint);
   }

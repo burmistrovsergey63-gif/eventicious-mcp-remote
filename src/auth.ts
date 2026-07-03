@@ -2,10 +2,45 @@ import { config } from "./config";
 import { logger } from "./logger";
 import { decryptMcpToken } from "./auth/mcp-token";
 
+/**
+ * Default course context constants
+ */
+export const DEFAULT_COURSE_CONTEXT = {
+  applicationId: "0",
+  languageId: "1",
+  appLanguageId: "0",
+  acceptLanguage: "ru",
+};
+
+/**
+ * Error codes for missing context
+ */
+export const MISSING_EVENT_ID_ERROR = "missing_event_id";
+export const MISSING_REQUEST_INFO_ERROR = "missing_eventicious_request_info";
+
 export interface EventiciousCredentials {
   baseUrl: string;
   clientId: string;
   clientSecret: string;
+}
+
+export interface EventiciousRequestInfo {
+  eventId: string;
+  applicationId: string;
+  languageId: string;
+  appLanguageId: string;
+}
+
+export interface DefaultCourseContext {
+  applicationId: string;
+  languageId: string;
+  appLanguageId: string;
+  acceptLanguage: string;
+}
+
+export interface NormalizedRequestContext extends EventiciousRequestInfo {
+  eventIdSource?: string;
+  acceptLanguage?: string;
 }
 
 /**
@@ -112,4 +147,70 @@ export function validateEventiciousCredentials(
 export function maskSecret(s: string): string {
   if (!s || s.length < 8) return "***";
   return s.slice(0, 3) + "***" + s.slice(-3);
+}
+
+/**
+ * Extract request context from MCP token payload
+ */
+export function extractRequestContext(payload: any): NormalizedRequestContext | null {
+  if (!payload) return null;
+  
+  try {
+    const context: any = {
+      applicationId: "0",
+      languageId: "1",
+      appLanguageId: "0",
+      acceptLanguage: "ru",
+    };
+
+    if (payload.requestInfo) {
+      const requestInfo = typeof payload.requestInfo === "string" 
+        ? JSON.parse(payload.requestInfo) 
+        : payload.requestInfo;
+      
+      if (requestInfo.eventId) {
+        context.eventId = requestInfo.eventId;
+      }
+      if (requestInfo.applicationId) context.applicationId = requestInfo.applicationId;
+      if (requestInfo.languageId) context.languageId = requestInfo.languageId;
+      if (requestInfo.appLanguageId) context.appLanguageId = requestInfo.appLanguageId;
+      if (requestInfo.acceptLanguage) context.acceptLanguage = requestInfo.acceptLanguage;
+    } else if (payload.eventId) {
+      context.eventId = payload.eventId;
+    }
+
+    return {
+      eventId: context.eventId || "",
+      applicationId: context.applicationId,
+      languageId: context.languageId,
+      appLanguageId: context.appLanguageId,
+      acceptLanguage: context.acceptLanguage,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Validate if a course operation can proceed
+ */
+export function validateCourseOperation(
+  requestContext?: NormalizedRequestContext,
+  toolArgEventId?: string
+): { ok: true } | { ok: false; error: string; code: string } {
+  const context = requestContext ?? {} as NormalizedRequestContext;
+
+  if (toolArgEventId) {
+    return { ok: true };
+  }
+
+  if (!context.eventId) {
+    return {
+      ok: false,
+      error: "Course import requires eventId to build EventiciousRequestInfo.",
+      code: MISSING_EVENT_ID_ERROR,
+    };
+  }
+
+  return { ok: true };
 }
