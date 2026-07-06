@@ -131,9 +131,8 @@ describe("eventicious_get_agent_instructions content", () => {
     expect(content).toContain("courseCover");
     expect(content).toContain("inlineTextImage");
     expect(content).toContain("Обложка курса");
-    expect(content).toContain("Картинка внутри урока");
-    expect(content).toContain("x-imgbb-api-key");
-    expect(content).toContain("https://imgbb.com/");
+    expect(content).toContain("Картинка внутри текста");
+    expect(content).toContain("публичный URL");
   });
 });
 
@@ -162,13 +161,14 @@ describe("x-imgbb-api-key header extraction", () => {
     expect(content).toContain("requestScopedImgbbKey || envImgbbApiKey");
   });
 
-  it("catalog-elements.ts has improved missing key error", () => {
+  it("catalog-elements.ts has improved missing key error mentioning public URL", () => {
     const catalogPath = path.join(__dirname, "..", "tools", "catalog-elements.ts");
     const content = fs.readFileSync(catalogPath, "utf-8");
 
     expect(content).toContain("MISSING_INLINE_IMAGE_KEY_ERROR");
-    expect(content).toContain("https://imgbb.com/");
-    expect(content).toContain("x-imgbb-api-key");
+    expect(content).toContain("публичный URL");
+    expect(content).toContain("Google Drive");
+    expect(content).toContain("Яндекс Диск");
   });
 
   it("catalog-elements.ts has improved fileId error", () => {

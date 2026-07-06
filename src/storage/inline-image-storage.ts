@@ -298,7 +298,7 @@ async function processImageNode(
   if (typeof attrs.fileId === "string" && attrs.fileId) {
     throw new Error(
       "fileId подходит для обложки курса, но не для картинки внутри текста. " +
-      "Для Text 2.0 нужен imageUrl или настроенный ImgBB."
+      "Для Text 2.0 нужен публичный URL изображения."
     );
   }
 
@@ -324,9 +324,9 @@ async function processImageNode(
   if (!storageOptions) {
     if (fileBase64 || effectiveDataUri) {
       throw new Error(
-        "Для загрузки картинки внутрь текстового блока нужен публичный URL. " +
-        "Передайте imageUrl или настройте ImgBB: получите API key на https://imgbb.com/ " +
-        "и добавьте IMGBB_API_KEY в env/MCP config как header x-imgbb-api-key."
+        "Для картинки внутри текстового блока нужен публичный URL. " +
+        "Загрузите изображение в любое публичное хранилище, например Google Drive, Яндекс Диск, ImgBB, GitHub Pages или CDN, " +
+        "и передайте ссылку как imageUrl."
       );
     }
     return { node, uploaded: null };

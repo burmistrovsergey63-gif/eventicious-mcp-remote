@@ -57,7 +57,7 @@ Pass credentials directly in each request:
 | `x-eventicious-client-id` | If not using MCP token | Eventicious client ID |
 | `x-eventicious-client-secret` | If not using MCP token | Eventicious client secret |
 | `x-eventicious-base-url` | No | Eventicious API base URL |
-| `x-imgbb-api-key` | No | ImgBB API key for inline image uploads in Text 2.0. Get free key at https://imgbb.com/. Priority over `IMGBB_API_KEY` env var. |
+| `x-imgbb-api-key` | No | (Deprecated) ImgBB API key. Inline images now use public URLs via `imageUrl`. |
 
 ## Endpoints
 

@@ -606,7 +606,7 @@ describe("processGravityJsonForInlineImages", () => {
     expect(resultStr).not.toContain("delete_url");
   });
 
-  it("missing key gives human-friendly error mentioning ImgBB setup", async () => {
+  it("missing key gives human-friendly error mentioning public URL", async () => {
     const gravityJson = {
       type: "doc",
       content: [{
@@ -616,7 +616,7 @@ describe("processGravityJsonForInlineImages", () => {
     };
     await expect(
       processGravityJsonForInlineImages(gravityJson, null, false)
-    ).rejects.toThrow("https://imgbb.com/");
+    ).rejects.toThrow("публичный URL");
   });
 
   it("fileId error explains cover vs inline image", async () => {
@@ -632,7 +632,7 @@ describe("processGravityJsonForInlineImages", () => {
     ).rejects.toThrow("обложки курса");
   });
 
-  it("fileId error mentions imageUrl as alternative", async () => {
+  it("fileId error mentions public URL as alternative", async () => {
     const gravityJson = {
       type: "doc",
       content: [{
@@ -642,6 +642,6 @@ describe("processGravityJsonForInlineImages", () => {
     };
     await expect(
       processGravityJsonForInlineImages(gravityJson, storageOptions, false)
-    ).rejects.toThrow("imageUrl");
+    ).rejects.toThrow("публичный URL");
   });
 });

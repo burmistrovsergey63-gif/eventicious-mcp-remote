@@ -127,18 +127,15 @@ IMGBB_EXPIRATION_SECONDS=<optional>
 INLINE_IMAGE_MAX_BYTES=33554432
 ```
 
-### Architecture: Path B (Per-Client ImgBB Key)
+### Architecture: Inline Images via Public URL
 
-ImgBB API key can be provided in two ways, with header taking priority:
+Inline images in Text 2.0 require a **public URL** (accessible without authorization).
+User uploads the image to any public storage (Google Drive, Яндекс Диск, ImgBB, GitHub Pages, CDN) and passes the link as `imageUrl`.
+MCP inserts the URL into GravityJson `image.attrs.src`.
 
-1. **Request header `x-imgbb-api-key`** (recommended for per-client usage)
-2. **Environment variable `IMGBB_API_KEY`** (fallback for server-wide config)
+ImgBB storage adapter remains in code but is not the default flow. Inline images use `imageUrl` directly.
 
-Priority: `x-imgbb-api-key` header > `IMGBB_API_KEY` env var.
-
-The header is extracted in `handleMcpRequest()` (transport.ts) and passed to `registerCatalogElementTools()`. Storage options are resolved per-invocation, not at registration time.
-
-Course covers are NOT affected — they use Eventicious `coverImageFileId` / `coverImageThumbnailFileId` and never touch ImgBB.
+Course covers are NOT affected — they use Eventicious `coverImageFileId` / `coverImageThumbnailFileId`.
 
 ### Implementation
 - `src/storage/inline-image-storage.ts` — ImgBB upload adapter

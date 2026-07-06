@@ -71,7 +71,7 @@ function collectImageNodes(node: unknown): UploadInlineImageInput[] {
       if (typeof attrs.fileId === "string" && attrs.fileId) {
         throw new Error(
           "fileId подходит для обложки курса, но не для картинки внутри текста. " +
-          "Для Text 2.0 нужен imageUrl или настроенный ImgBB."
+          "Для Text 2.0 нужен публичный URL изображения."
         );
       }
       const img: UploadInlineImageInput = {};

@@ -175,7 +175,9 @@ function registerTools(
                 courseCover:
                   "Обложка курса загружается в Eventicious, агент получает fileId/thumbnailFileId. Используйте coverImageFileId / coverImageThumbnailFileId.",
                 inlineTextImage:
-                  "Картинка внутри урока/каталога (Text 2.0 / GravityJson) нуждается в публичном URL. Если URL уже есть — укажите imageUrl. Если URL нет — получите API key на https://imgbb.com/ и добавьте его в MCP config (header x-imgbb-api-key). После настройки можно прикладывать картинки агенту, он сам загрузит их через ImgBB и вставит в текст.",
+                  "Картинка внутри текста курса/каталога (Text 2.0 / GravityJson) требует публичный URL. " +
+                  "Пользователь загружает изображение в любое публичное хранилище (Google Drive, Яндекс Диск, ImgBB, GitHub Pages, CDN) и передаёт ссылку как imageUrl. " +
+                  "Ссылка должна быть доступна без авторизации. MCP вставит URL в GravityJson image.attrs.src.",
               },
             }),
           },

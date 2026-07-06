@@ -170,15 +170,14 @@ Eventicious MCP
       "type": "http",
       "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
       "headers": {
-        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}",
-        "x-imgbb-api-key": "${IMGBB_API_KEY}"
+        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}"
       },
       "timeout": 120000
     }
   }
 }
 
-x-imgbb-api-key нужен только если пользователь хочет загружать картинки внутрь текстовых блоков без готового публичного URL. Если ключ не нужен, строку "x-imgbb-api-key" можно удалить из конфига.
+Для картинок внутри текстовых блоков пользователь загружает изображение в любое публичное хранилище и передаёт ссылку как imageUrl.
 
 Важно:
 - не выводи EVENTICIOUS_CLIENT_SECRET в ответ;
@@ -349,15 +348,11 @@ Eventicious MCP помогает с такими задачами:
 - Используются в `coverImageFileId` / `coverImageThumbnailFileId`
 
 **Inline-изображения в Text 2.0:**
-- Загружаются через ImgBB → возвращают публичный URL
-- Используются в GravityJson `image.attrs.src`
-- Есть публичный URL → укажите `imageUrl` напрямую
-- Нет URL → получите API key на https://imgbb.com/ и добавьте в MCP config:
-  - header `x-imgbb-api-key` (рекомендуется) или
-  - env `IMGBB_API_KEY` + `INLINE_IMAGE_STORAGE_DRIVER=imgbb`
-- После настройки можно прикладывать картинки агенту (`fileBase64`, `dataUri`), он сам загрузит их через ImgBB и вставит в текст.
+- Картинка внутри текста требует **публичный URL** (доступен без авторизации)
+- Пользователь загружает изображение в любое хранилище (Google Drive, Яндекс Диск, ImgBB, GitHub Pages, CDN) и передаёт ссылку как `imageUrl`
+- MCP вставит URL в GravityJson `image.attrs.src`
 
-> **Внимание:** `fileId` подходит только для обложки курса, но не для картинки внутри текста. Для Text 2.0 нужен `imageUrl` или настроенный ImgBB.
+> **Внимание:** `fileId` подходит только для обложки курса, но не для картинки внутри текста. Для Text 2.0 нужен публичный URL.
 
 Полный список tools не нужен для первого подключения. Агент сам увидит доступные tools после подключения.
 

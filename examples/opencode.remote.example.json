@@ -7,8 +7,7 @@
         "Authorization": "Bearer YOUR_MCP_ACCESS_TOKEN",
         "x-eventicious-base-url": "https://api-integration.eventicious.ru",
         "x-eventicious-client-id": "YOUR_CLIENT_ID",
-        "x-eventicious-client-secret": "YOUR_CLIENT_SECRET",
-        "x-imgbb-api-key": "YOUR_IMGBB_API_KEY"
+        "x-eventicious-client-secret": "YOUR_CLIENT_SECRET"
       }
     }
   }
