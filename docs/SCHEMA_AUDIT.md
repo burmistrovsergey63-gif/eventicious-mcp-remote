@@ -90,3 +90,19 @@
 ## Schema Audit Checkpoint (Pass 4)
 
 See `docs/SCHEMA_AUDIT_CHECKPOINT.md` for the full migration status and recommendations.
+
+## Course Structure Normalization (2026-07-06)
+
+The `eventicious_import_course_structure` tool now normalizes the payload before sending to the Eventicious API.
+
+### Behavior
+- MCP tool accepts PascalCase enums for user-friendly input: `Common`, `Task`, `Scorm`, `CheckInformation`, `PassTest`, `PassPoll`
+- Mapper normalizes to lowercase API values: `common`, `task`, `scorm`, `checkinformation`, `passtest`, `passpoll`
+- Top-level `conditionType` is moved to `settings.transition.conditionType`
+- Unknown enum values produce validation warnings (not errors)
+- Common stages without `conditionType` default to `checkinformation`
+
+### Implementation
+- `src/utils/course-structure-normalizer.ts` — `normalizeCourseStructureForEventiciousApi()` function
+- `src/tools/courses.ts` — calls mapper before API request
+- `src/utils/course-structure-normalizer.test.ts` — 25 tests covering all mapping scenarios

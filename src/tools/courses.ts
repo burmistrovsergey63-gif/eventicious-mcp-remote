@@ -7,6 +7,7 @@ import {
   courseImageUploadSchema,
 } from "../schemas/courses";
 import { requireDangerConfirm } from "../utils/confirm";
+import { normalizeCourseStructureForEventiciousApi } from "../utils/course-structure-normalizer";
 
 export function registerCourseTools(
   server: McpServer,
@@ -20,11 +21,12 @@ export function registerCourseTools(
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_import_course_structure", dry_run: params.dry_run, name: params.name });
       const { dry_run, confirm, ...body } = params;
-      if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: { name: body.name, description: body.description, stagesCount: body.stages?.length ?? 0, settings: body.settings } }) }] };
+      const { payload: normalizedBody, warnings } = normalizeCourseStructureForEventiciousApi(body);
+      if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: normalizedBody, warnings }) }] };
       if (!confirm) return toolError("confirm=true required to import course structure");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/courses", body, credentials });
-        return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/courses", body: normalizedBody, credentials });
+        return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as object, warnings }) }] };
       } catch (err) { return toolError(String(err)); }
     }
   );
