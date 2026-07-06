@@ -1,6 +1,32 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { logger } from "../logger";
+import {
+  UploadInlineImageInput,
+  isPublicHttpsUrl,
+} from "../storage/inline-image-storage";
+
+export type InlineImagePlanItem = {
+  action: "upload_inline_image";
+  provider: "imgbb";
+  fileName: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  willUseExpiration: boolean;
+};
+
+function hasImageNodes(node: unknown): boolean {
+  if (!node || typeof node !== "object") return false;
+  const obj = node as Record<string, unknown>;
+  if (obj.type === "image") return true;
+  if (Array.isArray(obj.content)) {
+    return obj.content.some(hasImageNodes);
+  }
+  if (Array.isArray(obj)) {
+    return obj.some(hasImageNodes);
+  }
+  return false;
+}
 
 interface GravityJsonConversionResult {
   result: Record<string, unknown>;
@@ -32,6 +58,63 @@ export function validateGravityJson(input: unknown): GravityJsonValidationResult
   }
 
   return { valid: errors.length === 0, warnings, errors };
+}
+
+function collectImageNodes(node: unknown): UploadInlineImageInput[] {
+  const images: UploadInlineImageInput[] = [];
+  if (!node || typeof node !== "object") return images;
+  const obj = node as Record<string, unknown>;
+
+  if (obj.type === "image") {
+    const attrs = obj.attrs as Record<string, unknown> | undefined;
+    if (attrs) {
+      const img: UploadInlineImageInput = {};
+      if (typeof attrs.imageUrl === "string") img.imageUrl = attrs.imageUrl;
+      if (typeof attrs.fileBase64 === "string") img.fileBase64 = attrs.fileBase64;
+      if (typeof attrs.dataUri === "string") img.dataUri = attrs.dataUri;
+      if (typeof attrs.fileName === "string") img.fileName = attrs.fileName;
+      if (typeof attrs.mimeType === "string") img.mimeType = attrs.mimeType;
+      if (img.imageUrl || img.fileBase64 || img.dataUri) {
+        images.push(img);
+      }
+    }
+  }
+
+  if (Array.isArray(obj.content)) {
+    for (const child of obj.content) {
+      images.push(...collectImageNodes(child));
+    }
+  }
+
+  return images;
+}
+
+export function buildInlineImagePlan(
+  gravityJson: Record<string, unknown>,
+  options: { forceUpload?: boolean; expirationSeconds?: number }
+): InlineImagePlanItem[] {
+  if (!hasImageNodes(gravityJson)) return [];
+
+  const imageInputs = collectImageNodes(gravityJson);
+  const plan: InlineImagePlanItem[] = [];
+
+  for (const input of imageInputs) {
+    const fileName = input.fileName || "inline-image";
+    const mimeType = input.mimeType || "image/jpeg";
+    const needsUpload = options.forceUpload || !isPublicHttpsUrl(input.imageUrl || "");
+
+    if (needsUpload) {
+      plan.push({
+        action: "upload_inline_image",
+        provider: "imgbb",
+        fileName,
+        mimeType,
+        willUseExpiration: !!options.expirationSeconds,
+      });
+    }
+  }
+
+  return plan;
 }
 
 export function convertMarkdownToGravityJson(text: string): GravityJsonConversionResult {

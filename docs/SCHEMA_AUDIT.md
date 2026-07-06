@@ -106,3 +106,29 @@ The `eventicious_import_course_structure` tool now normalizes the payload before
 - `src/utils/course-structure-normalizer.ts` — `normalizeCourseStructureForEventiciousApi()` function
 - `src/tools/courses.ts` — calls mapper before API request
 - `src/utils/course-structure-normalizer.test.ts` — 25 tests covering all mapping scenarios
+
+## Inline Image Storage (2026-07-06)
+
+The `eventicious_create_text2` tool now supports inline images in GravityJson via ImgBB storage.
+
+### Behavior
+- Image nodes in GravityJson can use `imageUrl`, `fileBase64`, or `dataUri`
+- Images are uploaded to ImgBB and replaced with public HTTPS URLs
+- Public HTTPS URLs (https://) are passed through without upload
+- SVG images are rejected
+- Images larger than 32 MB are rejected
+- Dry run returns placeholder URLs without calling ImgBB
+
+### Environment Variables
+```
+INLINE_IMAGE_STORAGE_DRIVER=imgbb
+IMGBB_API_KEY=<secret>
+IMGBB_EXPIRATION_SECONDS=<optional>
+INLINE_IMAGE_MAX_BYTES=33554432
+```
+
+### Implementation
+- `src/storage/inline-image-storage.ts` — ImgBB upload adapter
+- `src/storage/inline-image-storage.test.ts` — 21 tests
+- `src/tools/gravity-json.ts` — `buildInlineImagePlan()` function
+- `src/tools/catalog-elements.ts` — integrated into `eventicious_create_text2` tool

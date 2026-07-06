@@ -21,14 +21,25 @@ import {
   catalogMenuAddSchema,
   catalogMenuDeleteSchema,
 } from "../schemas/catalog-elements";
-import { convertMarkdownToGravityJson, validateGravityJson } from "./gravity-json";
+import { convertMarkdownToGravityJson, validateGravityJson, buildInlineImagePlan } from "./gravity-json";
 import { requireDangerConfirm } from "../utils/confirm";
+import { processGravityJsonForInlineImages, InlineImageStorageOptions } from "../storage/inline-image-storage";
 
 export function registerCatalogElementTools(
   server: McpServer,
   credentials: EventiciousCredentials,
   toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
 ) {
+  const imgbbApiKey = process.env.IMGBB_API_KEY;
+  const inlineImageStorageDriver = process.env.INLINE_IMAGE_STORAGE_DRIVER;
+  const expirationSeconds = process.env.IMGBB_EXPIRATION_SECONDS
+    ? parseInt(process.env.IMGBB_EXPIRATION_SECONDS, 10)
+    : undefined;
+
+  const storageOptions: InlineImageStorageOptions | null =
+    inlineImageStorageDriver === "imgbb" && imgbbApiKey
+      ? { apiKey: imgbbApiKey, expirationSeconds }
+      : null;
   // --- Folders ---
   server.tool(
     "eventicious_create_folder",
@@ -147,7 +158,7 @@ export function registerCatalogElementTools(
   // --- Text 2.0 / GravityJson ---
   server.tool(
     "eventicious_create_text2",
-    "Add a Text 2.0 (GravityJson/ProseMirror) element to a catalog. Accepts GravityJson object, JSON string, or markdown/plain text (auto-converted). For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
+    "Add a Text 2.0 (GravityJson/ProseMirror) element to a catalog. Accepts GravityJson object, JSON string, or markdown/plain text (auto-converted). Supports inline images via fileBase64/dataUri/imageUrl with ImgBB storage. For Russian text use UTF-8. In direct PowerShell 5.1 HTTP JSON calls do not pass JSON as -Body string; use UTF-8 bytes.",
     text2CreateSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_create_text2", catalogId: params.catalogId, dry_run: params.dry_run });
@@ -185,11 +196,49 @@ export function registerCatalogElementTools(
         return toolError("text must be a GravityJson object, JSON string, or markdown/plain text");
       }
 
+      const imagePlan = buildInlineImagePlan(gravityJson, {
+        forceUpload: !!storageOptions,
+        expirationSeconds,
+      });
+
+      let processedGravityJson = gravityJson;
+      let inlineImageUploads: Array<Record<string, unknown>> = [];
+
+      if (imagePlan.length > 0 && storageOptions) {
+        if (params.dry_run) {
+          for (const item of imagePlan) {
+            warnings.push(`Will upload inline image: ${item.fileName} (${item.mimeType || "unknown"})`);
+          }
+          const placeholderJson = JSON.parse(JSON.stringify(gravityJson));
+          processedGravityJson = placeholderJson;
+        } else {
+          try {
+            const { result, uploads } = await processGravityJsonForInlineImages(
+              gravityJson,
+              storageOptions,
+              false
+            );
+            processedGravityJson = result;
+            inlineImageUploads = uploads.map((u) => ({
+              provider: u.provider,
+              publicUrl: u.publicUrl,
+              width: u.width,
+              height: u.height,
+              sizeBytes: u.sizeBytes,
+            }));
+          } catch (err) {
+            return toolError(`Failed to process inline images: ${String(err)}`);
+          }
+        }
+      }
+
+      gravityJsonString = JSON.stringify(processedGravityJson);
+
       const { dry_run, confirm, catalogId, text, ...rest } = params;
       const body = { text: gravityJsonString, ...rest };
 
       if (dry_run) {
-        const previewGravityJson = gravityJson;
+        const previewGravityJson = processedGravityJson;
         const truncatedJson = gravityJsonString.length > 200
           ? gravityJsonString.slice(0, 200) + "...(truncated)"
           : gravityJsonString;
@@ -203,6 +252,7 @@ export function registerCatalogElementTools(
               order: rest.order,
               gravityJsonPreview: previewGravityJson,
               apiPayloadTextPreview: truncatedJson,
+              inlineImagePlan: imagePlan,
               warnings,
             }),
           }],
@@ -213,7 +263,7 @@ export function registerCatalogElementTools(
 
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/gravity-editor`, body, credentials });
-        return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as Record<string, unknown>, warnings }) }] };
+        return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as Record<string, unknown>, inlineImages: inlineImageUploads, warnings }) }] };
       } catch (err) { return toolError(String(err)); }
     }
   );
