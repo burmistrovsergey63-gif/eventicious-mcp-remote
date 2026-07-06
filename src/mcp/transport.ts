@@ -179,6 +179,55 @@ function registerTools(
                   "Пользователь загружает изображение в любое публичное хранилище (Google Drive, Яндекс Диск, ImgBB, GitHub Pages, CDN) и передаёт ссылку как imageUrl. " +
                   "Ссылка должна быть доступна без авторизации. MCP вставит URL в GravityJson image.attrs.src.",
               },
+              courseCreation: {
+                rule: "Не использовать минимальный payload. Создание курса через полный course skeleton. Сначала dry_run, потом confirm=true.",
+                requiredFields: [
+                  "name",
+                  "externalId",
+                  "description",
+                  "coverImageFileId + coverImageThumbnailFileId (загрузить отдельно через eventicious_upload_course_images)",
+                  "settings.progress",
+                  "settings.finalScreen",
+                  "settings.deadline",
+                  "settings.isFreeOrderAllowed",
+                  "stages[]",
+                ],
+                settingsSafeDefaults: {
+                  progress: { isEnabled: true, hintText: "Прогресс прохождения" },
+                  finalScreen: { isEnabled: true, title: "Курс завершён", text: "Вы успешно завершили курс." },
+                  deadline: {
+                    isEnabled: true,
+                    fixedDeadlineDate: "<YYYY-MM-DD>",
+                    relativeDeadlineUnits: "Months",
+                    relativeDeadlineValue: 5,
+                    notificationSettings: {
+                      isEnabled: true,
+                      localizedText: {
+                        "en-US": "The deadline for the course «{CourseName}» is approaching. Complete it by {DeadlineDate}.",
+                        "ru-RU": "Приближается срок выполнения курса «{CourseName}». Успейте пройти его до {DeadlineDate}.",
+                      },
+                      duplicateInEmail: false,
+                      sendingPeriods: [
+                        { unit: "Months", value: 3 },
+                        { unit: "Weeks", value: 2 },
+                        { unit: "Days", value: 1 },
+                      ],
+                    },
+                  },
+                  isFreeOrderAllowed: true,
+                },
+                stageGuidance: {
+                  commonStage: "type: \"Common\", settings.transition.conditionType: CheckInformation | PassTest | PassPoll, settings.finalMessage рекомендуется",
+                  taskStage: "type: \"Task\", taskContent.title обязателен",
+                  passTestPassPoll: "transition включает pollButtonNameOverride, pollPoints, poll.name",
+                },
+                enumGuidance: "MCP input schema использует PascalCase: type Common/Task/Scorm, conditionType CheckInformation/PassTest/PassPoll, deadline units Days/Weeks/Months. Нормализатор конвертирует в lowercase для API.",
+                dryRunFirst: "Всегда делать dry_run=true перед real run. Eventicious create course endpoint отвечает HTTP 500 при неполном payload.",
+                ifDataMissing: "Если данных не хватает, агент должен задать уточняющий вопрос или заполнить safe defaults, а не отправлять пустой payload.",
+              },
+              courseCreationTemplate: {
+                userRequestExample: "Создай курс в Eventicious по следующему описанию. Сначала собери полный course skeleton и выполни dry_run. Не отправляй минимальный payload. Если не хватает данных, используй known-safe defaults или задай уточняющий вопрос.\n\nДанные курса:\n- Название:\n- Описание:\n- Обложка: файл / уже загруженные coverImageFileId и coverImageThumbnailFileId\n- ExternalId:\n- Дедлайн:\n- Можно ли проходить в свободном порядке:\n- Этапы:\n  1. Common / CheckInformation / название / длительность\n  2. Common / PassTest / название теста / pollPoints\n  3. Task / название задания / taskContent.title\n\nПосле dry_run покажи summary:\n- stages count\n- stage types\n- condition types\n- has deadline\n- has sendingPeriods\n- has taskContent\n- has poll/test fields\n- has finalMessage\n\nТолько после подтверждения запускай real creation.",
+              },
             }),
           },
         ],

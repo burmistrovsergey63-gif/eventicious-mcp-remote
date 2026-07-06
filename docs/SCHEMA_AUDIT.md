@@ -143,3 +143,40 @@ Course covers are NOT affected — they use Eventicious `coverImageFileId` / `co
 - `src/tools/gravity-json.ts` — `buildInlineImagePlan()` function
 - `src/tools/catalog-elements.ts` — integrated into `eventicious_create_text2` tool
 - `src/mcp/transport.ts` — extracts `x-imgbb-api-key` header per request
+
+## Course Creation: Full Skeleton Required
+
+Eventicious create course endpoint returns HTTP 500 on incomplete payloads. MCP enforces full course skeleton via normalization warnings.
+
+### Required Structure
+- `name`, `description`, `externalId`
+- `coverImageFileId` + `coverImageThumbnailFileId` (pre-uploaded)
+- `settings.progress`, `settings.finalScreen`, `settings.deadline`, `settings.isFreeOrderAllowed`
+- `stages[]` with complete stage objects
+
+### Stage Requirements
+- **Common**: `settings.transition.conditionType` (CheckInformation/PassTest/PassPoll), `settings.finalMessage` recommended
+- **Task**: `taskContent.title` required
+- **PassTest/PassPoll**: `transition.poll`, `transition.pollPoints`, `transition.pollButtonNameOverride`
+
+### Normalization
+- PascalCase enums in MCP input → lowercase for API
+- Stage type: Common→common, Task→task, Scorm→scorm
+- ConditionType: CheckInformation→checkinformation, PassTest→passtest, PassPoll→passpoll
+- Common stage without conditionType defaults to checkinformation
+
+### Dry Run Warnings
+The normalizer emits warnings for:
+- Missing description, externalId, settings fields
+- Deadline enabled without dates
+- No stages
+- Task stage without taskContent.title
+- PassTest/PassPoll without poll metadata
+- Common stage without finalMessage
+
+### Implementation
+- `src/utils/course-structure-normalizer.ts` — normalization + warnings
+- `src/utils/course-structure-normalizer.test.ts` — 25 tests
+- `src/tools/courses.ts` — `eventicious_import_course_structure` tool
+- `src/tools/course-import.ts` — prepare/validate tools
+- `examples/course-create.reference.example.json` — reference skeleton

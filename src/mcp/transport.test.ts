@@ -179,3 +179,129 @@ describe("x-imgbb-api-key header extraction", () => {
     expect(content).toContain("обложки курса");
   });
 });
+
+describe("eventicious_get_agent_instructions course creation section", () => {
+  it("contains courseCreation section with skeleton guidance", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("courseCreation");
+    expect(content).toContain("requiredFields");
+    expect(content).toContain("settingsSafeDefaults");
+    expect(content).toContain("stageGuidance");
+    expect(content).toContain("enumGuidance");
+    expect(content).toContain("dryRunFirst");
+    expect(content).toContain("ifDataMissing");
+  });
+
+  it("instructs not to use minimal payload", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("Не использовать минимальный payload");
+    expect(content).toContain("полный course skeleton");
+  });
+
+  it("mentions PascalCase enums for MCP input", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("PascalCase");
+    expect(content).toContain("Common");
+    expect(content).toContain("CheckInformation");
+    expect(content).toContain("PassTest");
+  });
+
+  it("contains LLM request template", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("courseCreationTemplate");
+    expect(content).toContain("userRequestExample");
+    expect(content).toContain("dry_run");
+    expect(content).toContain("summary");
+  });
+
+  it("mentions HTTP 500 risk for incomplete payload", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("HTTP 500");
+  });
+});
+
+describe("course tool descriptions", () => {
+  it("eventicious_import_course_structure warns about full skeleton", () => {
+    const coursesPath = path.join(__dirname, "..", "tools", "courses.ts");
+    const content = fs.readFileSync(coursesPath, "utf-8");
+
+    expect(content).toContain("full skeleton");
+    expect(content).toContain("dry_run first");
+    expect(content).toContain("HTTP 500");
+    expect(content).toContain("PascalCase");
+  });
+
+  it("eventicious_prepare_course_import mentions skeleton verification", () => {
+    const courseImportPath = path.join(__dirname, "..", "tools", "course-import.ts");
+    const content = fs.readFileSync(courseImportPath, "utf-8");
+
+    expect(content).toContain("full course skeleton");
+  });
+
+  it("eventicious_validate_course_plan checks stage structure", () => {
+    const courseImportPath = path.join(__dirname, "..", "tools", "course-import.ts");
+    const content = fs.readFileSync(courseImportPath, "utf-8");
+
+    expect(content).toContain("taskContent.title");
+    expect(content).toContain("poll metadata");
+  });
+});
+
+describe("course-create.reference.example.json", () => {
+  it("is valid JSON with required fields", () => {
+    const examplePath = path.join(__dirname, "..", "..", "examples", "course-create.reference.example.json");
+    const content = fs.readFileSync(examplePath, "utf-8");
+    const example = JSON.parse(content);
+
+    expect(example.name).toBeDefined();
+    expect(example.description).toBeDefined();
+    expect(example.externalId).toBeDefined();
+    expect(example.coverImageFileId).toBeDefined();
+    expect(example.coverImageThumbnailFileId).toBeDefined();
+    expect(example.settings).toBeDefined();
+    expect(example.settings.progress).toBeDefined();
+    expect(example.settings.finalScreen).toBeDefined();
+    expect(example.settings.deadline).toBeDefined();
+    expect(example.settings.isFreeOrderAllowed).toBeDefined();
+    expect(example.stages.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("uses PascalCase enums", () => {
+    const examplePath = path.join(__dirname, "..", "..", "examples", "course-create.reference.example.json");
+    const content = fs.readFileSync(examplePath, "utf-8");
+    const example = JSON.parse(content);
+
+    for (const stage of example.stages) {
+      expect(["Common", "Task", "Scorm"]).toContain(stage.type);
+    }
+  });
+
+  it("stages have required structure", () => {
+    const examplePath = path.join(__dirname, "..", "..", "examples", "course-create.reference.example.json");
+    const content = fs.readFileSync(examplePath, "utf-8");
+    const example = JSON.parse(content);
+
+    const taskStage = example.stages.find((s: any) => s.type === "Task");
+    expect(taskStage).toBeDefined();
+    expect(taskStage.taskContent).toBeDefined();
+    expect(taskStage.taskContent.title).toBeDefined();
+
+    const commonStages = example.stages.filter((s: any) => s.type === "Common");
+    expect(commonStages.length).toBeGreaterThanOrEqual(1);
+    for (const cs of commonStages) {
+      expect(cs.settings).toBeDefined();
+      expect(cs.settings.transition).toBeDefined();
+      expect(cs.settings.transition.conditionType).toBeDefined();
+    }
+  });
+});

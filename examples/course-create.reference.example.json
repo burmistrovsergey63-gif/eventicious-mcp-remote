@@ -1,0 +1,81 @@
+{
+  "name": "Кибербезопасность",
+  "description": "Курс по основам информационной безопасности",
+  "externalId": "security-course-001",
+  "coverImageFileId": 186374,
+  "coverImageThumbnailFileId": 186377,
+  "settings": {
+    "progress": {
+      "isEnabled": true,
+      "hintText": "Выполнено {Progress}%"
+    },
+    "finalScreen": {
+      "isEnabled": true,
+      "title": "Курс завершён",
+      "text": "Вы успешно завершили курс."
+    },
+    "deadline": {
+      "isEnabled": true,
+      "fixedDeadlineDate": "2026-12-31",
+      "relativeDeadlineUnits": "Months",
+      "relativeDeadlineValue": 5,
+      "notificationSettings": {
+        "isEnabled": true,
+        "localizedText": {
+          "en-US": "The deadline for the course «{CourseName}» is approaching. Complete it by {DeadlineDate}.",
+          "ru-RU": "Приближается срок выполнения курса «{CourseName}». Успейте пройти его до {DeadlineDate}."
+        },
+        "duplicateInEmail": false,
+        "sendingPeriods": [
+          { "unit": "Months", "value": 3 },
+          { "unit": "Weeks", "value": 2 },
+          { "unit": "Days", "value": 1 }
+        ]
+      }
+    },
+    "isFreeOrderAllowed": true
+  },
+  "stages": [
+    {
+      "name": "Теория",
+      "type": "Common",
+      "settings": {
+        "transition": {
+          "conditionType": "CheckInformation"
+        },
+        "finalMessage": {
+          "isEnabled": true,
+          "title": "Теория пройдена",
+          "text": "Вы изучили материал."
+        }
+      }
+    },
+    {
+      "name": "Тест",
+      "type": "Common",
+      "settings": {
+        "transition": {
+          "conditionType": "PassTest",
+          "pollButtonNameOverride": "Начать тест",
+          "pollPoints": 100,
+          "poll": {
+            "name": "Экзамен по кибербезопасности"
+          }
+        },
+        "finalMessage": {
+          "isEnabled": true,
+          "title": "Тест сдан"
+        }
+      }
+    },
+    {
+      "name": "Практика",
+      "type": "Task",
+      "taskContent": {
+        "title": "Выполнить практическое задание"
+      }
+    }
+  ],
+  "dry_run": true,
+  "confirm": false
+}

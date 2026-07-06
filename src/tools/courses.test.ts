@@ -243,3 +243,68 @@ describe("prepare_course_import: image upload guidance", () => {
     expect(parsed.imageUploadGuidance.note).toContain("No upload needed");
   });
 });
+
+describe("import_course_structure: dry_run recommendation", () => {
+  async function getImportHandler() {
+    const { registerCourseTools } = await import("./courses");
+    const mockServer = { tool: vi.fn() };
+    registerCourseTools(mockServer as any, MOCK_CREDENTIALS, createToolError);
+    const call = (mockServer.tool.mock.calls as any[]).find(
+      (c: any[]) => c[0] === "eventicious_import_course_structure"
+    );
+    return call?.[3] as Function;
+  }
+
+  it("returns recommendation when payload is incomplete", async () => {
+    const handler = await getImportHandler();
+    const result = await handler({
+      name: "Minimal Course",
+      coverImageFileId: 100,
+      coverImageThumbnailFileId: 200,
+      settings: {},
+      stages: [{ name: "Stage", type: "Common" }],
+      dry_run: true,
+    });
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.dry_run).toBe(true);
+    expect(parsed.recommendation).toContain("incomplete");
+    expect(parsed.recommendation).toContain("HTTP 500");
+    expect(parsed.warnings.length).toBeGreaterThan(0);
+  });
+
+  it("does NOT recommend when payload is complete", async () => {
+    const handler = await getImportHandler();
+    const result = await handler({
+      name: "Full Course",
+      description: "A complete course",
+      externalId: "full-001",
+      coverImageFileId: 100,
+      coverImageThumbnailFileId: 200,
+      settings: {
+        progress: { isEnabled: true, hintText: "Progress" },
+        finalScreen: { isEnabled: true, title: "Done", text: "Completed" },
+        deadline: {
+          isEnabled: true,
+          fixedDeadlineDate: "2026-12-31",
+          notificationSettings: {
+            isEnabled: true,
+            sendingPeriods: [{ unit: "Months", value: 1 }],
+          },
+        },
+        isFreeOrderAllowed: true,
+      },
+      stages: [{
+        name: "Theory",
+        type: "Common",
+        settings: {
+          transition: { conditionType: "CheckInformation" },
+          finalMessage: { isEnabled: true, title: "Done" },
+        },
+      }],
+      dry_run: true,
+    });
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.dry_run).toBe(true);
+    expect(parsed.recommendation).toBeUndefined();
+  });
+});

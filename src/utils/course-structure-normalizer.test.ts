@@ -141,7 +141,7 @@ describe("normalizeCourseStructureForEventiciousApi", () => {
       }],
     });
     expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings[0].message).toContain("Conflicting conditionType");
+    expect(warnings.some(w => w.message.includes("Conflicting conditionType"))).toBe(true);
   });
 
   it("API-shaped raw payload remains stable after normalization", () => {
@@ -286,5 +286,145 @@ describe("normalizeCourseStructureForEventiciousApi", () => {
       stages: [{ name: "Stage", type: "Common", comment: "A comment" }],
     });
     expect((payload.stages as any[])[0].comment).toBe("A comment");
+  });
+
+  it("warns when description is missing", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      name: "Test",
+      stages: [{ name: "Stage", type: "Common" }],
+    });
+    expect(warnings.some(w => w.message.includes("Missing course description"))).toBe(true);
+  });
+
+  it("warns when externalId is missing", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      name: "Test",
+      description: "Desc",
+      stages: [{ name: "Stage", type: "Common" }],
+    });
+    expect(warnings.some(w => w.message.includes("Missing externalId"))).toBe(true);
+  });
+
+  it("warns when settings.progress is missing", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      name: "Test",
+      description: "Desc",
+      externalId: "ext-001",
+      settings: { finalScreen: {}, deadline: {}, isFreeOrderAllowed: true },
+      stages: [{ name: "Stage", type: "Common" }],
+    });
+    expect(warnings.some(w => w.message.includes("settings.progress"))).toBe(true);
+  });
+
+  it("warns when settings.deadline is missing", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      name: "Test",
+      description: "Desc",
+      externalId: "ext-001",
+      settings: { progress: {}, finalScreen: {}, isFreeOrderAllowed: true },
+      stages: [{ name: "Stage", type: "Common" }],
+    });
+    expect(warnings.some(w => w.message.includes("settings.deadline"))).toBe(true);
+  });
+
+  it("warns when Task stage missing taskContent.title", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      stages: [{ name: "Practice", type: "Task" }],
+    });
+    expect(warnings.some(w => w.message.includes("Task stage") && w.message.includes("taskContent.title"))).toBe(true);
+  });
+
+  it("warns when Common stage missing finalMessage", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      stages: [{ name: "Theory", type: "Common", settings: { transition: { conditionType: "CheckInformation" } } }],
+    });
+    expect(warnings.some(w => w.message.includes("finalMessage"))).toBe(true);
+  });
+
+  it("warns when PassTest missing poll metadata", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      stages: [{ name: "Quiz", type: "Common", settings: { transition: { conditionType: "PassTest" }, finalMessage: { isEnabled: true } } }],
+    });
+    expect(warnings.some(w => w.message.includes("missing transition.poll"))).toBe(true);
+  });
+
+  it("warns when PassPoll missing pollPoints", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      stages: [{ name: "Poll", type: "Common", settings: { transition: { conditionType: "PassPoll", poll: { name: "Survey" } }, finalMessage: { isEnabled: true } } }],
+    });
+    expect(warnings.some(w => w.message.includes("pollPoints"))).toBe(true);
+  });
+
+  it("warns when no stages defined", () => {
+    const { warnings } = normalizeCourseStructureForEventiciousApi({
+      name: "Test",
+      stages: [],
+    });
+    expect(warnings.some(w => w.message.includes("No stages defined"))).toBe(true);
+  });
+
+  it("does NOT warn on complete reference-like payload", () => {
+    const referencePayload = {
+      name: "Cybersecurity",
+      description: "Course",
+      externalId: "sec-001",
+      settings: {
+        progress: { isEnabled: true, hintText: "Progress" },
+        finalScreen: { isEnabled: true, title: "Done", text: "Completed" },
+        deadline: {
+          isEnabled: true,
+          fixedDeadlineDate: "2026-12-31",
+          notificationSettings: {
+            isEnabled: true,
+            sendingPeriods: [{ unit: "Months", value: 1 }],
+          },
+        },
+        isFreeOrderAllowed: true,
+      },
+      stages: [
+        {
+          name: "Theory",
+          type: "Common",
+          settings: {
+            transition: { conditionType: "CheckInformation" },
+            finalMessage: { isEnabled: true, title: "Done" },
+          },
+        },
+        {
+          name: "Quiz",
+          type: "Common",
+          settings: {
+            transition: {
+              conditionType: "PassTest",
+              pollButtonNameOverride: "Start",
+              pollPoints: 100,
+              poll: { name: "Exam" },
+            },
+            finalMessage: { isEnabled: true, title: "Passed" },
+          },
+        },
+        {
+          name: "Practice",
+          type: "Task",
+          taskContent: { title: "Do task" },
+        },
+      ],
+    };
+    const { warnings } = normalizeCourseStructureForEventiciousApi(referencePayload);
+    const skeletonWarnings = warnings.filter(w =>
+      w.message.includes("Missing course description") ||
+      w.message.includes("Missing externalId") ||
+      w.message.includes("settings.progress") ||
+      w.message.includes("settings.deadline") ||
+      w.message.includes("settings.finalScreen") ||
+      w.message.includes("isFreeOrderAllowed") ||
+      w.message.includes("taskContent.title") ||
+      w.message.includes("finalMessage") ||
+      w.message.includes("missing transition.poll") ||
+      w.message.includes("pollPoints") ||
+      w.message.includes("pollButtonNameOverride") ||
+      w.message.includes("No stages defined")
+    );
+    expect(skeletonWarnings).toHaveLength(0);
   });
 });

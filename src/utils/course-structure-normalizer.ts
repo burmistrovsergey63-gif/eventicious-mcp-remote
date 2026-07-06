@@ -73,8 +73,46 @@ export function normalizeCourseStructureForEventiciousApi(
   output.settings = input.settings;
 
   const stages = input.stages;
-  if (!Array.isArray(stages)) {
+
+  if (!input.description) {
+    warnings.push({ message: "Missing course description. Eventicious may reject incomplete payloads." });
+  }
+  if (!input.externalId) {
+    warnings.push({ message: "Missing externalId. Recommended for course deduplication." });
+  }
+
+  const settings = input.settings as Record<string, unknown> | undefined;
+  if (!settings?.progress) {
+    warnings.push({ message: "Missing settings.progress. Course creation may fail without it." });
+  }
+  if (!settings?.finalScreen) {
+    warnings.push({ message: "Missing settings.finalScreen. Course creation may fail without it." });
+  }
+  if (!settings?.deadline) {
+    warnings.push({ message: "Missing settings.deadline. Course creation is known to fail with HTTP 500 without deadline settings." });
+  }
+  if (settings?.deadline) {
+    const dl = settings.deadline as Record<string, unknown>;
+    if (dl.isEnabled && !dl.fixedDeadlineDate && !dl.relativeDeadlineUnits) {
+      warnings.push({ message: "Deadline enabled but no fixedDeadlineDate or relativeDeadlineUnits provided." });
+    }
+    if (dl.isEnabled && dl.notificationSettings) {
+      const ns = dl.notificationSettings as Record<string, unknown>;
+      if (ns.isEnabled && (!Array.isArray(ns.sendingPeriods) || ns.sendingPeriods.length === 0)) {
+        warnings.push({ message: "Deadline notifications enabled but no sendingPeriods defined." });
+      }
+    }
+  }
+  if (settings?.isFreeOrderAllowed === undefined) {
+    warnings.push({ message: "Missing settings.isFreeOrderAllowed. Recommended to set explicitly." });
+  }
+
+  if (!Array.isArray(stages) || stages.length === 0) {
+    warnings.push({ message: "No stages defined. Course creation requires at least one stage." });
     output.stages = stages;
+    if (warnings.length > 0) {
+      logger.warn("course_structure_normalization_warnings", { warnings: warnings.map(w => w.message) });
+    }
     return { payload: output, warnings };
   }
 
@@ -94,6 +132,10 @@ export function normalizeCourseStructureForEventiciousApi(
     }
 
     if (stage.taskContent !== undefined) result.taskContent = stage.taskContent;
+
+    if (normalizedType === "task" && (!stage.taskContent || !(stage.taskContent as Record<string, unknown>)?.title)) {
+      warnings.push({ message: `Task stage "${String(stage.name)}" missing taskContent.title. Eventicious may reject the payload.` });
+    }
 
     const topConditionType = normalizeConditionType(stage.conditionType);
     const existingSettings = stage.settings as Record<string, unknown> | undefined;
@@ -131,6 +173,22 @@ export function normalizeCourseStructureForEventiciousApi(
     }
 
     if (Object.keys(mergedSettings).length > 0) result.settings = mergedSettings;
+
+    if (normalizedType === "common" && !existingSettings?.finalMessage) {
+      warnings.push({ message: `Common stage "${String(stage.name)}" missing settings.finalMessage. Recommended for known-safe course skeleton.` });
+    }
+
+    if (mergedConditionType === "passtest" || mergedConditionType === "passpoll") {
+      if (!existingTransition?.poll) {
+        warnings.push({ message: `Stage "${String(stage.name)}" with ${mergedConditionType} missing transition.poll. Include poll.name for known-safe skeleton.` });
+      }
+      if (existingTransition?.pollPoints === undefined) {
+        warnings.push({ message: `Stage "${String(stage.name)}" with ${mergedConditionType} missing transition.pollPoints.` });
+      }
+      if (!existingTransition?.pollButtonNameOverride) {
+        warnings.push({ message: `Stage "${String(stage.name)}" with ${mergedConditionType} missing transition.pollButtonNameOverride.` });
+      }
+    }
 
     return result;
   });

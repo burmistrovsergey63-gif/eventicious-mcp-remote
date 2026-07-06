@@ -354,6 +354,74 @@ Eventicious MCP помогает с такими задачами:
 
 > **Внимание:** `fileId` подходит только для обложки курса, но не для картинки внутри текста. Для Text 2.0 нужен публичный URL.
 
+### Создание курса: рабочий skeleton
+
+> **Важно:** Минимальный payload приводит к HTTP 500. Eventicious create course endpoint плохо отвечает, если не хватает важных полей. Всегда используйте полный course skeleton.
+
+**Workflow:**
+1. Загрузите обложку через `eventicious_upload_course_images` → получите `coverImageFileId` + `coverImageThumbnailFileId`
+2. Соберите полный course skeleton с полным settings и stages
+3. Выполните `dry_run=true` — проверьте warnings
+4. После подтверждения выполните `confirm=true`
+
+**Обязательные поля:**
+- `name`, `externalId`, `description`
+- `coverImageFileId`, `coverImageThumbnailFileId`
+- `settings.progress`, `settings.finalScreen`, `settings.deadline`, `settings.isFreeOrderAllowed`
+- `stages[]` с полной структурой
+
+**Settings safe defaults:**
+```json
+{
+  "progress": { "isEnabled": true, "hintText": "Прогресс прохождения" },
+  "finalScreen": { "isEnabled": true, "title": "Курс завершён", "text": "Вы успешно завершили курс." },
+  "deadline": {
+    "isEnabled": true,
+    "fixedDeadlineDate": "<YYYY-MM-DD>",
+    "relativeDeadlineUnits": "Months",
+    "relativeDeadlineValue": 5,
+    "notificationSettings": {
+      "isEnabled": true,
+      "localizedText": {
+        "en-US": "The deadline for the course «{CourseName}» is approaching. Complete it by {DeadlineDate}.",
+        "ru-RU": "Приближается срок выполнения курса «{CourseName}». Успейте пройти его до {DeadlineDate}."
+      },
+      "duplicateInEmail": false,
+      "sendingPeriods": [
+        { "unit": "Months", "value": 3 },
+        { "unit": "Weeks", "value": 2 },
+        { "unit": "Days", "value": 1 }
+      ]
+    }
+  },
+  "isFreeOrderAllowed": true
+}
+```
+
+**Stages:**
+- Common stage: `type: "Common"`, `settings.transition.conditionType` (CheckInformation / PassTest / PassPoll), `settings.finalMessage`
+- Task stage: `type: "Task"`, `taskContent.title` обязателен
+- PassTest/PassPoll: `transition.pollButtonNameOverride`, `transition.pollPoints`, `transition.poll.name`
+
+**Enum guidance:** MCP input schema использует PascalCase (Common/Task/Scorm, CheckInformation/PassTest/PassPoll, Days/Weeks/Months). Нормализатор конвертирует в lowercase для API.
+
+**Пример запроса к агенту:**
+```
+Создай курс в Eventicious по следующему описанию.
+Сначала собери полный course skeleton и выполни dry_run.
+Не отправляй минимальный payload.
+
+Данные курса:
+- Название: ...
+- Описание: ...
+- Обложка: ...
+- Этапы: 1. Common / CheckInformation / ..., 2. Task / ...
+
+После dry_run покажи summary. Только после подтверждения запускай real creation.
+```
+
+См. `examples/course-create.reference.example.json` для полного примера skeleton.
+
 Полный список tools не нужен для первого подключения. Агент сам увидит доступные tools после подключения.
 
 ---

@@ -16,13 +16,16 @@ export function registerCourseTools(
 ) {
   server.tool(
     "eventicious_import_course_structure",
-    "Create a new course with stages. Returns IDs for polls, tasks, SCORM placeholders, and catalogs. Requires pre-uploaded cover image IDs. For Russian text use UTF-8.",
+    "Create a new course with full skeleton. Returns IDs for polls, tasks, SCORM placeholders, and catalogs. Requires pre-uploaded coverImageFileId+coverImageThumbnailFileId. Always dry_run first — Eventicious returns HTTP 500 on incomplete payload. Include: name, description, externalId, settings (progress, finalScreen, deadline with sendingPeriods, isFreeOrderAllowed), and complete stages[] with taskContent.title for Task stages and poll metadata for PassTest/PassPoll. Use PascalCase enums (Common/Task/Scorm, CheckInformation/PassTest/PassPoll). For Russian text use UTF-8.",
     courseImportSchema,
     async (params) => {
       logger.info("tool_call", { tool: "eventicious_import_course_structure", dry_run: params.dry_run, name: params.name });
       const { dry_run, confirm, ...body } = params;
       const { payload: normalizedBody, warnings } = normalizeCourseStructureForEventiciousApi(body);
-      if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: normalizedBody, warnings }) }] };
+      const incompleteWarning = warnings.length > 0
+        ? "Course payload looks incomplete. Eventicious course creation is known to fail with HTTP 500 when required skeleton fields are missing. Use full course skeleton with settings, deadline, finalMessage, taskContent and poll metadata."
+        : undefined;
+      if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: normalizedBody, warnings, ...(incompleteWarning ? { recommendation: incompleteWarning } : {}) }) }] };
       if (!confirm) return toolError("confirm=true required to import course structure");
       try {
         const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/courses", body: normalizedBody, credentials });
