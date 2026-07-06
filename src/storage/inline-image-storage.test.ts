@@ -457,7 +457,7 @@ describe("processGravityJsonForInlineImages", () => {
     };
     await expect(
       processGravityJsonForInlineImages(gravityJson, storageOptions, false)
-    ).rejects.toThrow("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+    ).rejects.toThrow("fileId подходит для обложки курса, но не для картинки внутри текста");
   });
 
   it("fileBase64 is not present in final payload", async () => {
@@ -604,5 +604,44 @@ describe("processGravityJsonForInlineImages", () => {
     const { result } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
     const resultStr = JSON.stringify(result);
     expect(resultStr).not.toContain("delete_url");
+  });
+
+  it("missing key gives human-friendly error mentioning ImgBB setup", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+      }],
+    };
+    await expect(
+      processGravityJsonForInlineImages(gravityJson, null, false)
+    ).rejects.toThrow("https://imgbb.com/");
+  });
+
+  it("fileId error explains cover vs inline image", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileId: "abc123" },
+      }],
+    };
+    await expect(
+      processGravityJsonForInlineImages(gravityJson, storageOptions, false)
+    ).rejects.toThrow("обложки курса");
+  });
+
+  it("fileId error mentions imageUrl as alternative", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileId: "abc123" },
+      }],
+    };
+    await expect(
+      processGravityJsonForInlineImages(gravityJson, storageOptions, false)
+    ).rejects.toThrow("imageUrl");
   });
 });

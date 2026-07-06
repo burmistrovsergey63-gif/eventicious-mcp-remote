@@ -122,13 +122,27 @@ The `eventicious_create_text2` tool now supports inline images in GravityJson vi
 ### Environment Variables
 ```
 INLINE_IMAGE_STORAGE_DRIVER=imgbb
-IMGBB_API_KEY=<secret>
+IMGBB_API_KEY=<secret>                    # fallback, read at request time
 IMGBB_EXPIRATION_SECONDS=<optional>
 INLINE_IMAGE_MAX_BYTES=33554432
 ```
+
+### Architecture: Path B (Per-Client ImgBB Key)
+
+ImgBB API key can be provided in two ways, with header taking priority:
+
+1. **Request header `x-imgbb-api-key`** (recommended for per-client usage)
+2. **Environment variable `IMGBB_API_KEY`** (fallback for server-wide config)
+
+Priority: `x-imgbb-api-key` header > `IMGBB_API_KEY` env var.
+
+The header is extracted in `handleMcpRequest()` (transport.ts) and passed to `registerCatalogElementTools()`. Storage options are resolved per-invocation, not at registration time.
+
+Course covers are NOT affected — they use Eventicious `coverImageFileId` / `coverImageThumbnailFileId` and never touch ImgBB.
 
 ### Implementation
 - `src/storage/inline-image-storage.ts` — ImgBB upload adapter
 - `src/storage/inline-image-storage.test.ts` — 21 tests
 - `src/tools/gravity-json.ts` — `buildInlineImagePlan()` function
 - `src/tools/catalog-elements.ts` — integrated into `eventicious_create_text2` tool
+- `src/mcp/transport.ts` — extracts `x-imgbb-api-key` header per request

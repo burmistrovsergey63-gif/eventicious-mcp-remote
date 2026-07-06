@@ -69,7 +69,10 @@ function collectImageNodes(node: unknown): UploadInlineImageInput[] {
     const attrs = obj.attrs as Record<string, unknown> | undefined;
     if (attrs) {
       if (typeof attrs.fileId === "string" && attrs.fileId) {
-        throw new Error("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+        throw new Error(
+          "fileId подходит для обложки курса, но не для картинки внутри текста. " +
+          "Для Text 2.0 нужен imageUrl или настроенный ImgBB."
+        );
       }
       const img: UploadInlineImageInput = {};
       if (typeof attrs.imageUrl === "string") img.imageUrl = attrs.imageUrl;

@@ -28,18 +28,32 @@ import { processGravityJsonForInlineImages, InlineImageStorageOptions } from "..
 export function registerCatalogElementTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestScopedImgbbKey?: string
 ) {
-  const imgbbApiKey = process.env.IMGBB_API_KEY;
+  const envImgbbApiKey = process.env.IMGBB_API_KEY;
   const inlineImageStorageDriver = process.env.INLINE_IMAGE_STORAGE_DRIVER;
   const expirationSeconds = process.env.IMGBB_EXPIRATION_SECONDS
     ? parseInt(process.env.IMGBB_EXPIRATION_SECONDS, 10)
     : undefined;
 
-  const storageOptions: InlineImageStorageOptions | null =
-    inlineImageStorageDriver === "imgbb" && imgbbApiKey
-      ? { apiKey: imgbbApiKey, expirationSeconds }
-      : null;
+  function resolveStorageOptions(): InlineImageStorageOptions | null {
+    const apiKey = requestScopedImgbbKey || envImgbbApiKey;
+    if (inlineImageStorageDriver === "imgbb" && apiKey) {
+      return { apiKey, expirationSeconds };
+    }
+    return null;
+  }
+
+  const MISSING_INLINE_IMAGE_KEY_ERROR =
+    "Для загрузки картинки внутрь текстового блока нужен публичный URL. " +
+    "Передайте imageUrl или настройте ImgBB: получите API key на https://imgbb.com/ " +
+    "и добавьте IMGBB_API_KEY в env/MCP config как header x-imgbb-api-key.";
+
+  const FILE_ID_INLINE_ERROR =
+    "fileId подходит для обложки курса, но не для картинки внутри текста. " +
+    "Для Text 2.0 нужен imageUrl или настроенный ImgBB.";
+
   // --- Folders ---
   server.tool(
     "eventicious_create_folder",
@@ -196,15 +210,17 @@ export function registerCatalogElementTools(
         return toolError("text must be a GravityJson object, JSON string, or markdown/plain text");
       }
 
+      const currentStorageOptions = resolveStorageOptions();
+
       const imagePlan = buildInlineImagePlan(gravityJson, {
-        forceUpload: !!storageOptions,
+        forceUpload: !!currentStorageOptions,
         expirationSeconds,
       });
 
       let processedGravityJson = gravityJson;
       let inlineImageUploads: Array<Record<string, unknown>> = [];
 
-      if (imagePlan.length > 0 && storageOptions) {
+      if (imagePlan.length > 0 && currentStorageOptions) {
         if (params.dry_run) {
           for (const item of imagePlan) {
             warnings.push(`Will upload inline image: ${item.fileName} (${item.mimeType || "unknown"})`);
@@ -215,7 +231,7 @@ export function registerCatalogElementTools(
           try {
             const { result, uploads } = await processGravityJsonForInlineImages(
               gravityJson,
-              storageOptions,
+              currentStorageOptions,
               false
             );
             processedGravityJson = result;
@@ -231,6 +247,8 @@ export function registerCatalogElementTools(
             return toolError(`Failed to process inline images: ${String(err)}`);
           }
         }
+      } else if (imagePlan.length > 0 && !currentStorageOptions) {
+        return toolError(MISSING_INLINE_IMAGE_KEY_ERROR);
       }
 
       gravityJsonString = JSON.stringify(processedGravityJson);

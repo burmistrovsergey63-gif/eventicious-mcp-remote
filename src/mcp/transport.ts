@@ -62,7 +62,9 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
     version: "0.6.4",
   });
 
-  registerTools(server, credentials);
+  const imgbbApiKey = request.headers.get("x-imgbb-api-key") || undefined;
+
+  registerTools(server, credentials, imgbbApiKey);
 
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
@@ -82,7 +84,8 @@ function toolError(message: string) {
 
 function registerTools(
   server: McpServer,
-  credentials: ReturnType<typeof extractEventiciousCredentials>
+  credentials: ReturnType<typeof extractEventiciousCredentials>,
+  imgbbApiKey?: string
 ) {
   const maxUsers = config.maxUsersPerRequest;
 
@@ -167,6 +170,12 @@ function registerTools(
                   "Prepare tools build a plan or structure without writing to Eventicious.",
                 writeToolsNeedPreviewAndConfirmation:
                   "create/update/delete/import/upload/block/unblock tools must not run without preview (dry_run=true) and explicit confirmation.",
+              },
+              imageHandling: {
+                courseCover:
+                  "Обложка курса загружается в Eventicious, агент получает fileId/thumbnailFileId. Используйте coverImageFileId / coverImageThumbnailFileId.",
+                inlineTextImage:
+                  "Картинка внутри урока/каталога (Text 2.0 / GravityJson) нуждается в публичном URL. Если URL уже есть — укажите imageUrl. Если URL нет — получите API key на https://imgbb.com/ и добавьте его в MCP config (header x-imgbb-api-key). После настройки можно прикладывать картинки агенту, он сам загрузит их через ImgBB и вставит в текст.",
               },
             }),
           },
@@ -942,7 +951,7 @@ function registerTools(
   registerSessionAttachmentTools(server, credentials);
   registerScheduleImportTools(server, credentials);
   registerCatalogTools(server, credentials, toolError);
-  registerCatalogElementTools(server, credentials, toolError);
+  registerCatalogElementTools(server, credentials, toolError, imgbbApiKey);
   registerGravityJsonTools(server, toolError);
   registerCatalogImportTools(server, toolError);
   registerCourseTools(server, credentials, toolError);

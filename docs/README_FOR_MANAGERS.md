@@ -170,12 +170,15 @@ Eventicious MCP
       "type": "http",
       "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
       "headers": {
-        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}"
+        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}",
+        "x-imgbb-api-key": "${IMGBB_API_KEY}"
       },
       "timeout": 120000
     }
   }
 }
+
+x-imgbb-api-key нужен только если пользователь хочет загружать картинки внутрь текстовых блоков без готового публичного URL. Если ключ не нужен, строку "x-imgbb-api-key" можно удалить из конфига.
 
 Важно:
 - не выводи EVENTICIOUS_CLIENT_SECRET в ответ;
@@ -348,14 +351,13 @@ Eventicious MCP помогает с такими задачами:
 **Inline-изображения в Text 2.0:**
 - Загружаются через ImgBB → возвращают публичный URL
 - Используются в GravityJson `image.attrs.src`
-- Требуется настройка окружения:
-  ```
-  INLINE_IMAGE_STORAGE_DRIVER=imgbb
-  IMGBB_API_KEY=your-api-key
-  IMGBB_EXPIRATION_SECONDS=2592000  # опционально, 30 дней по умолчанию
-  ```
+- Есть публичный URL → укажите `imageUrl` напрямую
+- Нет URL → получите API key на https://imgbb.com/ и добавьте в MCP config:
+  - header `x-imgbb-api-key` (рекомендуется) или
+  - env `IMGBB_API_KEY` + `INLINE_IMAGE_STORAGE_DRIVER=imgbb`
+- После настройки можно прикладывать картинки агенту (`fileBase64`, `dataUri`), он сам загрузит их через ImgBB и вставит в текст.
 
-> **Внимание:** Если установлен `IMGBB_EXPIRATION_SECONDS`, изображения могут исчезнуть из текстовых блоков Eventicious после истечения срока.
+> **Внимание:** `fileId` подходит только для обложки курса, но не для картинки внутри текста. Для Text 2.0 нужен `imageUrl` или настроенный ImgBB.
 
 Полный список tools не нужен для первого подключения. Агент сам увидит доступные tools после подключения.
 

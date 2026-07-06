@@ -296,7 +296,10 @@ async function processImageNode(
   if (!attrs) return { node, uploaded: null };
 
   if (typeof attrs.fileId === "string" && attrs.fileId) {
-    throw new Error("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+    throw new Error(
+      "fileId подходит для обложки курса, но не для картинки внутри текста. " +
+      "Для Text 2.0 нужен imageUrl или настроенный ImgBB."
+    );
   }
 
   const src = typeof attrs.src === "string" ? attrs.src : undefined;
@@ -320,7 +323,11 @@ async function processImageNode(
 
   if (!storageOptions) {
     if (fileBase64 || effectiveDataUri) {
-      throw new Error("Inline image storage not configured. Set INLINE_IMAGE_STORAGE_DRIVER=imgbb and IMGBB_API_KEY.");
+      throw new Error(
+        "Для загрузки картинки внутрь текстового блока нужен публичный URL. " +
+        "Передайте imageUrl или настройте ImgBB: получите API key на https://imgbb.com/ " +
+        "и добавьте IMGBB_API_KEY в env/MCP config как header x-imgbb-api-key."
+      );
     }
     return { node, uploaded: null };
   }

@@ -122,4 +122,60 @@ describe("eventicious_get_agent_instructions content", () => {
     );
     expect(match).toBeTruthy();
   });
+
+  it("contains image handling instructions in Russian", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("imageHandling");
+    expect(content).toContain("courseCover");
+    expect(content).toContain("inlineTextImage");
+    expect(content).toContain("Обложка курса");
+    expect(content).toContain("Картинка внутри урока");
+    expect(content).toContain("x-imgbb-api-key");
+    expect(content).toContain("https://imgbb.com/");
+  });
+});
+
+describe("x-imgbb-api-key header extraction", () => {
+  it("transport.ts reads x-imgbb-api-key from request headers", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("x-imgbb-api-key");
+    expect(content).toContain('request.headers.get("x-imgbb-api-key")');
+  });
+
+  it("transport.ts passes imgbbApiKey to registerCatalogElementTools", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("registerCatalogElementTools(server, credentials, toolError, imgbbApiKey)");
+  });
+
+  it("catalog-elements.ts accepts requestScopedImgbbKey parameter", () => {
+    const catalogPath = path.join(__dirname, "..", "tools", "catalog-elements.ts");
+    const content = fs.readFileSync(catalogPath, "utf-8");
+
+    expect(content).toContain("requestScopedImgbbKey");
+    expect(content).toContain("resolveStorageOptions");
+    expect(content).toContain("requestScopedImgbbKey || envImgbbApiKey");
+  });
+
+  it("catalog-elements.ts has improved missing key error", () => {
+    const catalogPath = path.join(__dirname, "..", "tools", "catalog-elements.ts");
+    const content = fs.readFileSync(catalogPath, "utf-8");
+
+    expect(content).toContain("MISSING_INLINE_IMAGE_KEY_ERROR");
+    expect(content).toContain("https://imgbb.com/");
+    expect(content).toContain("x-imgbb-api-key");
+  });
+
+  it("catalog-elements.ts has improved fileId error", () => {
+    const catalogPath = path.join(__dirname, "..", "tools", "catalog-elements.ts");
+    const content = fs.readFileSync(catalogPath, "utf-8");
+
+    expect(content).toContain("FILE_ID_INLINE_ERROR");
+    expect(content).toContain("обложки курса");
+  });
 });

@@ -108,7 +108,7 @@ describe("buildInlineImagePlan", () => {
       }],
     };
     expect(() => buildInlineImagePlan(gravityJson, {})).toThrow(
-      "Eventicious fileId cannot be used as GravityJson image.attrs.src."
+      "fileId подходит для обложки курса, но не для картинки внутри текста"
     );
   });
 
