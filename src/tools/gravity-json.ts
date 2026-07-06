@@ -68,12 +68,18 @@ function collectImageNodes(node: unknown): UploadInlineImageInput[] {
   if (obj.type === "image") {
     const attrs = obj.attrs as Record<string, unknown> | undefined;
     if (attrs) {
+      if (typeof attrs.fileId === "string" && attrs.fileId) {
+        throw new Error("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+      }
       const img: UploadInlineImageInput = {};
       if (typeof attrs.imageUrl === "string") img.imageUrl = attrs.imageUrl;
       if (typeof attrs.fileBase64 === "string") img.fileBase64 = attrs.fileBase64;
       if (typeof attrs.dataUri === "string") img.dataUri = attrs.dataUri;
       if (typeof attrs.fileName === "string") img.fileName = attrs.fileName;
       if (typeof attrs.mimeType === "string") img.mimeType = attrs.mimeType;
+      if (typeof attrs.src === "string" && attrs.src.startsWith("data:")) {
+        img.dataUri = attrs.src;
+      }
       if (img.imageUrl || img.fileBase64 || img.dataUri) {
         images.push(img);
       }
@@ -101,7 +107,7 @@ export function buildInlineImagePlan(
   for (const input of imageInputs) {
     const fileName = input.fileName || "inline-image";
     const mimeType = input.mimeType || "image/jpeg";
-    const needsUpload = options.forceUpload || !isPublicHttpsUrl(input.imageUrl || "");
+    const needsUpload = options.forceUpload || !isPublicHttpsUrl(input.imageUrl || "") || !!input.dataUri || !!input.fileBase64;
 
     if (needsUpload) {
       plan.push({

@@ -221,6 +221,7 @@ export function registerCatalogElementTools(
             processedGravityJson = result;
             inlineImageUploads = uploads.map((u) => ({
               provider: u.provider,
+              source: u.source,
               publicUrl: u.publicUrl,
               width: u.width,
               height: u.height,

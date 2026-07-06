@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   uploadInlineImageToImgBB,
   isPublicHttpsUrl,
+  processGravityJsonForInlineImages,
   UploadInlineImageInput,
   InlineImageStorageOptions,
 } from "./inline-image-storage";
@@ -303,5 +304,305 @@ describe("uploadInlineImageToImgBB", () => {
 
     const formData = fetchMock.mock.calls[0][1].body as FormData;
     expect(formData.get("image")).toBe(VALID_PNG_BASE64);
+  });
+
+  it("returns source field in result", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await uploadInlineImageToImgBB(
+      { fileBase64: VALID_PNG_BASE64, mimeType: "image/png" },
+      { apiKey: VALID_API_KEY },
+      "fileBase64"
+    );
+
+    expect(result.source).toBe("fileBase64");
+  });
+
+  it("returns source=dataUri when source param is dataUri", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await uploadInlineImageToImgBB(
+      { dataUri: `data:image/png;base64,${VALID_PNG_BASE64}` },
+      { apiKey: VALID_API_KEY },
+      "dataUri"
+    );
+
+    expect(result.source).toBe("dataUri");
+  });
+});
+
+describe("processGravityJsonForInlineImages", () => {
+  const storageOptions: InlineImageStorageOptions = { apiKey: VALID_API_KEY };
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("returns unchanged GravityJson when no image nodes", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{ type: "paragraph", attrs: {}, content: [{ type: "text", text: "hello" }] }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    expect(result).toEqual(gravityJson);
+    expect(uploads).toEqual([]);
+  });
+
+  it("leaves attrs.src with public HTTPS URL unchanged", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: "https://i.ibb.co/abc123/test.png" },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+    expect(uploads).toEqual([]);
+  });
+
+  it("uploads attrs.src dataUri to ImgBB and replaces src", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+    expect(imageAttrs.dataUri).toBeUndefined();
+    expect(uploads).toHaveLength(1);
+    expect(uploads[0].publicUrl).toBe("https://i.ibb.co/abc123/test.png");
+    expect(uploads[0].source).toBe("dataUri");
+  });
+
+  it("uploads fileBase64 to ImgBB and replaces src", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileBase64: VALID_PNG_BASE64, mimeType: "image/png" },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+    expect(imageAttrs.fileBase64).toBeUndefined();
+    expect(uploads).toHaveLength(1);
+    expect(uploads[0].source).toBe("fileBase64");
+  });
+
+  it("maps imageUrl to src when imageUrl is public HTTPS", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { imageUrl: "https://i.ibb.co/abc123/test.png" },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+    expect(imageAttrs.imageUrl).toBeUndefined();
+    expect(uploads).toEqual([]);
+  });
+
+  it("uploads non-public imageUrl to ImgBB", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { imageUrl: "http://example.com/image.png" },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+    expect(imageAttrs.imageUrl).toBeUndefined();
+    expect(uploads).toHaveLength(1);
+    expect(uploads[0].source).toBe("imageUrl");
+  });
+
+  it("rejects fileId in image attrs", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileId: "abc123" },
+      }],
+    };
+    await expect(
+      processGravityJsonForInlineImages(gravityJson, storageOptions, false)
+    ).rejects.toThrow("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+  });
+
+  it("fileBase64 is not present in final payload", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileBase64: VALID_PNG_BASE64, mimeType: "image/png", fileName: "test.png" },
+      }],
+    };
+    const { result } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.fileBase64).toBeUndefined();
+    expect(imageAttrs.dataUri).toBeUndefined();
+  });
+
+  it("dry_run does not call ImgBB", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, true);
+    const imageAttrs = (result.content as Array<Record<string, unknown>>)[0].attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toContain("dry-run://imgbb/");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(uploads).toHaveLength(1);
+    expect(uploads[0].publicUrl).toContain("dry-run://imgbb/");
+  });
+
+  it("rejects SVG in src dataUri", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDov" },
+      }],
+    };
+    await expect(
+      processGravityJsonForInlineImages(gravityJson, storageOptions, false)
+    ).rejects.toThrow("SVG images are not allowed");
+  });
+
+  it("IMGBB_API_KEY is not present in errors", async () => {
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+      }],
+    };
+    try {
+      await processGravityJsonForInlineImages(gravityJson, { apiKey: "secret-key-12345" }, false);
+    } catch (err) {
+      expect(String(err)).not.toContain("secret-key-12345");
+    }
+  });
+
+  it("processes nested image nodes recursively", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "bullet_list",
+        attrs: {},
+        content: [{
+          type: "list_item",
+          attrs: {},
+          content: [{
+            type: "paragraph",
+            attrs: {},
+            content: [{
+              type: "image",
+              attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+            }],
+          }],
+        }],
+      }],
+    };
+    const { result, uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    expect(uploads).toHaveLength(1);
+    const docContent = result.content as Array<Record<string, unknown>>;
+    const bulletList = docContent[0];
+    const listItemContent = bulletList.content as Array<Record<string, unknown>>;
+    const listItem = listItemContent[0];
+    const paraContent = listItem.content as Array<Record<string, unknown>>;
+    const paragraph = paraContent[0];
+    const imgContent = paragraph.content as Array<Record<string, unknown>>;
+    const imageNode = imgContent[0];
+    const imageAttrs = imageNode.attrs as Record<string, unknown>;
+    expect(imageAttrs.src).toBe("https://i.ibb.co/abc123/test.png");
+  });
+
+  it("processes multiple image nodes", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [
+        {
+          type: "image",
+          attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+        },
+        {
+          type: "image",
+          attrs: { src: `data:image/png;base64,${VALID_PNG_BASE64}` },
+        },
+      ],
+    };
+    const { uploads } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    expect(uploads).toHaveLength(2);
+  });
+
+  it("delete_url is not present in final GravityJson", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(MOCK_IMGBB_SUCCESS_RESPONSE),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const gravityJson = {
+      type: "doc",
+      content: [{
+        type: "image",
+        attrs: { fileBase64: VALID_PNG_BASE64, mimeType: "image/png" },
+      }],
+    };
+    const { result } = await processGravityJsonForInlineImages(gravityJson, storageOptions, false);
+    const resultStr = JSON.stringify(result);
+    expect(resultStr).not.toContain("delete_url");
   });
 });

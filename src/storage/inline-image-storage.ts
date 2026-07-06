@@ -22,6 +22,7 @@ export type UploadInlineImageInput = {
 export type UploadInlineImageResult = {
   publicUrl: string;
   provider: "imgbb";
+  source: "dataUri" | "fileBase64" | "imageUrl" | "src";
   providerImageId?: string;
   width?: number;
   height?: number;
@@ -98,7 +99,8 @@ function redactDeleteUrl(deleteUrl: string | undefined): string | undefined {
 
 export async function uploadInlineImageToImgBB(
   input: UploadInlineImageInput,
-  options: InlineImageStorageOptions
+  options: InlineImageStorageOptions,
+  source: UploadInlineImageResult["source"] = "fileBase64"
 ): Promise<UploadInlineImageResult> {
   const { apiKey, expirationSeconds, maxBytes = MAX_INLINE_IMAGE_BYTES, dryRun = false } = options;
 
@@ -141,6 +143,7 @@ export async function uploadInlineImageToImgBB(
     return {
       publicUrl: `dry-run://imgbb/${sanitizedName}`,
       provider: "imgbb",
+      source,
       sizeBytes,
     };
   }
@@ -216,6 +219,7 @@ export async function uploadInlineImageToImgBB(
   return {
     publicUrl,
     provider: "imgbb",
+    source,
     providerImageId: responseData.data?.image_id,
     width: responseData.data?.width,
     height: responseData.data?.height,
@@ -291,42 +295,60 @@ async function processImageNode(
   const attrs = node.attrs as Record<string, unknown> | undefined;
   if (!attrs) return { node, uploaded: null };
 
+  if (typeof attrs.fileId === "string" && attrs.fileId) {
+    throw new Error("Eventicious fileId cannot be used as GravityJson image.attrs.src.");
+  }
+
+  const src = typeof attrs.src === "string" ? attrs.src : undefined;
   const imageUrl = typeof attrs.imageUrl === "string" ? attrs.imageUrl : undefined;
   const fileBase64 = typeof attrs.fileBase64 === "string" ? attrs.fileBase64 : undefined;
   const dataUri = typeof attrs.dataUri === "string" ? attrs.dataUri : undefined;
 
-  if (!imageUrl && !fileBase64 && !dataUri) return { node, uploaded: null };
+  const effectiveDataUri = dataUri || (src && src.startsWith("data:") ? src : undefined);
+  const effectiveImageUrl = imageUrl || (src && !src.startsWith("data:") ? src : undefined);
 
-  const needsUpload = !isPublicHttpsUrl(imageUrl || "");
+  if (!effectiveDataUri && !fileBase64 && !effectiveImageUrl) return { node, uploaded: null };
 
-  if (!needsUpload && imageUrl) {
+  if (effectiveImageUrl && isPublicHttpsUrl(effectiveImageUrl) && !fileBase64 && !effectiveDataUri) {
     const cleanedAttrs = { ...attrs };
     delete cleanedAttrs.imageUrl;
     delete cleanedAttrs.fileBase64;
     delete cleanedAttrs.dataUri;
-    cleanedAttrs.src = imageUrl;
+    cleanedAttrs.src = effectiveImageUrl;
     return { node: { ...node, attrs: cleanedAttrs }, uploaded: null };
   }
 
   if (!storageOptions) {
-    if (fileBase64 || dataUri) {
+    if (fileBase64 || effectiveDataUri) {
       throw new Error("Inline image storage not configured. Set INLINE_IMAGE_STORAGE_DRIVER=imgbb and IMGBB_API_KEY.");
     }
     return { node, uploaded: null };
   }
 
+  const source: UploadInlineImageResult["source"] = effectiveDataUri ? "dataUri"
+    : fileBase64 ? "fileBase64"
+    : imageUrl ? "imageUrl"
+    : "src";
+
   const input: UploadInlineImageInput = {
     fileName: typeof attrs.fileName === "string" ? attrs.fileName : undefined,
     mimeType: typeof attrs.mimeType === "string" ? attrs.mimeType : undefined,
     fileBase64,
-    dataUri,
-    imageUrl,
+    dataUri: effectiveDataUri,
+    imageUrl: effectiveImageUrl && !isPublicHttpsUrl(effectiveImageUrl) ? effectiveImageUrl : undefined,
   };
+
+  const mimeForValidation = effectiveDataUri
+    ? (effectiveDataUri.match(/^data:(image\/[a-z+]+);base64,/)?.[1])
+    : input.mimeType;
+  if (mimeForValidation) {
+    validateMimeType(mimeForValidation);
+  }
 
   const result = await uploadInlineImageToImgBB(input, {
     ...storageOptions,
     dryRun,
-  });
+  }, source);
 
   const cleanedAttrs = { ...attrs };
   delete cleanedAttrs.imageUrl;
