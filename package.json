@@ -16,7 +16,11 @@
     "smoke:list": "node scripts/list-smoke-tests.js",
     "smoke:tools": "node scripts/smoke-tools.js",
     "smoke:remote": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-remote.ps1",
-    "smoke:auth": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-auth-exchange.ps1"
+    "smoke:auth": "powershell -ExecutionPolicy Bypass -File ./scripts/smoke-auth-exchange.ps1",
+    "smoke:health": "node scripts/smoke/health.mjs",
+    "smoke:mcp-info": "node scripts/smoke/mcp-info.mjs",
+    "smoke:remote-tools": "node scripts/smoke/remote-tools.mjs",
+    "smoke:auth-verify": "node scripts/smoke/auth-verify.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

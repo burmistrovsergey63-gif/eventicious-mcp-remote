@@ -504,20 +504,24 @@ Test files live next to source files (`*.test.ts`). Tests mock all external API 
 
 ## Smoke Checks
 
-Smoke checks verify basic functionality without real API calls:
+Smoke checks verify basic functionality without real API calls. Cross-platform Node.js scripts work on Windows, Linux, and macOS:
 
 ```bash
-npm run smoke:list   # List available smoke test scripts
-npm run smoke:tools  # Verify exactly 75 MCP tools are registered
-npm run smoke:remote # Test remote deployment (requires MCP_REMOTE_URL env)
+npm run smoke:list        # List available smoke test scripts
+npm run smoke:tools       # Verify exactly 75 MCP tools are registered (no env)
+npm run smoke:health      # GET /healthz (requires MCP_REMOTE_URL)
+npm run smoke:mcp-info    # GET /mcp info (requires MCP_REMOTE_URL)
+npm run smoke:remote-tools # POST /mcp initialize+tools/list (requires MCP_REMOTE_URL + MCP_ACCESS_TOKEN)
+npm run smoke:auth-verify # GET /auth/verify (requires MCP_REMOTE_URL + MCP_ACCESS_TOKEN)
 ```
 
-For remote smoke check with MCP access token:
+PowerShell scripts are also available (Windows-only):
 
 ```powershell
-$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
-$env:MCP_ACCESS_TOKEN="your-token"
-.\scripts\smoke-remote.ps1
+.\scripts\smoke-health.ps1        # GET /healthz
+.\scripts\smoke-mcp-info.ps1      # GET /mcp
+.\scripts\smoke-remote.ps1        # POST /mcp (requires MCP_REMOTE_URL + MCP_ACCESS_TOKEN)
+.\scripts\smoke-auth-exchange.ps1 # Auth exchange (requires Eventicious credentials)
 ```
 
 For full auth exchange smoke test:

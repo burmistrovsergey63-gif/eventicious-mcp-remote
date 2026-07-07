@@ -27,31 +27,38 @@ Steps:
 
 ## Smoke Tests
 
+### Cross-Platform (Node.js) — works on Windows, Linux, macOS
+
+- `npm run smoke:tools` - Verify exactly 75 MCP tools are registered (no env required)
+- `npm run smoke:health` - GET /healthz (requires `MCP_REMOTE_URL`)
+- `npm run smoke:mcp-info` - GET /mcp info (requires `MCP_REMOTE_URL`)
+- `npm run smoke:remote-tools` - POST /mcp initialize + tools/list (requires `MCP_REMOTE_URL` + `MCP_ACCESS_TOKEN`)
+- `npm run smoke:auth-verify` - GET /auth/verify (requires `MCP_REMOTE_URL` + `MCP_ACCESS_TOKEN`)
 - `npm run smoke:list` - List available smoke test scripts
-- `npm run smoke:tools` - Verify exactly 75 MCP tools are registered (local static check)
-- `npm run smoke:remote` - Test remote deployment health and MCP endpoint
 
-### Remote Smoke Check
+### PowerShell (Windows-only)
 
-To verify remote Layero deployment:
+- `.\scripts\smoke-health.ps1` - GET /healthz
+- `.\scripts\smoke-mcp-info.ps1` - GET /mcp
+- `.\scripts\smoke-remote.ps1` - POST /mcp (requires `MCP_REMOTE_URL` + `MCP_ACCESS_TOKEN`)
+- `.\scripts\smoke-auth-exchange.ps1` - Auth exchange (requires Eventicious credentials)
 
-```powershell
-$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
-$env:MCP_ACCESS_TOKEN="your-mcp-token"
-npm run smoke:remote
-```
+### Environment Variables
 
-Or with fake Eventicious credentials (safe for smoke check):
+| Script | MCP_REMOTE_URL | MCP_ACCESS_TOKEN |
+|--------|:--------------:|:----------------:|
+| smoke:tools | - | - |
+| smoke:health | required | - |
+| smoke:mcp-info | required | - |
+| smoke:remote-tools | required | required |
+| smoke:auth-verify | required | required |
 
-```powershell
-$env:MCP_REMOTE_URL="https://your-instance.layero.ru"
-$env:MCP_ACCESS_TOKEN="your-mcp-token"
-npm run smoke:remote
-```
+### What They Check
 
-The script checks:
-1. GET /healthz endpoint returns `{ok: true, service: "eventicious-mcp-remote"}`
-2. POST /mcp with tools/list returns 75 tools (if MCP_ACCESS_TOKEN provided)
+- **health**: HTTP 200, `ok: true`, `service: "eventicious-mcp-remote"`, version present
+- **mcp-info**: HTTP 200, service/protocol/endpoint/version fields present
+- **remote-tools**: initialize handshake + tools/list returns exactly 75 tools
+- **auth-verify**: HTTP 200, `ok: true`, `toolsCount: 75`, service present
 
 Last verified: Layero preview at https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru - 75 tools confirmed.
 
