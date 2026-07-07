@@ -6,3 +6,9 @@ node_modules
 dist
 *.log
 tsconfig.tsbuildinfo
+
+# Untracked e2e/debug scripts with hardcoded secrets — never commit
+scripts/check-*.ps1
+scripts/e2e-*.ps1
+scripts/test-import-*.ps1
+PROJECT_CONTEXT_FOR_ORCHESTRATOR.md

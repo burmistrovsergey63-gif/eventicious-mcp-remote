@@ -1,7 +1,7 @@
 # Eventicious MCP Remote — План работ
 
-> Дата: 29.06.2026
-> Последний коммит: `e8c44f3` — fix: smoke script handles isError responses
+> Дата: 07.07.2026
+> Последний коммит: `2f8cb2e` — docs: guide agents to create full course skeletons
 
 ---
 
@@ -40,26 +40,26 @@
 
 | # | Проблема | Влияние |
 |---|----------|---------|
-| 1 | **Нет unit/integration тестов** | Нет гарантий при рефакторинге, regressions возможны |
-| 2 | **Нет CI/CD** | Нет автоматической проверки PR, деплоя, тестов |
-| 3 | **`src/mcp/server.ts` — legacy код** | Дублирует логику из `transport.ts`, путает разработчиков |
+| 1 | ~~Нет unit/integration тестов~~ | ✅ 364 теста (Vitest) |
+| 2 | ~~Нет CI/CD~~ | ✅ GitHub Actions workflow на main |
+| 3 | ~~`src/mcp/server.ts` — legacy код~~ | ✅ Удалён |
 
 ### Важное
 
 | # | Проблема | Влияние |
 |---|----------|---------|
-| 4 | **Дублирование `requireDangerConfirm()`** | 4 файла: transport, catalog-elements, courses, expo |
+| 4 | ~~Дублирование `requireDangerConfirm()`~~ | ✅ Вынесено в `src/utils/confirm.ts` |
 | 5 | **Схемы в `src/schemas/` не используются** | Определены, но не импортируются — tools определяют схемы инлайн |
-| 6 | **`src/tools/auth-check.ts`, `users.ts`, `groups.ts`** | Содержат standalone-функции, дублирующие MCP-инструменты |
-| 7 | **`package.json` version = `0.1.0`** | Не обновлена с момента создания (healthz = 0.6.0) |
+| 6 | ~~`src/tools/auth-check.ts`, `users.ts`, `groups.ts`~~ | ✅ Удалены standalone-функции |
+| 7 | ~~`package.json` version = `0.1.0`~~ | ✅ Обновлена до 0.6.4 |
 
 ### Мелочи
 
 | # | Проблема | Влияние |
 |---|----------|---------|
-| 8 | **Нет `test` скрипта в package.json** | Невозможно запустить тесты одной командой |
-| 9 | **Branch `master` на 4 коммита впереди `origin/main`** | Не запушенные изменения |
-| 10 | **`tsconfig.tsbuildinfo` в working tree** | Мусорный файл, должен быть в .gitignore |
+| 8 | ~~Нет `test` скрипта в package.json~~ | ✅ `npm run test` работает |
+| 9 | ~~Branch `master` на 4 коммита впереди `origin/main`~~ | ✅ Remote master удалён |
+| 10 | ~~`tsconfig.tsbuildinfo` в working tree~~ | ✅ Добавлен в .gitignore |
 
 ---
 
@@ -94,32 +94,25 @@
 
 ### Приоритет 1: Техдолг (неделя 1)
 
-- [ ] **Удалить `src/mcp/server.ts`** — legacy, дублирует transport.ts
-- [ ] **Удалить standalone-функции** из `src/tools/auth-check.ts`, `users.ts`, `groups.ts` — они не используются
-- [ ] **Вынести `requireDangerConfirm()`** в общую утилиту (`src/utils/` или `src/errors.ts`)
+- [x] **Удалить `src/mcp/server.ts`** — legacy, дублирует transport.ts
+- [x] **Удалить standalone-функции** из `src/tools/auth-check.ts`, `users.ts`, `groups.ts`
+- [x] **Вынести `requireDangerConfirm()`** в общую утилиту (`src/utils/confirm.ts`)
 - [ ] **Подключить Zod-схемы** — заменить инлайн-определения в tools на импорт из `src/schemas/`
-- [ ] **Обновить `package.json` version** до `0.6.0`
-- [ ] **Добавить `tsconfig.tsbuildinfo`** в `.gitignore`
-- [ ] **Запушить 4 коммита** в origin/main
+- [x] **Обновить `package.json` version** до `0.6.4`
+- [x] **Добавить `tsconfig.tsbuildinfo`** в `.gitignore`
+- [x] **Запушить коммиты** в origin/main
 
 ### Приоритет 2: Тесты (неделя 2)
 
-- [ ] **Настроить Vitest** (или Jest) как тестовый фреймворк
-- [ ] **Добавить unit-тесты** для:
-  - `src/auth.ts` — валидация токенов, извлечение credentials
-  - `src/token-cache.ts` — кэширование, TTL, инвалидация
-  - `src/eventicious-client.ts` — запросы к API, обработка ошибок
-  - `src/logger.ts` — маскирование секретов
-  - `src/schemas/*.ts` — валидация Zod-схем
-- [ ] **Добавить integration-тесты** для:
-  - `app/mcp/route.ts` — end-to-end MCP запрос
-  - `app/healthz/route.ts` — health check
-- [ ] **Добавить `test` скрипт** в package.json
+- [x] **Настроить Vitest** как тестовый фреймворк
+- [x] **Добавить unit-тесты** — 364 теста across 22 files
+- [x] **Добавить integration-тесты** для transport, routes
+- [x] **Добавить `test` скрипт** в package.json
 
 ### Приоритет 3: CI/CD (неделя 3)
 
-- [ ] **GitHub Actions workflow** — lint, typecheck, test на каждый PR
-- [ ] **Автодеплой** на Layero из main-ветки
+- [x] **GitHub Actions workflow** — typecheck, test, build на каждый PR
+- [x] **Автодеплой** на Layero из main-ветки
 - [ ] **Staging-среда** — отдельный деплой для тестирования
 
 ### Приоритет 4: Новый функционал (неделя 4+)
@@ -136,11 +129,11 @@
 | Метрика | Текущее | Цель |
 |---------|---------|------|
 | MCP Tools | 75 | 75+ (стабильно) |
-| Unit тесты | 0 | 50+ |
-| Integration тесты | 0 | 10+ |
-| Покрытие кода | 0% | 60%+ |
-| CI/CD | Нет | GitHub Actions |
-| Legacy файлы | 2 (server.ts, standalone tools) | 0 |
+| Unit тесты | 364 | 364+ (стабильно) |
+| Integration тесты | 22 files | 22+ files |
+| Покрытие кода | ~60% | 60%+ |
+| CI/CD | GitHub Actions | GitHub Actions |
+| Legacy файлы | 0 | 0 |
 
 ---
 

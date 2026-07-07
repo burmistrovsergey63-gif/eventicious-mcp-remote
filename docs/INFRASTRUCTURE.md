@@ -22,7 +22,8 @@ Steps:
 3. `npm ci` (clean install)
 4. `npm run typecheck`
 5. `npm run test`
-6. `npm run build`
+6. `npm run smoke:tools`
+7. `npm run build`
 
 ## Smoke Tests
 
@@ -60,8 +61,8 @@ Smoke tests should only run in dry-run mode. Never run with `confirm=true` on pr
 
 See `docs/SCHEMA_AUDIT.md` and `docs/SCHEMA_AUDIT_CHECKPOINT.md` for analysis of Zod schema usage across tools.
 
-Current status after hardening release 0.6.1:
-- 156 unit tests passing
+Current status after release 0.6.4:
+- 364 unit tests passing
 - 75 MCP tools registered
 - Schema shapes verified compatible with server.tool()
 - Remaining inline schemas are intentional helper tools:

@@ -57,7 +57,7 @@
 
 **Schema migration complete.** All simple CRUD tools have been migrated and hardened.
 
-### Hardening Release 0.6.1
+### Hardening Release 0.6.4
 
 This release adds:
 - Tool-count smoke check (`npm run smoke:tools`) verifying 75 tools registered

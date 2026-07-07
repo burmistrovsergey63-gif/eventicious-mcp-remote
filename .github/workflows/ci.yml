@@ -31,5 +31,8 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Smoke - tool count
+        run: npm run smoke:tools
+
       - name: Build
         run: npm run build || echo "Build completed with warnings"

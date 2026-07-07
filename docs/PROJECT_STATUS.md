@@ -1,8 +1,8 @@
 # Project Status: Eventicious MCP Remote Connector
 
-**Version:** 0.6.0  
+**Version:** 0.6.4  
 **Branch:** main  
-**Last Commit:** `2261161`  
+**Last Commit:** `2f8cb2e`  
 **Production:** Layero preview environment
 
 ---
@@ -26,11 +26,11 @@
 **Status:** COMPLETE
 
 - ✅ tsconfig.tsbuildinfo added to .gitignore
-- ✅ Version bump to 0.6.0
+- ✅ Version bump to 0.6.4
 - ✅ Legacy file cleanup (server.ts, auth-check.ts removed)
 - ✅ Confirm helper utility created (`src/utils/confirm.ts`)
 - ✅ Structured errors utility (`src/utils/errors.ts`)
-- ✅ Vitest test infrastructure (127 tests passing)
+- ✅ Vitest test infrastructure (364 tests passing)
 - ✅ CI workflow on main branch
 - ✅ Remote master branch deleted after Layero migration
 
@@ -60,7 +60,7 @@
 
 - Total MCP tools: 75
 - Migrated tools (simple CRUD): 19
-- Tests: 127 passing
+- Tests: 364 passing
 - Production branch: main (Layero)
 - Remote master: deleted
 
