@@ -2,7 +2,9 @@
 
 ## Overview
 
-Stateless MCP Token Exchange allows managers to connect Eventicious MCP without storing credentials in `.mcp.json`. Exchange your Eventicious API credentials for an encrypted MCP token.
+Stateless MCP Token Exchange allows managers to connect Eventicious MCP without storing raw credentials in config files. Exchange your Eventicious API credentials for an encrypted MCP token.
+
+**Важно:** Endpoint `/auth/exchange` выдаёт только MCP token. Он не создаёт конфигурационный файл клиента автоматически. Конфиг создаётся отдельно — вручную или installer script-ом.
 
 ## Prerequisites
 
@@ -63,21 +65,9 @@ Response:
 
 ### Step 3: Configure Client
 
-Set environment variable:
-```powershell
-$env:EVENTICIOUS_MCP_TOKEN="mcp_evt_..."
-```
+Создайте конфигурационный файл клиента (отдельно от получения token).
 
-Or create `.env` file:
-```
-EVENTICIOUS_MCP_TOKEN=mcp_evt_...
-```
-
-## MCP Client Configuration
-
-### Claude Code
-
-Create `.mcp.json`:
+**Для Claude Code** — создайте `.mcp.json`:
 ```json
 {
   "mcpServers": {
@@ -95,7 +85,8 @@ Create `.mcp.json`:
 
 ### OpenCode
 
-See [OPENCODE_SETUP.md](OPENCODE_SETUP.md) for detailed OpenCode configuration.
+Для OpenCode используйте installer script или создайте `opencode.json` вручную.
+См. [OPENCODE_SETUP.md](OPENCODE_SETUP.md) для детальной инструкции.
 
 ## Verification
 

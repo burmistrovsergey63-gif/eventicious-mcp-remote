@@ -134,9 +134,13 @@ Eventicious MCP
 
 ---
 
-## Шаг 5. Отправьте промт для получения MCP token
+## Шаг 5. Получите MCP token
 
-Скопируйте и отправьте агенту этот промт:
+Endpoint `/auth/exchange` выдаёт только MCP token. Он не создаёт конфигурационный файл клиента автоматически.
+
+### Вариант А. Через агента в чате
+
+Отправьте агенту этот промт:
 
 ```text
 Ты находишься в папке, где лежит файл .env с моими Eventicious API credentials.
@@ -162,49 +166,98 @@ Eventicious MCP
 
 6. Не удаляй старые строки из .env.
 
-7. Создай в этой же папке файл .mcp.json со следующим содержимым:
-
-{
-  "mcpServers": {
-    "eventicious": {
-      "type": "http",
-      "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
-      "headers": {
-        "Authorization": "Bearer ${EVENTICIOUS_MCP_TOKEN}"
-      },
-      "timeout": 120000
-    }
-  }
-}
-
-Для картинок внутри текстовых блоков пользователь загружает изображение в любое публичное хранилище и передаёт ссылку как imageUrl.
+7. Напиши краткий отчёт:
+   "MCP token получен, .env обновлён".
 
 Важно:
 - не выводи EVENTICIOUS_CLIENT_SECRET в ответ;
 - не выводи полный MCP token в ответ;
 - не отправляй содержимое .env в чат;
-- если нужно показать токен, покажи только первые и последние 6 символов;
-- после выполнения напиши только краткий отчёт:
-  "MCP token получен, .env обновлён, .mcp.json создан".
+- если нужно показать токен, покажи только первые и последние 6 символов.
 ```
 
-После успешного выполнения в файле `.env` должна появиться строка:
+### Вариант Б. Через PowerShell вручную
+
+```powershell
+$exchange = @{
+    baseUrl = "https://api-integration.eventicious.ru/"
+    clientId = "<your-client-id>"
+    clientSecret = "<your-client-secret>"
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod -Uri "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/auth/exchange" -Method POST -ContentType "application/json" -Body $exchange
+Write-Host "MCP token: $($response.mcpToken)"
+```
+
+После получения token добавьте его в `.env`:
 
 ```env
 EVENTICIOUS_MCP_TOKEN=mcp_evt_...
 ```
 
-А в папке должен появиться файл:
+---
 
-```text
-.mcp.json
+## Шаг 6. Создайте конфигурационный файл клиента
+
+MCP-сервер не создаёт конфигурационный файл автоматически. Создайте файл вручную в зависимости от вашего клиента.
+
+### Для OpenCode
+
+**Рекомендуемый способ: installer script**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\installers\opencode\install-opencode.ps1
+```
+
+Installer спросит папку проекта и данные подключения, создаст `opencode.json`.
+
+Подробности: [docs/INSTALL_OPENCODE.md](../docs/INSTALL_OPENCODE.md)
+
+**Ручной способ: создать `opencode.json`**
+
+Создайте файл `opencode.json` в корне проекта:
+
+```json
+{
+  "mcp": {
+    "eventicious": {
+      "type": "remote",
+      "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
+      "enabled": true,
+      "timeout": 120000,
+      "authorization": {
+        "type": "bearer",
+        "token": "<ваш-mcp-token>"
+      }
+    }
+  }
+}
+```
+
+### Для Claude Code
+
+Создайте файл `.mcp.json` в корне проекта:
+
+```json
+{
+  "mcpServers": {
+    "eventicious": {
+      "type": "http",
+      "url": "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
+      "authorization": {
+        "type": "bearer",
+        "token": "<ваш-mcp-token>"
+      }
+    }
+  }
+}
 ```
 
 ---
 
-## Шаг 6. Перезапустите чат
+## Шаг 7. Перезапустите чат
 
-После создания `.mcp.json` лучше закрыть текущий чат и открыть новый чат в этой же папке.
+После создания конфигурационного файла закройте текущий чат и откройте новый в той же папке.
 
 Это нужно, чтобы AI-клиент заново прочитал MCP-настройки.
 
@@ -216,27 +269,19 @@ EVENTICIOUS_MCP_TOKEN=mcp_evt_...
 Eventicious MCP
 ```
 
-2. В папке есть файл:
-
-```text
-.env
-```
-
-3. В папке есть файл:
-
-```text
-.mcp.json
-```
-
-4. В `.env` есть строка:
+2. В папке есть файл `.env`:
 
 ```env
 EVENTICIOUS_MCP_TOKEN=mcp_evt_...
 ```
 
+3. В папке есть конфигурационный файл:
+   - OpenCode: `opencode.json`
+   - Claude Code: `.mcp.json`
+
 ---
 
-## Шаг 7. Отправьте первый проверочный промт
+## Шаг 8. Отправьте первый проверочный промт
 
 В новом чате отправьте:
 
@@ -269,7 +314,7 @@ EVENTICIOUS_MCP_TOKEN=mcp_evt_...
 
 ---
 
-## Шаг 8. Сделайте первый безопасный запрос
+## Шаг 9. Сделайте первый безопасный запрос
 
 После проверки подключения отправьте:
 
@@ -291,7 +336,7 @@ EVENTICIOUS_MCP_TOKEN=mcp_evt_...
 
 ---
 
-## Шаг 9. Как безопасно работать с изменениями
+## Шаг 10. Как безопасно работать с изменениями
 
 Не просите агента сразу “создать”, “обновить” или “удалить” данные.
 
@@ -324,7 +369,7 @@ confirm=true
 
 ---
 
-## Шаг 10. Что можно делать через Eventicious MCP
+## Шаг 11. Что можно делать через Eventicious MCP
 
 Eventicious MCP помогает с такими задачами:
 
@@ -525,14 +570,16 @@ MCP-сервер stateless — ID-шники, которые возвращае�
 
 ---
 
-## Шаг 11. Частые ошибки
+## Шаг 12. Частые ошибки
 
 | Ошибка | Что значит | Что сделать |
 |---|---|---|
 | Файл получился `.env.txt` | Windows добавил расширение `.txt` | Переименуйте файл в `.env` |
-| Файл получился `.mcp.json.txt` | Windows добавил расширение `.txt` | Переименуйте файл в `.mcp.json` |
+| Файл получился `.mcp.json.txt` | Windows добавил расширение `.txt` (Claude Code) | Переименуйте файл в `.mcp.json` |
+| Файл получился `opencode.json.txt` | Windows добавил расширение `.txt` (OpenCode) | Переименуйте файл в `opencode.json` |
 | Агент не видит `.env` | Чат открыт не в той папке | Откройте новый чат внутри папки `Eventicious MCP` |
-| Агент не видит `.mcp.json` | Файл создан не в той папке или с неправильным названием | Проверьте название и расположение файла |
+| Агент не видит `.mcp.json` (Claude Code) | Файл создан не в той папке или с неправильным названием | Проверьте название и расположение файла |
+| Агент не видит `opencode.json` (OpenCode) | Файл создан не в той папке или с неправильным названием | Проверьте название и расположение файла |
 | `401 invalid credentials` | Eventicious credentials неверные или отозваны | Проверьте Base URL, Client ID и Client Secret |
 | `401 invalid MCP token` | MCP token неверный, повреждён или устарел | Получите новый MCP token через `/auth/exchange` |
 | `404 endpoint not found` | Указан неправильный endpoint | Проверьте адрес MCP-сервера |
@@ -543,7 +590,7 @@ MCP-сервер stateless — ID-шники, которые возвращае�
 
 ---
 
-## Шаг 12. Безопасность
+## Шаг 13. Безопасность
 
 Соблюдайте правила:
 
@@ -559,7 +606,7 @@ MCP-сервер stateless — ID-шники, которые возвращае�
 
 ---
 
-## Шаг 13. Что делать, если ничего не работает
+## Шаг 14. Что делать, если ничего не работает
 
 Передайте техническому специалисту:
 
@@ -577,7 +624,7 @@ https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/healthz
 
 5. Видит ли агент файлы:
    - `.env`;
-   - `.mcp.json`.
+   - `.mcp.json` (Claude Code) или `opencode.json` (OpenCode).
 
 Не передавайте техническому специалисту в открытом виде:
 

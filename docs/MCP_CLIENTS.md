@@ -4,12 +4,15 @@ Supported MCP clients for Eventicious MCP Remote Connector.
 
 ## Supported Clients
 
-| Client | Setup Guide | Auth Method |
-|--------|-------------|-------------|
-| Claude Code | [CLAUDE_CODE_SETUP.md](CLAUDE_CODE_SETUP.md) | Bearer token (recommended) or headers |
-| OpenCode | [OPENCODE_SETUP.md](OPENCODE_SETUP.md) | Bearer token (recommended) or headers |
+| Клиент | Основной config | Рекомендуемый способ |
+|--------|----------------|---------------------|
+| OpenCode | `opencode.json` | installer script или ручной `opencode.json` |
+| Claude Code | `.mcp.json` | ручной `.mcp.json` |
+| Other MCP clients | depends | использовать URL `/mcp` + Bearer token |
 
 ## Authentication Methods
+
+**Важно:** MCP-сервер не создаёт конфигурационный файл клиента автоматически. Конфиг создаётся отдельно — вручную или installer script-ом.
 
 ### Method 1: MCP Token (Recommended)
 

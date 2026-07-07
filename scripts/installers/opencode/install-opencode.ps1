@@ -275,5 +275,5 @@ Write-Host "     $projectDir"
 Write-Host "  2. Restart OpenCode if it is already open."
 Write-Host "  3. Ask OpenCode:"
 Write-Host '     Используй eventicious MCP. Проверь tools/list и eventicious_auth_check.'
-Write-Host "  4. Expected: tools/list=68, auth_check=success"
+Write-Host "  4. Expected: tools/list=75, auth_check=success"
 Write-Host ""

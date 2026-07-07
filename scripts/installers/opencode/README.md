@@ -44,7 +44,7 @@ Installer сам определит папку проекта и предлож�
 
 Ожидается:
 
-- `tools/list`: 68 tools
+- `tools/list`: 75 tools
 - `auth_check`: success
 
 ## Удаление
@@ -90,7 +90,7 @@ powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1 `
 
 ## Troubleshooting
 
-### tools/list < 68
+### tools/list < 75
 
 - Перезапустите OpenCode после установки.
 - Проверьте, что `opencode.json` содержит секцию `mcp.eventicious`.

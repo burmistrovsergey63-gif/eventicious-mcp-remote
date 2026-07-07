@@ -30,7 +30,7 @@ Installer спросит:
 Используй eventicious MCP. Проверь tools/list и eventicious_auth_check.
 ```
 
-Ожидается: `tools/list: 68`, `auth_check: success`
+Ожидается: `tools/list: 75`, `auth_check: success`
 
 ---
 
@@ -117,7 +117,7 @@ powershell -ExecutionPolicy Bypass -File .\uninstall-opencode.ps1 -TargetDir "C:
 
 ## Troubleshooting
 
-### tools/list < 68
+### tools/list < 75
 
 - Перезапустите OpenCode после установки
 - Проверьте `opencode.json`: `Get-Content opencode.json | ConvertFrom-Json`

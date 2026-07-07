@@ -73,8 +73,8 @@ Prerequisites: Node.js 20+, Eventicious API credentials
    ```
 
 2. Configure your MCP client with the returned `mcpToken`:
-   - Claude Code: see `examples/claude-code.mcp.example.json`
-   - OpenCode: see `examples/opencode.mcp.example.json`
+   - Claude Code: see `examples/claude-code.mcp.example.json` (`.mcp.json` format)
+   - OpenCode: see `examples/opencode.mcp.example.json` (`opencode.json` format)
 
 3. Verify connection:
    ```bash
@@ -475,13 +475,34 @@ Response:
 | MCP_TOKEN_TTL_DAYS | No | 30 | Token validity period in days |
 | MCP_TOKEN_ISSUER | No | eventicious-mcp-remote | Token issuer identifier |
 
-### MCP Configuration (.mcp.json)
+### Client Configuration
+
+MCP-сервер не создаёт конфигурационный файл клиента автоматически. Конфиг создаётся вручную или installer script-ом.
+
+**Claude Code** — `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "eventicious": {
       "type": "http",
+      "url": "https://your-instance.layero.ru/mcp",
+      "authorization": {
+        "type": "bearer",
+        "token": "mcp_evt_..."
+      }
+    }
+  }
+}
+```
+
+**OpenCode** — `opencode.json` (см. [docs/OPENCODE_SETUP.md](docs/OPENCODE_SETUP.md)):
+
+```json
+{
+  "mcp": {
+    "eventicious": {
+      "type": "remote",
       "url": "https://your-instance.layero.ru/mcp",
       "authorization": {
         "type": "bearer",
