@@ -74,6 +74,8 @@ describe("auth_check agentGuidance", () => {
     expect(content).toContain("success: true");
     expect(content).toContain('"Credentials valid"');
     expect(content).toContain("toolsAvailable: 75");
+    expect(content).toContain("toolsListEndpoint");
+    expect(content).toContain("/mcp/tools");
   });
 
   it("auth_check returns toolError on failure", () => {
@@ -399,6 +401,65 @@ describe("eventicious_get_agent_instructions courseContentPopulation section", (
     expect(content).toContain("eventicious_update_course");
     expect(content).toContain("eventicious_unfinalize_course");
     expect(content).toContain("Do not invent update/unfinalize tools");
+  });
+});
+
+describe("eventicious_get_agent_instructions capability map", () => {
+  it("contains capabilityMap section", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("capabilityMap");
+    expect(content).toContain("Explain Eventicious MCP capabilities to an AI agent and manager");
+  });
+
+  it("contains all domain sections", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("Users and groups");
+    expect(content).toContain("Catalogs and content");
+    expect(content).toContain("Courses");
+    expect(content).toContain("Schedule");
+    expect(content).toContain("Exhibitors");
+    expect(content).toContain("Gamification");
+  });
+
+  it("contains manager explanation template", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("managerExplanationTemplate");
+    expect(content).toContain("Я подключён к Eventicious MCP");
+    expect(content).toContain("только после dry-run и вашего подтверждения");
+  });
+
+  it("contains first-connect checklist", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("firstResponseChecklist");
+    expect(content).toContain("eventicious_auth_check");
+    expect(content).toContain("eventicious_get_agent_instructions");
+    expect(content).toContain("Проверить tool count");
+  });
+
+  it("contains PII/PD warning", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("piiWarning");
+    expect(content).toContain("Персональные данные");
+    expect(content).toContain("Не сохранять ПДн");
+  });
+
+  it("contains safety rules in each domain", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("dry_run=true default for all writes");
+    expect(content).toContain("Deletion requires danger_confirm");
+  });
+
+  it("contains dry_run first and danger_confirm references", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+    expect(content).toContain("dry_run first");
+    expect(content).toContain("danger_confirm");
   });
 });
 

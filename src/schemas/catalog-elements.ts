@@ -4,7 +4,7 @@ import { z } from "zod";
 export const folderCreateSchema = {
   catalogId: z.number().int().describe("Parent catalog ID"),
   name: z.string().describe("Folder name"),
-  description: z.string().optional().describe("Folder description (plain text or HTML)"),
+  description: z.string().describe("Folder description (plain text or HTML) — required by Eventicious API"),
   isHtmlText: z.boolean().optional().describe("Whether description contains HTML tags"),
   externalId: z.string().optional().describe("External identifier"),
   order: z.number().int().optional().describe("Display order"),

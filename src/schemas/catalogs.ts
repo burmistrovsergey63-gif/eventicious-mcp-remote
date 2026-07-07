@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const catalogCreateSchema = {
   name: z.string().describe("Catalog name"),
-  description: z.string().optional().describe("Catalog description (plain text or HTML)"),
+  description: z.string().describe("Catalog description (plain text or HTML) — required by Eventicious API"),
   isHtmlText: z.boolean().optional().describe("Whether description contains HTML tags"),
   externalId: z.string().optional().describe("External identifier for your system"),
   order: z.number().int().optional().describe("Display order in catalog list"),

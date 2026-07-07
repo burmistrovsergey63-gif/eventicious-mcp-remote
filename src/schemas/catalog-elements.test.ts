@@ -28,16 +28,32 @@ describe("catalog-elements schema shapes - raw shape validation", () => {
       const result = schema.safeParse({
         catalogId: 1,
         name: "Test Folder",
+        description: "Test folder description",
         viewOptions: "textOnly",
         dry_run: true,
       });
       expect(result.success).toBe(true);
     });
 
-    it("rejects missing required fields (catalogId, name, viewOptions)", () => {
+    it("rejects missing required fields (catalogId, name, description, viewOptions)", () => {
       const schema = z.object(folderCreateSchema);
       const result = schema.safeParse({ dry_run: true });
       expect(result.success).toBe(false);
+    });
+
+    it("rejects missing required description", () => {
+      const schema = z.object(folderCreateSchema);
+      const result = schema.safeParse({
+        catalogId: 1,
+        name: "Test Folder",
+        viewOptions: "textOnly",
+        dry_run: true,
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const issues = result.error.issues.filter(i => i.path.includes("description"));
+        expect(issues.length).toBeGreaterThan(0);
+      }
     });
 
     it("accepts all optional fields", () => {

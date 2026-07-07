@@ -20,7 +20,8 @@
     "smoke:health": "node scripts/smoke/health.mjs",
     "smoke:mcp-info": "node scripts/smoke/mcp-info.mjs",
     "smoke:remote-tools": "node scripts/smoke/remote-tools.mjs",
-    "smoke:auth-verify": "node scripts/smoke/auth-verify.mjs"
+    "smoke:auth-verify": "node scripts/smoke/auth-verify.mjs",
+    "smoke:mcp-tools": "node scripts/smoke/mcp-tools.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

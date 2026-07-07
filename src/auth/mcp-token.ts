@@ -77,7 +77,7 @@ export function issueMcpToken(
     return { ok: false, error: "invalid_encryption_key" };
   }
 
-  const ttlDays = options?.ttlDays ?? parseInt(process.env.MCP_TOKEN_TTL_DAYS || "30", 10);
+  const ttlDays = options?.ttlDays ?? parseInt(process.env.MCP_TOKEN_TTL_DAYS || "180", 10);
   const issuer = options?.issuer ?? process.env.MCP_TOKEN_ISSUER ?? "eventicious-mcp-remote";
 
   const now = new Date();

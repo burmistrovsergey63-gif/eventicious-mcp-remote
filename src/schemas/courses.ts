@@ -83,7 +83,7 @@ export const courseStageSchema = z.object({
 // --- Course Import Schema ---
 export const courseImportSchema = {
   name: z.string().min(1).max(100).describe("Course name"),
-  description: z.string().optional().describe("Course description"),
+  description: z.string().describe("Course description — required by Eventicious API"),
   coverImageFileId: z.number().int().describe("Cover image file ID (must be pre-uploaded)"),
   coverImageThumbnailFileId: z.number().int().describe("Thumbnail file ID (must be pre-uploaded)"),
   settings: courseSettingsSchema.describe("Course settings"),

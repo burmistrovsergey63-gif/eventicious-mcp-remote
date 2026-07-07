@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       ok: true,
       mcpToken,
       mcpUrl: process.env.MCP_PUBLIC_BASE_URL || "https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/mcp",
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + parseInt(process.env.MCP_TOKEN_TTL_DAYS || "180", 10) * 24 * 60 * 60 * 1000).toISOString(),
       toolsCount: 75,
     });
   } catch (e) {

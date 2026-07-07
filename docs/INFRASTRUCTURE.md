@@ -32,6 +32,7 @@ Steps:
 - `npm run smoke:tools` - Verify exactly 75 MCP tools are registered (no env required)
 - `npm run smoke:health` - GET /healthz (requires `MCP_REMOTE_URL`)
 - `npm run smoke:mcp-info` - GET /mcp info (requires `MCP_REMOTE_URL`)
+- `npm run smoke:mcp-tools` - GET /mcp/tools (requires `MCP_REMOTE_URL`)
 - `npm run smoke:remote-tools` - POST /mcp initialize + tools/list (requires `MCP_REMOTE_URL` + `MCP_ACCESS_TOKEN`)
 - `npm run smoke:auth-verify` - GET /auth/verify (requires `MCP_REMOTE_URL` + `MCP_ACCESS_TOKEN`)
 - `npm run smoke:list` - List available smoke test scripts

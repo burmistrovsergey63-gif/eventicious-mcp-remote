@@ -28,6 +28,18 @@ $exchange = @{
 $response = Invoke-RestMethod -Uri "https://your-endpoint.layero.ru/auth/exchange" -Method POST -ContentType "application/json" -Body $exchange
 ```
 
+### Tools Discovery
+
+Полный список доступных MCP инструментов можно получить без подключения SSE:
+
+```text
+GET /mcp/tools
+```
+
+Ответ: JSON с `toolCount` (текущее значение: 75) и массивом `tools` с именами инструментов.
+
+Используйте `/mcp/tools` для проверки доступных инструментов без ручного парсинга SSE-ответа.
+
 Use in client config:
 ```json
 {
@@ -75,10 +87,10 @@ Pass credentials directly in each request:
 ## Token Lifecycle
 
 1. Exchange: POST `/auth/exchange` with credentials
-2. Receive: MCP token (valid 30 days by default)
+2. Receive: MCP token (valid 180 days by default, configurable via `MCP_TOKEN_TTL_DAYS`)
 3. Use: Include as `Authorization: Bearer mcp_evt_...` header
-4. Verify: GET `/auth/verify` to check token status
-5. Expiry: Exchange again after 30 days
+4. Verify: GET `/auth/verify` to check token status and `expiresAt`
+5. Expiry: If token expires, perform `/auth/exchange` again with your Eventicious credentials
 
 ## Security Model
 

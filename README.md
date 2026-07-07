@@ -424,7 +424,7 @@ Managers no longer need to insert Eventicious credentials directly in `.mcp.json
 1. Call `POST /auth/exchange` with Eventicious credentials (one-time)
 2. Receive encrypted MCP token
 3. Use MCP token in Authorization header: `Bearer mcp_evt_...`
-4. MCP token is valid for 30 days by default
+4. MCP token is valid for 180 days by default (configurable via MCP_TOKEN_TTL_DAYS env var)
 
 ### Endpoints
 
@@ -450,7 +450,7 @@ Response:
   "ok": true,
   "mcpToken": "mcp_evt_...",
   "mcpUrl": "https://...",
-  "expiresAt": "2026-07-30T...",
+  "expiresAt": "2027-01-03T...",
   "toolsCount": 75
 }
 ```
@@ -467,12 +467,31 @@ Response:
 }
 ```
 
+### GET /mcp/tools
+
+Returns the full list of registered MCP tools as JSON. No authentication required (tool list is not sensitive).
+
+Response:
+```json
+{
+  "service": "eventicious-mcp-remote",
+  "version": "1.0.0",
+  "toolCount": 75,
+  "tools": [
+    { "name": "eventicious_auth_check" },
+    { "name": "eventicious_get_agent_instructions" }
+  ]
+}
+```
+
+This endpoint avoids the need to parse raw SSE responses for tool discovery. Use it to verify the available tool set programmatically.
+
 ### Environment Variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | MCP_TOKEN_ENCRYPTION_KEY | Yes | - | 64-char hex key for AES-256-GCM encryption |
-| MCP_TOKEN_TTL_DAYS | No | 30 | Token validity period in days |
+| MCP_TOKEN_TTL_DAYS | No | 180 | Token validity period in days |
 | MCP_TOKEN_ISSUER | No | eventicious-mcp-remote | Token issuer identifier |
 
 ### Client Configuration
@@ -583,6 +602,7 @@ npm run smoke:list        # List available smoke test scripts
 npm run smoke:tools       # Verify exactly 75 MCP tools are registered (no env)
 npm run smoke:health      # GET /healthz (requires MCP_REMOTE_URL)
 npm run smoke:mcp-info    # GET /mcp info (requires MCP_REMOTE_URL)
+npm run smoke:mcp-tools   # GET /mcp/tools (requires MCP_REMOTE_URL)
 npm run smoke:remote-tools # POST /mcp initialize+tools/list (requires MCP_REMOTE_URL + MCP_ACCESS_TOKEN)
 npm run smoke:auth-verify # GET /auth/verify (requires MCP_REMOTE_URL + MCP_ACCESS_TOKEN)
 ```

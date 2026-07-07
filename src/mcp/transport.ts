@@ -75,9 +75,24 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 return await transport.handleRequest(request);
 }
 
-function toolError(message: string) {
+function toolError(message: string, context?: { tool?: string; endpoint?: string; checkedFields?: string[] }) {
+  const structured: Record<string, unknown> = { error: message };
+  if (context?.tool) structured.tool = context.tool;
+  if (context?.endpoint) structured.endpoint = context.endpoint;
+  if (context?.checkedFields) {
+    structured.checkedRequiredFields = context.checkedFields;
+    const fieldMatch = context.checkedFields.find(f => message.toLowerCase().includes(f.toLowerCase()));
+    if (fieldMatch) {
+      structured.field = fieldMatch;
+      structured.suggestion = `Ensure "${fieldMatch}" is provided and non-empty. If the field is optional, set it to an empty string explicitly.`;
+    }
+    if (!fieldMatch && (message.includes("required") || message.includes("missing") || message.includes("invalid"))) {
+      structured.checkedRequiredFields = context.checkedFields;
+      structured.suggestion = "Check that all required fields are provided. Refer to the tool description for the required schema.";
+    }
+  }
   return {
-    content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }],
+    content: [{ type: "text" as const, text: JSON.stringify(structured) }],
     isError: true as const,
   };
 }
@@ -114,6 +129,13 @@ function registerTools(
                   startWithReadOnlyTools: true,
                   useDryRunBeforeWrites: true,
                   directPowerShellHttpJsonMustUseUtf8Bytes: true,
+                  toolsListEndpoint: "/mcp/tools",
+                  onboardingInstructions: "Call eventicious_get_agent_instructions for full capability map and safety rules.",
+                  firstSteps: [
+                    "1. eventicious_auth_check — verify credentials",
+                    "2. eventicious_get_agent_instructions — get full onboarding",
+                    "3. Verify tool count matches expected (75)",
+                  ],
                 },
               }),
             },
@@ -367,6 +389,136 @@ function registerTools(
               idLedgerFallback: {
                 rule: "If the MCP client cannot write local files, output the updated EVENTICIOUS_MCP_IDS.md content in the chat and ask the user to save it before continuing.",
                 note: "Do not ask the user to save the file every time if the agent can write to the workspace directly.",
+              },
+              capabilityMap: {
+                purpose: "Explain Eventicious MCP capabilities to an AI agent and manager.",
+                domains: [
+                  {
+                    name: "Users and groups",
+                    capabilities: [
+                      "check credentials (auth_check)",
+                      "list/get users via ACL groups",
+                      "create users with dry-run first",
+                      "update users with dry-run first",
+                      "block/unblock users",
+                      "permanently delete users (requires danger_confirm)",
+                      "create/update/delete ACL groups",
+                      "move users between groups",
+                      "add/remove Curator(1)/Supervisor(2) roles per group",
+                      "assign/remove mentors to mentees",
+                    ],
+                    safety: [
+                      "All write operations default to dry_run=true",
+                      "Deletion requires danger_confirm matching exact string",
+                      "Max 200 users per batch request",
+                      "PII rules: do not store personal data in ID ledger",
+                    ],
+                  },
+                  {
+                    name: "Catalogs and content",
+                    capabilities: [
+                      "list/get root catalogs and folders",
+                      "create/update/delete root catalogs",
+                      "create/update/delete folders with ACL visibility",
+                      "create links, add files, add videos to catalogs",
+                      "create/delete Text 2.0 / GravityJson elements (no update tool — delete+recreate)",
+                      "reorder root catalogs and elements within catalogs",
+                      "add/remove catalogs from menu",
+                      "bulk delete folders and elements",
+                      "add/remove ACL groups to/from catalogs",
+                      "build and validate catalog import plans via prepare/validate tools",
+                    ],
+                    safety: [
+                      "dry_run=true default for all writes",
+                      "Deletion requires danger_confirm",
+                      "Catalog import helpers never perform real writes",
+                    ],
+                  },
+                  {
+                    name: "Courses",
+                    capabilities: [
+                      "upload course cover images (imageUrl, fileBase64, dataUri)",
+                      "import full course skeleton with stages, settings, polls, tasks",
+                      "map course import response IDs for content population",
+                      "check course readiness before finalization",
+                      "finalize draft courses (requires danger_confirm)",
+                      "import poll/test content into course stages",
+                      "import task content into Task stages",
+                      "upload SCORM zip to Scorm stages",
+                      "upload task attachments",
+                      "prepare and validate course import plans",
+                    ],
+                    safety: [
+                      "Always dry_run first — Eventicious returns HTTP 500 on incomplete payload",
+                      "Full course skeleton required (name, description, settings, stages)",
+                      "Use eventicious_check_course_ready_to_finalize before finalization",
+                      "Save returned IDs to EVENTICIOUS_MCP_IDS.md immediately",
+                      "Task content must be imported before course finalization",
+                      "Course settings and stage structure are creation-time critical (no update tools)",
+                    ],
+                  },
+                  {
+                    name: "Schedule",
+                    capabilities: [
+                      "create/update/delete locations",
+                      "create/update/delete tags/topics",
+                      "create/update/delete sessions with tags, speakers, locations",
+                      "create/update/delete session attachments",
+                      "build safe schedule import plans from Excel/JSON rows",
+                      "validate schedule import plans",
+                    ],
+                    safety: [
+                      "dry_run=true default",
+                      "Deletion requires danger_confirm",
+                      "Schedule import helpers never perform real writes",
+                    ],
+                  },
+                  {
+                    name: "Exhibitors",
+                    capabilities: [
+                      "create/update/delete exhibitors",
+                      "build and validate exhibitor import plans",
+                      "handle company details, logo URLs, representatives",
+                    ],
+                    safety: [
+                      "dry_run=true default",
+                      "Deletion requires danger_confirm",
+                      "Update: null/empty fields may reset values in admin UI",
+                    ],
+                  },
+                  {
+                    name: "Gamification",
+                    capabilities: [
+                      "manually add or write-off points to users",
+                      "validate gamification charge parameters",
+                    ],
+                    safety: [
+                      "Positive scores = charge, negative scores = write-off",
+                      "Score must not be zero",
+                      "Max absolute value: 10000 (soft limit with warning)",
+                    ],
+                  },
+                ],
+                managerExplanationTemplate: [
+                  "Я подключён к Eventicious MCP. Я могу безопасно проверять доступ, получать списки, готовить dry-run изменений, помогать с каталогами, курсами, расписанием, пользователями, группами, экспонентами и геймификацией. Реальные изменения я буду делать только после dry-run и вашего подтверждения. Персональные данные без согласованного контура обработки использовать нельзя.",
+                ],
+                firstResponseChecklist: [
+                  "1. Вызвать eventicious_auth_check для проверки credentials.",
+                  "2. Вызвать eventicious_get_agent_instructions для получения полных инструкций.",
+                  "3. Проверить tool count (ожидается 75).",
+                  "4. Объяснить пользователю: что доступно, что нельзя делать без подтверждения, как вести EVENTICIOUS_MCP_IDS.md, какие данные нельзя отправлять.",
+                  "5. Уточнить eventId, applicationId, languageId, appLanguageId для контекста запросов.",
+                  "6. Если есть EventiciousRequestInfo — передавать его во все запросы к API.",
+                ],
+                piiWarning: {
+                  rule: "Персональные данные (ПДн) не должны передаваться без согласованного контура обработки.",
+                  details: [
+                    "Не запрашивать у пользователя ФИО, email, телефон без явной необходимости для операции.",
+                    "Не сохранять ПДн в EVENTICIOUS_MCP_IDS.md.",
+                    "Для тестовых/демо-сред использовать обезличенные данные.",
+                    "При создании пользователей: минимально необходимый набор полей.",
+                  ],
+                },
               },
             }),
           },

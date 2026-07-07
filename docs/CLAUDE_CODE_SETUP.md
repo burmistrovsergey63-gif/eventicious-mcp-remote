@@ -94,4 +94,4 @@ curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/mcp 
 - Never commit `.mcp.json` with real tokens to version control
 - Add `.mcp.json` to `.gitignore` if it contains secrets
 - Access revocation happens via Eventicious credentials on Eventicious side
-- MCP tokens are encrypted and expire after 30 days
+- MCP tokens are encrypted and expire after 180 days by default (configurable via `MCP_TOKEN_TTL_DAYS`)

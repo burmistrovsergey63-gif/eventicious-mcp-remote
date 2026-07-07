@@ -41,7 +41,7 @@ Response:
   "ok": true,
   "mcpToken": "mcp_evt_...",
   "mcpUrl": "https://your-endpoint.layero.ru/mcp",
-  "expiresAt": "2026-07-30T...",
+  "expiresAt": "2027-01-03T...",
   "toolsCount": 75
 }
 ```
@@ -117,7 +117,7 @@ curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/mcp 
 
 - Prefix: `mcp_evt_`
 - Contains encrypted Eventicious credentials
-- Valid for 30 days by default
+- Valid for 180 days by default (configurable via `MCP_TOKEN_TTL_DAYS`)
 - AES-256-GCM encrypted
 
 ## Troubleshooting

@@ -45,6 +45,75 @@ describe("mcp-token crypto utility", () => {
       }
     });
 
+    it("uses default TTL of 180 days", () => {
+      process.env.MCP_TOKEN_ENCRYPTION_KEY = testKey;
+      const result = issueMcpToken({
+        baseUrl: "https://api.example.ru",
+        clientId: "test-client",
+        clientSecret: "test-secret",
+      });
+      expect(typeof result).toBe("string");
+      if (typeof result === "string") {
+        const payload = decryptMcpToken(result);
+        expect(payload).not.toBeNull();
+        if (payload) {
+          const createdAt = new Date(payload.createdAt).getTime();
+          const expiresAt = new Date(payload.expiresAt).getTime();
+          const diffDays = (expiresAt - createdAt) / (1000 * 60 * 60 * 24);
+          expect(diffDays).toBeGreaterThanOrEqual(179);
+          expect(diffDays).toBeLessThanOrEqual(181);
+        }
+      }
+    });
+
+    it("uses custom TTL when specified", () => {
+      process.env.MCP_TOKEN_ENCRYPTION_KEY = testKey;
+      const result = issueMcpToken(
+        { baseUrl: "https://api.example.ru", clientId: "test-client", clientSecret: "test-secret" },
+        { ttlDays: 7 }
+      );
+      expect(typeof result).toBe("string");
+      if (typeof result === "string") {
+        const payload = decryptMcpToken(result);
+        expect(payload).not.toBeNull();
+        if (payload) {
+          const createdAt = new Date(payload.createdAt).getTime();
+          const expiresAt = new Date(payload.expiresAt).getTime();
+          const diffDays = (expiresAt - createdAt) / (1000 * 60 * 60 * 24);
+          expect(diffDays).toBeGreaterThanOrEqual(6);
+          expect(diffDays).toBeLessThanOrEqual(8);
+        }
+      }
+    });
+
+    it("uses MCP_TOKEN_TTL_DAYS env var when set", () => {
+      process.env.MCP_TOKEN_ENCRYPTION_KEY = testKey;
+      const origTtl = process.env.MCP_TOKEN_TTL_DAYS;
+      process.env.MCP_TOKEN_TTL_DAYS = "90";
+      const result = issueMcpToken({
+        baseUrl: "https://api.example.ru",
+        clientId: "test-client",
+        clientSecret: "test-secret",
+      });
+      expect(typeof result).toBe("string");
+      if (typeof result === "string") {
+        const payload = decryptMcpToken(result);
+        expect(payload).not.toBeNull();
+        if (payload) {
+          const createdAt = new Date(payload.createdAt).getTime();
+          const expiresAt = new Date(payload.expiresAt).getTime();
+          const diffDays = (expiresAt - createdAt) / (1000 * 60 * 60 * 24);
+          expect(diffDays).toBeGreaterThanOrEqual(89);
+          expect(diffDays).toBeLessThanOrEqual(91);
+        }
+      }
+      if (origTtl === undefined) {
+        delete process.env.MCP_TOKEN_TTL_DAYS;
+      } else {
+        process.env.MCP_TOKEN_TTL_DAYS = origTtl;
+      }
+    });
+
     it("returns error when encryption key missing", () => {
       delete process.env.MCP_TOKEN_ENCRYPTION_KEY;
       const result = issueMcpToken({

@@ -28,5 +28,7 @@ export async function GET() {
     protocol: "mcp",
     endpoint: "POST /mcp",
     version: "1.0.0",
+    toolsEndpoint: "/mcp/tools",
+    toolCount: 75,
   });
 }

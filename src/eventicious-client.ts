@@ -113,10 +113,29 @@ export async function eventiciousRequest(
   }
 
   if (!res.ok) {
-    const msg =
+    let msg =
       typeof data === "object" && data !== null && "message" in data
         ? String((data as Record<string, unknown>).message)
         : `HTTP ${res.status} ${res.statusText}`;
+    const apiBody = typeof data === "object" && data !== null ? data : {};
+    const apiErrors = (apiBody as Record<string, unknown>).errors;
+    const apiError = (apiBody as Record<string, unknown>).error;
+    const apiTitle = (apiBody as Record<string, unknown>).title;
+
+    if (msg === "The request is invalid" && endpoint) {
+      const detailParts: string[] = [`Calling ${method} ${endpoint}`];
+      if (apiErrors) {
+        detailParts.push(`API errors: ${JSON.stringify(apiErrors)}`);
+      }
+      if (apiError) {
+        detailParts.push(`API error: ${apiError}`);
+      }
+      if (apiTitle) {
+        detailParts.push(`API title: ${apiTitle}`);
+      }
+      msg = `${msg}. ${detailParts.join(". ")}.`;
+    }
+
     logger.error("eventicious_api_error_detail", {
       endpoint,
       status: res.status,
@@ -125,7 +144,7 @@ export async function eventiciousRequest(
       acceptLanguage: acceptLanguage,
       eventId: requestContext?.eventId,
     });
-    throw new EventiciousError(msg, res.status, endpoint);
+    throw new EventiciousError(msg, res.status, endpoint, { apiBody: msg !== "The request is invalid" ? undefined : apiBody });
   }
 
   return { status: res.status, data };
