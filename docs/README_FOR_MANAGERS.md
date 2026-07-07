@@ -422,6 +422,67 @@ Eventicious MCP помогает с такими задачами:
 
 См. `examples/course-create.reference.example.json` для полного примера skeleton.
 
+---
+
+## ID Ledger / Mapping Artifact
+
+### Зачем это нужно
+
+MCP-сервер stateless — ID-шники, которые возвращает Eventicious (courseId, stageId, stageCatalogId, pollId, taskContentId, scormId), не сохраняются между сессиями. Без сохранения этих ID невозможно наполнить курс контентом.
+
+### Что делать
+
+После каждой успешной create/import/upload/write операции агент обязан:
+
+1. Извлечь все ID из ответа MCP.
+2. Сохранить или обновить локальный markdown-файл `EVENTICIOUS_MCP_IDS.md` в рабочей папке.
+3. Использовать этот файл как source of truth для следующих шагов.
+4. Не наполнять курс, если нужные ID отсутствуют в ledger.
+
+### Какие ID сохранять
+
+- `courseId` — идентификатор курса
+- `courseCatalogId` — идентификатор каталога курса (если есть)
+- `stageId` — идентификатор этапа
+- `stageCatalogId` — идентификатор каталога этапа (нужен для Text 2.0)
+- `pollId` — идентификатор опроса/теста (нужен для PassTest/PassPoll)
+- `taskContentId` — идентификатор задания (нужен для Task)
+- `scormId` — идентификатор SCORM-пакета (если есть)
+
+### Чего нельзя сохранять
+
+- Секреты (client secret, MCP token, encryption keys)
+- Персональные данные
+- Токены доступа
+
+### Пример workflow
+
+1. Агент создаёт курс через `eventicious_import_course_structure`
+2. Сохраняет raw response
+3. Вызывает `eventicious_map_course_import_response`
+4. Записывает все ID в `EVENTICIOUS_MCP_IDS.md`
+5. Перед наполнением Text 2.0 проверяет наличие `stageCatalogId`
+6. Перед импортом теста проверяет наличие `pollId`
+7. Перед импортом задания проверяет наличие `taskContentId`
+8. Если нужного ID нет — не выполняет write и сообщает о блокере
+
+### Структура файла EVENTICIOUS_MCP_IDS.md
+
+Агент создаёт файл по шаблону, который доступен через `eventicious_get_agent_instructions`. Шаблон включает таблицы для:
+
+- Session (дата, Event ID, Base URL)
+- Files (fileId, thumbnailFileId)
+- Courses (courseId, externalId, status)
+- Course Stages (stageId, stageCatalogId, pollId, taskContentId, scormId)
+- Catalogs and Elements
+- Polls and Tests
+- Tasks
+- Action Log (time, tool, returned IDs, next action)
+
+### Если клиент не может писать файлы
+
+Если MCP-клиент не поддерживает запись файлов, агент выводит содержимое `EVENTICIOUS_MCP_IDS.md` в чат и просит пользователя сохранить его перед продолжением.
+
 Полный список tools не нужен для первого подключения. Агент сам увидит доступные tools после подключения.
 
 ---

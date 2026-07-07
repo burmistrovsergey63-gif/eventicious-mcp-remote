@@ -313,6 +313,27 @@ Course creation follows an import pipeline:
 9. **Check ready** → `eventicious_check_course_ready_to_finalize`
 10. **Finalize course** → `eventicious_finalize_course` (requires `danger_confirm='FINALIZE_EVENTICIOUS_COURSE'`)
 
+## ID Ledger / Mapping Artifact
+
+MCP server is stateless — IDs returned by Eventicious (courseId, stageId, stageCatalogId, pollId, taskContentId, scormId) are not persisted between sessions. Without saving them, content population is impossible.
+
+After every successful create/import/upload/write operation, the AI agent must extract all returned IDs and save them into a local markdown file `EVENTICIOUS_MCP_IDS.md` in the working directory.
+
+This file is agent-managed. It is not stored on the server or on Layero filesystem.
+
+**Rules:**
+- Never store secrets, access tokens, client secrets, MCP tokens, encryption keys, or personal data in this file
+- Only store technical IDs and safe object labels needed for follow-up MCP operations
+- Before content population, always check that required IDs are present in the ledger
+- If a required ID is missing, do NOT execute write call and report the blocker
+
+**Required IDs for course content population:**
+- `stageCatalogId` — needed for Text 2.0 elements
+- `pollId` — needed for PassTest/PassPoll stages
+- `taskContentId` — needed for Task stages
+
+See `docs/README_FOR_MANAGERS.md` for the full ledger template and workflow details.
+
 ### Cover Image Required
 
 Course creation requires both `coverImageFileId` and `coverImageThumbnailFileId`. Upload images first via `eventicious_upload_course_images`.

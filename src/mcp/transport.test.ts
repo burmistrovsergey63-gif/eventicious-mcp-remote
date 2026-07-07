@@ -230,6 +230,99 @@ describe("eventicious_get_agent_instructions course creation section", () => {
   });
 });
 
+describe("eventicious_get_agent_instructions ID Ledger section", () => {
+  it("contains idLedger section with core rule", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("idLedger");
+    expect(content).toContain("EVENTICIOUS_MCP_IDS.md");
+    expect(content).toContain("After every successful create/import/upload/write operation");
+    expect(content).toContain("MCP server is stateless");
+  });
+
+  it("contains security rules forbidding secrets", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("Never store secrets in this file");
+    expect(content).toContain("Never store access tokens, client secrets, MCP tokens, encryption keys");
+    expect(content).toContain("Only store technical IDs");
+  });
+
+  it("contains list of tools that should trigger ledger update", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("eventicious_import_course_structure");
+    expect(content).toContain("eventicious_map_course_import_response");
+    expect(content).toContain("eventicious_create_text2");
+    expect(content).toContain("eventicious_import_poll_content");
+    expect(content).toContain("eventicious_import_task_content");
+    expect(content).toContain("eventicious_upload_task_attachments");
+    expect(content).toContain("eventicious_upload_scorm_to_stage");
+  });
+
+  it("contains course workflow with stageCatalogId, pollId, taskContentId", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("stageCatalogId");
+    expect(content).toContain("pollId");
+    expect(content).toContain("taskContentId");
+    expect(content).toContain("scormId");
+    expect(content).toContain("courseCatalogId");
+  });
+
+  it("contains course workflow rules for after import", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("afterImportCourseStructure");
+    expect(content).toContain("Save full raw response");
+    expect(content).toContain("Call eventicious_map_course_import_response");
+    expect(content).toContain("Extract and write to EVENTICIOUS_MCP_IDS.md");
+  });
+
+  it("contains before content population check", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("beforeContentPopulation");
+    expect(content).toContain("Text 2.0 requires stageCatalogId");
+    expect(content).toContain("PassTest/PassPoll require pollId");
+    expect(content).toContain("Task requires taskContentId");
+    expect(content).toContain("do NOT execute write call and report blocker");
+  });
+
+  it("contains idLedgerTemplate with full markdown template", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("idLedgerTemplate");
+    expect(content).toContain("# Eventicious MCP ID Ledger");
+    expect(content).toContain("Do not store secrets here");
+    expect(content).toContain("## Session");
+    expect(content).toContain("## Files");
+    expect(content).toContain("## Courses");
+    expect(content).toContain("## Course Stages");
+    expect(content).toContain("## Catalogs and Elements");
+    expect(content).toContain("## Polls and Tests");
+    expect(content).toContain("## Tasks");
+    expect(content).toContain("## Action Log");
+  });
+
+  it("contains idLedgerFallback for clients that cannot write files", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("idLedgerFallback");
+    expect(content).toContain("MCP client cannot write local files");
+    expect(content).toContain("output the updated EVENTICIOUS_MCP_IDS.md content in the chat");
+    expect(content).toContain("ask the user to save it before continuing");
+  });
+});
+
 describe("course tool descriptions", () => {
   it("eventicious_import_course_structure warns about full skeleton", () => {
     const coursesPath = path.join(__dirname, "..", "tools", "courses.ts");

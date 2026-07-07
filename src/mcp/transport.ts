@@ -228,6 +228,93 @@ function registerTools(
               courseCreationTemplate: {
                 userRequestExample: "Создай курс в Eventicious по следующему описанию. Сначала собери полный course skeleton и выполни dry_run. Не отправляй минимальный payload. Если не хватает данных, используй known-safe defaults или задай уточняющий вопрос.\n\nДанные курса:\n- Название:\n- Описание:\n- Обложка: файл / уже загруженные coverImageFileId и coverImageThumbnailFileId\n- ExternalId:\n- Дедлайн:\n- Можно ли проходить в свободном порядке:\n- Этапы:\n  1. Common / CheckInformation / название / длительность\n  2. Common / PassTest / название теста / pollPoints\n  3. Task / название задания / taskContent.title\n\nПосле dry_run покажи summary:\n- stages count\n- stage types\n- condition types\n- has deadline\n- has sendingPeriods\n- has taskContent\n- has poll/test fields\n- has finalMessage\n\nТолько после подтверждения запускай real creation.",
               },
+              idLedger: {
+                rule: "After every successful create/import/upload/write operation, extract all returned IDs and save them into a local markdown file EVENTICIOUS_MCP_IDS.md in your working directory.",
+                why: "MCP server is stateless. IDs returned by Eventicious (courseId, stageId, stageCatalogId, pollId, taskContentId, scormId) are not persisted. Without saving them, content population is impossible.",
+                filename: "EVENTICIOUS_MCP_IDS.md",
+                securityRules: [
+                  "Never store secrets in this file",
+                  "Never store access tokens, client secrets, MCP tokens, encryption keys, or personal data",
+                  "Only store technical IDs and safe object labels needed for follow-up MCP operations",
+                ],
+                whenToUpdate: [
+                  "eventicious_upload_course_images",
+                  "eventicious_import_course_structure",
+                  "eventicious_map_course_import_response",
+                  "eventicious_create_text2",
+                  "eventicious_import_poll_content",
+                  "eventicious_import_task_content",
+                  "eventicious_upload_task_attachments",
+                  "eventicious_upload_scorm_to_stage",
+                  "eventicious_create_catalog, eventicious_update_catalog",
+                  "eventicious_create_text2, eventicious_create_link, eventicious_add_file_to_catalog, eventicious_add_video_to_catalog",
+                  "eventicious_create_users, eventicious_create_acl_group",
+                  "eventicious_create_location, eventicious_create_tag, eventicious_create_session",
+                  "eventicious_create_exhibitor",
+                ],
+                whatToSave: {
+                  perTool: "tool name, returned ID, safe human-readable label, parent object (if any), next required action",
+                  courseWorkflow: [
+                    "courseId",
+                    "courseCatalogId (if present)",
+                    "all stageId",
+                    "all stageCatalogId",
+                    "all pollId",
+                    "all taskContentId",
+                    "all scormId (if present)",
+                  ],
+                },
+                courseWorkflow: {
+                  afterImportCourseStructure: [
+                    "1. Save full raw response in working context",
+                    "2. Call eventicious_map_course_import_response if tool is available",
+                    "3. Extract and write to EVENTICIOUS_MCP_IDS.md: courseId, courseCatalogId, all stageId, all stageCatalogId, all pollId, all taskContentId, all scormId",
+                    "4. For each stage record: stage index, stage title, stage type, transition condition, related technical ID",
+                  ],
+                  beforeContentPopulation: "Check ledger before content population. Text 2.0 requires stageCatalogId. PassTest/PassPoll require pollId. Task requires taskContentId. If required ID is missing in ledger, do NOT execute write call and report blocker.",
+                },
+              },
+              idLedgerTemplate: {
+                filename: "EVENTICIOUS_MCP_IDS.md",
+                content:
+                  "# Eventicious MCP ID Ledger\n\n" +
+                  "> Created by AI agent. Do not store secrets here.\n" +
+                  "> This file stores technical IDs returned by Eventicious MCP tools.\n\n" +
+                  "## Session\n\n" +
+                  "- Date:\n- Event ID:\n- Base URL:\n- Operator / context:\n- Notes:\n\n" +
+                  "## Files\n\n" +
+                  "| Purpose | fileId | thumbnailFileId | Source | Notes |\n" +
+                  "|---|---:|---:|---|---|\n" +
+                  "| Course cover |  |  |  |  |\n\n" +
+                  "## Courses\n\n" +
+                  "| Course title | courseId | externalId | status | Mapping status | Notes |\n" +
+                  "|---|---:|---|---|---|---|\n" +
+                  "|  |  |  |  | mapped / partial / missing |  |\n\n" +
+                  "## Course Stages\n\n" +
+                  "| Course ID | Stage index | Stage title | Stage type | stageId | stageCatalogId | transition | pollId | taskContentId | scormId | Notes |\n" +
+                  "|---:|---:|---|---|---:|---:|---|---:|---:|---:|---|\n" +
+                  "|  |  |  |  |  |  |  |  |  |  |  |\n\n" +
+                  "## Catalogs and Elements\n\n" +
+                  "| Purpose | catalogId | elementId | Type | Title | Parent / Course | Notes |\n" +
+                  "|---|---:|---:|---|---|---|---|\n" +
+                  "|  |  |  | Text 2.0 / File / Link / Video |  |  |  |\n\n" +
+                  "## Polls and Tests\n\n" +
+                  "| Course ID | Stage title | pollId | Poll/Test name | Type | Status | Notes |\n" +
+                  "|---:|---|---:|---|---|---|---|\n" +
+                  "|  |  |  |  | PassPoll / PassTest | created / populated / checked |  |\n\n" +
+                  "## Tasks\n\n" +
+                  "| Course ID | Stage title | taskContentId | Task title | Status | Notes |\n" +
+                  "|---:|---|---:|---|---|---|\n" +
+                  "|  |  |  |  | created / populated / checked |  |\n\n" +
+                  "## Action Log\n\n" +
+                  "| Time | Tool | Object | Returned IDs | Next required action |\n" +
+                  "|---|---|---|---|---|\n" +
+                  "|  |  |  |  |  |",
+              },
+              idLedgerFallback: {
+                rule: "If the MCP client cannot write local files, output the updated EVENTICIOUS_MCP_IDS.md content in the chat and ask the user to save it before continuing.",
+                note: "Do not ask the user to save the file every time if the agent can write to the workspace directly.",
+              },
             }),
           },
         ],
