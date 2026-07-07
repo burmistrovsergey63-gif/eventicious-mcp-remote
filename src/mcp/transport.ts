@@ -311,6 +311,59 @@ function registerTools(
                   "|---|---|---|---|---|\n" +
                   "|  |  |  |  |  |",
               },
+              courseContentPopulation: {
+                title: "Course Content Population Rules",
+                requiredIdMapping: {
+                  rule: "After eventicious_import_course_structure, immediately save the raw response and map all returned IDs into EVENTICIOUS_MCP_IDS.md.",
+                  requiredIds: {
+                    text2: "stageCatalogId — stages[].catalogId — needed for Text 2.0 / GravityJson content in stage catalog",
+                    pollTest: "pollId — stages[].pollId — needed for PassTest / PassPoll stages",
+                    task: "taskContentId — stages[].taskContentId — needed for Task stages",
+                  },
+                  doNotContinue: "Do not continue content population if the required ID is missing.",
+                },
+                correctOperationOrder: {
+                  rule: "Follow this recommended order for course creation and content population:",
+                  steps: [
+                    "1. Upload course images via eventicious_upload_course_images.",
+                    "2. Import full course structure via eventicious_import_course_structure.",
+                    "3. Save raw response and update EVENTICIOUS_MCP_IDS.md with all IDs.",
+                    "4. Import Task content via eventicious_import_task_content while the course is still draft.",
+                    "5. Import Poll/Test content via eventicious_import_poll_content using pollId.",
+                    "6. Add Text 2.0 materials via eventicious_create_text2 using stageCatalogId.",
+                    "7. Run course readiness check via eventicious_check_course_ready_to_finalize.",
+                    "8. Finalize the course via eventicious_finalize_course.",
+                  ],
+                },
+                taskContentBeforeFinalization: {
+                  rule: "Task content must be imported before course finalization.",
+                  blockerBehavior: "If the course is already finalized and Task content was not imported, report a blocker. Do not retry eventicious_import_task_content blindly.",
+                  apiError: "Task content with Id X is associated with a course that is not in draft status. Only task contents associated with courses in draft status can be imported.",
+                },
+                text2UpdateLimitation: {
+                  rule: "Current MCP tools can create, delete, and reorder Text 2.0 elements, but there is no update Text 2.0 tool.",
+                  workaround: "To change existing Text 2.0 content, delete the old element and create a new one. This changes catalogElementId.",
+                  futureGap: "eventicious_update_text2 is a known dev gap.",
+                },
+                pollTestContent: {
+                  rule: "Use eventicious_import_poll_content with pollId.",
+                  formatNote: "For answer options, always include options[].optionData.text.",
+                  behavior: "Can fill empty poll or re-import over existing poll content.",
+                },
+                stageStructureIsCreationTimeCritical: {
+                  rule: "Current MCP tools do not update stage type, conditionType, stage order, or add/remove stages after creation.",
+                  implication: "Define stage types (Common/Task/Scorm), conditionType (CheckInformation/PassTest/PassPoll), and stage order correctly in the full course skeleton before eventicious_import_course_structure.",
+                },
+                courseSettingsAreCreationTimeCritical: {
+                  rule: "Current MCP tools do not update course name, description, progress settings, finalScreen, deadline, or unfinalize a course after creation.",
+                  implication: "Define all course settings correctly in the full course skeleton before eventicious_import_course_structure.",
+                  futureGaps: [
+                    "No eventicious_update_course tool",
+                    "No eventicious_unfinalize_course tool",
+                  ],
+                  doNotCreate: "Do not invent update/unfinalize tools if MCP does not have them.",
+                },
+              },
               idLedgerFallback: {
                 rule: "If the MCP client cannot write local files, output the updated EVENTICIOUS_MCP_IDS.md content in the chat and ask the user to save it before continuing.",
                 note: "Do not ask the user to save the file every time if the agent can write to the workspace directly.",

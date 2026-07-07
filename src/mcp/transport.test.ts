@@ -323,6 +323,85 @@ describe("eventicious_get_agent_instructions ID Ledger section", () => {
   });
 });
 
+describe("eventicious_get_agent_instructions courseContentPopulation section", () => {
+  it("contains courseContentPopulation section title", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("courseContentPopulation");
+    expect(content).toContain("Course Content Population Rules");
+  });
+
+  it("contains required ID mapping rules", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("requiredIdMapping");
+    expect(content).toContain("stageCatalogId");
+    expect(content).toContain("pollId");
+    expect(content).toContain("taskContentId");
+  });
+
+  it("contains correct operation order", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("correctOperationOrder");
+    expect(content).toContain("eventicious_upload_course_images");
+    expect(content).toContain("eventicious_import_course_structure");
+    expect(content).toContain("eventicious_import_task_content");
+    expect(content).toContain("eventicious_import_poll_content");
+    expect(content).toContain("eventicious_create_text2");
+    expect(content).toContain("eventicious_check_course_ready_to_finalize");
+    expect(content).toContain("eventicious_finalize_course");
+  });
+
+  it("contains task content before finalization rule", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("taskContentBeforeFinalization");
+    expect(content).toContain("Task content must be imported before course finalization");
+    expect(content).toContain("report a blocker");
+  });
+
+  it("contains Text 2.0 update limitation", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("text2UpdateLimitation");
+    expect(content).toContain("no update Text 2.0 tool");
+    expect(content).toContain("delete the old element and create a new one");
+    expect(content).toContain("changes catalogElementId");
+  });
+
+  it("contains poll/test content rules with options format", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("pollTestContent");
+    expect(content).toContain("options[].optionData.text");
+  });
+
+  it("contains stage structure is creation-time critical", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("stageStructureIsCreationTimeCritical");
+    expect(content).toContain("conditionType");
+  });
+
+  it("contains course settings limitations and future gaps", () => {
+    const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
+    const content = fs.readFileSync(transportPath, "utf-8");
+
+    expect(content).toContain("courseSettingsAreCreationTimeCritical");
+    expect(content).toContain("eventicious_update_course");
+    expect(content).toContain("eventicious_unfinalize_course");
+    expect(content).toContain("Do not invent update/unfinalize tools");
+  });
+});
+
 describe("course tool descriptions", () => {
   it("eventicious_import_course_structure warns about full skeleton", () => {
     const coursesPath = path.join(__dirname, "..", "tools", "courses.ts");

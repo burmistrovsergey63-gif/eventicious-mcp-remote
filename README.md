@@ -334,6 +334,36 @@ This file is agent-managed. It is not stored on the server or on Layero filesyst
 
 See `docs/README_FOR_MANAGERS.md` for the full ledger template and workflow details.
 
+## Course Content Population Rules
+
+`courseId` alone is not enough to populate a course. You need a full ID ledger with stage-level IDs.
+
+**Required IDs by content type:**
+
+| Content type | Required ID | Source |
+|---|---|---|
+| Text 2.0 | `stageCatalogId` | `stages[].catalogId` from course import response |
+| PassTest / PassPoll | `pollId` | `stages[].pollId` from course import response |
+| Task | `taskContentId` | `stages[].taskContentId` from course import response |
+
+**Recommended operation order:**
+
+1. Upload course images
+2. Import full course structure
+3. Save raw response and update `EVENTICIOUS_MCP_IDS.md`
+4. Import Task content (while course is still draft)
+5. Import Poll/Test content using `pollId`
+6. Add Text 2.0 materials using `stageCatalogId`
+7. Run course readiness check
+8. Finalize the course
+
+**Key constraints:**
+
+- Task content must be imported before course finalization. If the course is already finalized and Task content was not imported, report a blocker.
+- Text 2.0 has no update tool. To change existing text, delete + create (changes `catalogElementId`).
+- Stage structure (type, conditionType, order) and course settings (name, description, progress, deadline) must be defined correctly in the skeleton before creation.
+- No `eventicious_update_course` or `eventicious_unfinalize_course` tools exist yet.
+
 ### Cover Image Required
 
 Course creation requires both `coverImageFileId` and `coverImageThumbnailFileId`. Upload images first via `eventicious_upload_course_images`.
