@@ -19,8 +19,9 @@ function countToolCallsInFile(filePath: string): string[] {
 }
 
 export function getToolManifest(): ToolsManifest {
-  const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
-  const toolsDir = path.join(__dirname, "..", "tools");
+  const projectRoot = process.cwd();
+  const transportPath = path.join(projectRoot, "src", "mcp", "transport.ts");
+  const toolsDir = path.join(projectRoot, "src", "tools");
 
   const names: string[] = [];
 
