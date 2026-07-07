@@ -68,7 +68,7 @@ Smoke tests should only run in dry-run mode. Never run with `confirm=true` on pr
 
 See `docs/SCHEMA_AUDIT.md` and `docs/SCHEMA_AUDIT_CHECKPOINT.md` for analysis of Zod schema usage across tools.
 
-Current status after release 0.6.4:
+Current status after release 1.0.0:
 - 364 unit tests passing
 - 75 MCP tools registered
 - Schema shapes verified compatible with server.tool()

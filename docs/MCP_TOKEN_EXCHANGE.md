@@ -102,7 +102,7 @@ See [OPENCODE_SETUP.md](OPENCODE_SETUP.md) for detailed OpenCode configuration.
 ### Check Health
 ```bash
 curl https://your-endpoint.layero.ru/healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.6.4"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"1.0.0"}
 ```
 
 ### Verify MCP Connection

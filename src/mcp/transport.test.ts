@@ -45,7 +45,7 @@ describe("eventicious_get_agent_instructions", () => {
 
     expect(content).toContain("eventicious_get_agent_instructions");
     expect(content).toContain("mcpVersion");
-    expect(content).toContain("0.6.4");
+    expect(content).toContain("1.0.0");
     expect(content).toContain("expectedToolsCount");
     expect(content).toContain("75");
     expect(content).toContain("useUtf8ForRussianText");

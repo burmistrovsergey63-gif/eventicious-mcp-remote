@@ -45,7 +45,7 @@ Expected response:
 {
   "ok": true,
   "service": "eventicious-mcp-remote",
-  "version": "0.6.4"
+  "version": "1.0.0"
 }
 ```
 

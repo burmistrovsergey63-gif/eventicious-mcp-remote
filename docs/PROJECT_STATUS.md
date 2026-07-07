@@ -1,6 +1,6 @@
 # Project Status: Eventicious MCP Remote Connector
 
-**Version:** 0.6.4  
+**Version:** 1.0.0  
 **Branch:** main  
 **Last Commit:** `2f8cb2e`  
 **Production:** Layero preview environment

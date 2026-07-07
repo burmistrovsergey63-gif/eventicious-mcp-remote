@@ -88,7 +88,7 @@ Pass credentials directly in each request:
 ## Manual QA
 
 Manager onboarding manual QA passed:
-- server: eventicious-mcp-remote v0.6.4;
+- server: eventicious-mcp-remote v1.0.0;
 - transport: MCP 2024-11-05 / SSE;
 - token validation: Credentials valid;
 - tools visible: 75;

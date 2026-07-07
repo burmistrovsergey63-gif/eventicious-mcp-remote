@@ -59,7 +59,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
-    version: "0.6.4",
+    version: "1.0.0",
   });
 
   const imgbbApiKey = request.headers.get("x-imgbb-api-key") || undefined;
@@ -139,7 +139,7 @@ function registerTools(
           {
             type: "text" as const,
             text: JSON.stringify({
-              mcpVersion: "0.6.4",
+              mcpVersion: "1.0.0",
               expectedToolsCount: 75,
               safetyRules: {
                 startWithReadOnlyChecks: true,

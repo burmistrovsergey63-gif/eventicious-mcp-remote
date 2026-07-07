@@ -1,0 +1,241 @@
+{
+    "name":  "MCP reference course replay 20260706_182534",
+    "description":  "\u003cp\u003eПрактический курс для сотрудников реализации и продаж\u003c/p\u003e",
+    "externalId":  "mcp_reference_course_replay_20260706_182534",
+    "coverImageFileId":  3317284,
+    "coverImageThumbnailFileId":  3317285,
+    "settings":  {
+                     "progress":  {
+                                      "isEnabled":  true,
+                                      "hintText":  "Прогресс прохождения"
+                                  },
+                     "finalScreen":  {
+                                         "isEnabled":  true,
+                                         "title":  "Курс завершён",
+                                         "text":  "Вы успешно завершили курс."
+                                     },
+                     "deadline":  {
+                                      "isEnabled":  true,
+                                      "fixedDeadlineDate":  "2026-09-15",
+                                      "relativeDeadlineUnits":  "months",
+                                      "relativeDeadlineValue":  5,
+                                      "notificationSettings":  {
+                                                                   "isEnabled":  true,
+                                                                   "localizedText":  {
+                                                                                         "en-US":  "The deadline for the course «{CourseName}» is approaching. Complete it by {DeadlineDate}.",
+                                                                                         "ru-RU":  "Приближается срок выполнения курса «{CourseName}». Успейте пройти его до {DeadlineDate}."
+                                                                                     },
+                                                                   "duplicateInEmail":  false,
+                                                                   "sendingPeriods":  [
+                                                                                          {
+                                                                                              "unit":  "months",
+                                                                                              "value":  3
+                                                                                          },
+                                                                                          {
+                                                                                              "unit":  "weeks",
+                                                                                              "value":  2
+                                                                                          },
+                                                                                          {
+                                                                                              "unit":  "days",
+                                                                                              "value":  1
+                                                                                          }
+                                                                                      ]
+                                                               }
+                                  },
+                     "isFreeOrderAllowed":  true
+                 },
+    "stages":  [
+                   {
+                       "name":  "Этап 1. Почему клиент спрашивает про API, и почему вы теряетесь?",
+                       "comment":  "15 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "passpoll",
+                                                           "pollButtonNameOverride":  "Пройти опрос",
+                                                           "pollPoints":  100,
+                                                           "poll":  {
+                                                                        "name":  "Стартовый опрос: Ваш опыт с API и SSO"
+                                                                    }
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 2. Как API решает задачи клиентов: три практических сценария",
+                       "comment":  "20 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "passtest",
+                                                           "pollButtonNameOverride":  "Пройти тест",
+                                                           "pollPoints":  100,
+                                                           "poll":  {
+                                                                        "name":  "Соотнесение задач клиентов и сценариев API"
+                                                                    }
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 3. Анатомия API-запроса: что нужно знать, чтобы не бояться",
+                       "comment":  "15 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "passtest",
+                                                           "pollButtonNameOverride":  "Пройти тест",
+                                                           "pollPoints":  100,
+                                                           "poll":  {
+                                                                        "name":  "Проверка: Анатомия API-запроса"
+                                                                    }
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 4. Практикум: ваш первый самостоятельный поиск в документации API",
+                       "comment":  "20 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "checkinformation"
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 5. Задание: Поиск endpoint для удаления пользователей",
+                       "comment":  "Практическое задание: Практикум: ваш первый самостоятельный поиск в документации API",
+                       "type":  "task",
+                       "taskContent":  {
+                                           "title":  "Поиск endpoint для удаления пользователей"
+                                       }
+                   },
+                   {
+                       "name":  "Этап 6. Кейсы: \u0027Клиент спрашивает — вы ищете решение\u0027",
+                       "comment":  "20-25 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "checkinformation"
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 7. Задание: Практика: ответ на клиентский запрос",
+                       "comment":  "Практическое задание: Кейсы: \u0027Клиент спрашивает — вы ищете решение\u0027",
+                       "type":  "task",
+                       "taskContent":  {
+                                           "title":  "Практика: ответ на клиентский запрос"
+                                       }
+                   },
+                   {
+                       "name":  "Этап 8. Что ответить, если API не работает: разбор типовых ошибок",
+                       "comment":  "20 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "passtest",
+                                                           "pollButtonNameOverride":  "Пройти тест",
+                                                           "pollPoints":  100,
+                                                           "poll":  {
+                                                                        "name":  "Проверка: Диагностика ошибок API и коммуникация с клиентом"
+                                                                    }
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 9. Как продать и объяснить ценность API и SSO клиенту",
+                       "comment":  "20 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "checkinformation"
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 10. Задание: Практика: Объясни ценность API/SSO клиенту",
+                       "comment":  "Практическое задание: Как продать и объяснить ценность API и SSO клиенту",
+                       "type":  "task",
+                       "taskContent":  {
+                                           "title":  "Практика: Объясни ценность API/SSO клиенту"
+                                       }
+                   },
+                   {
+                       "name":  "Этап 11. Внедряем в работу: ваш личный план и шпаргалки",
+                       "comment":  "25 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "passpoll",
+                                                           "pollButtonNameOverride":  "Пройти опрос",
+                                                           "pollPoints":  100,
+                                                           "poll":  {
+                                                                        "name":  "Финальный опрос: ваши планы и уверенность"
+                                                                    }
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 12. Итоговый кейс: Консультация \u0027сложного\u0027 клиента",
+                       "comment":  "45-60 минут",
+                       "type":  "common",
+                       "settings":  {
+                                        "transition":  {
+                                                           "conditionType":  "checkinformation"
+                                                       },
+                                        "finalMessage":  {
+                                                             "isEnabled":  true,
+                                                             "title":  "Этап пройден",
+                                                             "text":  "Вы можете переходить к следующему этапу."
+                                                         }
+                                    }
+                   },
+                   {
+                       "name":  "Этап 13. Задание: Итоговый кейс: Ответ на запрос клиента",
+                       "comment":  "Практическое задание: Итоговый кейс: Консультация \u0027сложного\u0027 клиента",
+                       "type":  "task",
+                       "taskContent":  {
+                                           "title":  "Итоговый кейс: Ответ на запрос клиента"
+                                       }
+                   }
+               ]
+}

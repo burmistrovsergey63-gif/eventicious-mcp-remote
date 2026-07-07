@@ -76,7 +76,7 @@ If you prefer not to use MCP tokens, use headers directly:
 ```bash
 # Check health
 curl https://your-endpoint.layero.ru/healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"0.6.4"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"1.0.0"}
 
 # Verify MCP token
 curl -H "Authorization: Bearer mcp_evt_..." https://your-endpoint.layero.ru/auth/verify
