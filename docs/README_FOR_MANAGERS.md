@@ -659,6 +659,10 @@ https://sergeyburmistrov-eventicious-mcp-remote.preview.layero.ru/healthz
 
 ---
 
+## Production-тестирование
+
+Для controlled production rollout и единого вводного документа см. [PRODUCTION_TESTING_GUIDE.md](PRODUCTION_TESTING_GUIDE.md).
+
 ## Короткая памятка
 
 1. Установите OpenCode, Claude Code или Codex.

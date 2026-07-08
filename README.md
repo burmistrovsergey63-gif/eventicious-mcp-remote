@@ -543,7 +543,11 @@ Legacy header authentication (`x-eventicious-client-id`, `x-eventicious-client-s
 - Secrets are never logged
 - No server-side token storage
 
-### Related Files
+#### Production Testing
+
+Для production-тестирования и controlled rollout см. [docs/PRODUCTION_TESTING_GUIDE.md](docs/PRODUCTION_TESTING_GUIDE.md) — единый вводный документ для команды.
+
+## Related Files
 
 - src/auth/mcp-token.ts: Token encryption/decryption utility
 - src/auth/eventicious-credentials.ts: Credential validation
