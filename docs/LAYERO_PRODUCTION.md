@@ -39,7 +39,7 @@ Run these checks after deploy:
 ```powershell
 # 1. Health check
 GET /healthz
-# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"1.0.0"}
+# Expected: {"ok":true,"service":"eventicious-mcp-remote","version":"1.0.1"}
 
 # 2. Auth protection
 POST /mcp without Authorization
