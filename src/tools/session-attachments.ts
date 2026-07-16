@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   createSessionAttachmentShape,
@@ -9,7 +10,9 @@ import {
 
 export function registerSessionAttachmentTools(
   server: McpServer,
-  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>
+  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>,
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_create_session_attachment",
@@ -34,7 +37,7 @@ export function registerSessionAttachmentTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/create`, body: payload, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/create`, body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_create_session_attachment", error: e instanceof Error ? e.message : "Unknown" });
@@ -68,7 +71,7 @@ export function registerSessionAttachmentTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/update/${params.attachmentId}`, body: payload, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/update/${params.attachmentId}`, body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_update_session_attachment", error: e instanceof Error ? e.message : "Unknown" });
@@ -99,7 +102,7 @@ export function registerSessionAttachmentTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/delete/${params.attachmentId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/sessions/${params.sessionId}/attachments/delete/${params.attachmentId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_delete_session_attachment", error: e instanceof Error ? e.message : "Unknown" });

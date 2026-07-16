@@ -320,7 +320,9 @@ const validateSchema = {
 
 export function registerGravityJsonTools(
   server: McpServer,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: import("../auth").EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_convert_markdown_to_gravity_json",

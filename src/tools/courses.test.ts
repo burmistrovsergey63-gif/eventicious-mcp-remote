@@ -248,9 +248,9 @@ describe("import_course_structure: dry_run recommendation", () => {
   async function getImportHandler() {
     const { registerCourseTools } = await import("./courses");
     const mockServer = { tool: vi.fn() };
-    registerCourseTools(mockServer as any, MOCK_CREDENTIALS, createToolError);
-    const call = (mockServer.tool.mock.calls as any[]).find(
-      (c: any[]) => c[0] === "eventicious_import_course_structure"
+  registerCourseTools(mockServer as any, MOCK_CREDENTIALS, createToolError);
+  const call = (mockServer.tool.mock.calls as any[]).find(
+    (c: any[]) => c[0] === "eventicious_import_course_structure"
     );
     return call?.[3] as Function;
   }

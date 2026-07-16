@@ -4,7 +4,9 @@ import { courseImportPlanInputSchema, coursePlanValidationSchema, courseImportRe
 
 export function registerCourseImportTools(
   server: McpServer,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: import("../auth").EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_prepare_course_import",

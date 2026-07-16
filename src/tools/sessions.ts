@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   createSessionShape,
@@ -9,7 +10,9 @@ import {
 
 export function registerSessionTools(
   server: McpServer,
-  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>
+  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>,
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_create_session",
@@ -47,7 +50,7 @@ export function registerSessionTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/sessions/create", body: payload, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/sessions/create", body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_create_session", error: e instanceof Error ? e.message : "Unknown" });
@@ -90,7 +93,7 @@ export function registerSessionTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/sessions/update/${params.id}`, body: payload, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/sessions/update/${params.id}`, body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_update_session", error: e instanceof Error ? e.message : "Unknown" });
@@ -121,7 +124,7 @@ export function registerSessionTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/sessions/delete/${params.id}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/sessions/delete/${params.id}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_delete_session", error: e instanceof Error ? e.message : "Unknown" });

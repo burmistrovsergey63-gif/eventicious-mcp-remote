@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { logger } from "../logger";
+import { EventiciousRequestInfo } from "../auth";
 import { detectLikelyMojibake } from "../utils/text-encoding";
 
 interface NormalizedRow {
@@ -90,7 +91,9 @@ function matchUserByEmail<T extends { id: number; email?: string }>(items: T[], 
 
 export function registerScheduleImportTools(
   server: McpServer,
-  _credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>
+  _credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>,
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_prepare_schedule_import",

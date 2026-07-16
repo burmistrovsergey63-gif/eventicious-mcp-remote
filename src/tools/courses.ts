@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   courseImportSchema,
@@ -12,7 +13,9 @@ import { normalizeCourseStructureForEventiciousApi } from "../utils/course-struc
 export function registerCourseTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_import_course_structure",
@@ -28,7 +31,7 @@ export function registerCourseTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: normalizedBody, warnings, ...(incompleteWarning ? { recommendation: incompleteWarning } : {}) }) }] };
       if (!confirm) return toolError("confirm=true required to import course structure");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/courses", body: normalizedBody, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/courses", body: normalizedBody, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as object, warnings }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -44,7 +47,7 @@ export function registerCourseTools(
       if (!params.confirm) return toolError("confirm=true required to finalize course");
       if (!requireDangerConfirm(params.danger_confirm, "FINALIZE_EVENTICIOUS_COURSE")) return toolError("danger_confirm='FINALIZE_EVENTICIOUS_COURSE' required");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/courses/${params.courseId}/finalize`, body: {}, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/courses/${params.courseId}/finalize`, body: {}, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -98,7 +101,7 @@ export function registerCourseTools(
           for (const s of sources) {
             formData.append("file", s.blob, s.name);
           }
-          const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/images/upload?generateThumbnails=true", body: formData, credentials, isMultipart: true });
+          const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/images/upload?generateThumbnails=true", body: formData, credentials, isMultipart: true, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
           return res.data;
         }
 

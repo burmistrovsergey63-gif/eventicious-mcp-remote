@@ -90,7 +90,9 @@ function buildGravityJsonFromItem(item: { markdown?: string; plainText?: string;
 
 export function registerCatalogImportTools(
   server: McpServer,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: import("../auth").EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_prepare_catalog_import",

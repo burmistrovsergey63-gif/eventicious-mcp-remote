@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   folderCreateSchema,
@@ -29,6 +30,8 @@ export function registerCatalogElementTools(
   server: McpServer,
   credentials: EventiciousCredentials,
   toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string,
   requestScopedImgbbKey?: string
 ) {
   const envImgbbApiKey = process.env.IMGBB_API_KEY;
@@ -65,7 +68,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to create folder");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders`, body, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -81,7 +84,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, folderId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to update folder");
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders/${folderId}`, body, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/folders/${folderId}`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -97,7 +100,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete folder");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_FOLDER")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_FOLDER' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/folders/${params.folderId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/folders/${params.folderId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -114,7 +117,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to add file");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/files`, body: { files: [body] }, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/files`, body: { files: [body] }, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -130,7 +133,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete file");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/files/${params.catalogElementId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/files/${params.catalogElementId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -147,7 +150,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to create link");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/links`, body, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/links`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -163,7 +166,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete link");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/links/${params.catalogElementId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/links/${params.catalogElementId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -281,7 +284,7 @@ export function registerCatalogElementTools(
       if (!confirm) return toolError("confirm=true required to create text2");
 
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/gravity-editor`, body, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/gravity-editor`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify({ ...res.data as Record<string, unknown>, inlineImages: inlineImageUploads, warnings }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -297,7 +300,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete text2");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/gravity-editor/${params.catalogElementId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/gravity-editor/${params.catalogElementId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -314,7 +317,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to add video");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/videos`, body, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/videos`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -330,7 +333,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete video");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_CONTENT")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_CONTENT' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/videos/${params.catalogElementId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/videos/${params.catalogElementId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -347,7 +350,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to add groups");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/groups`, body, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/elements/groups`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -363,7 +366,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete group");
       if (!requireDangerConfirm(params.danger_confirm, "DELETE_EVENTICIOUS_CATALOG_GROUP")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_GROUP' required");
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/groups/${params.catalogElementId}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/catalogs/${params.catalogId}/elements/groups/${params.catalogElementId}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -380,7 +383,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to reorder catalogs");
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: "/api/external/v2/catalogs/order", body, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: "/api/external/v2/catalogs/order", body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -396,7 +399,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!confirm) return toolError("confirm=true required to reorder elements");
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/order`, body, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/order`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -413,7 +416,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId, preview: body }) }] };
       if (!requireDangerConfirm(danger_confirm, "DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK")) return toolError("danger_confirm='DELETE_EVENTICIOUS_CATALOG_ITEMS_BULK' required");
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/deleteBulk`, body, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/catalogs/${catalogId}/content/deleteBulk`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -430,7 +433,7 @@ export function registerCatalogElementTools(
       if (dry_run) return { content: [{ type: "text" as const, text: JSON.stringify({ dry_run: true, catalogId }) }] };
       if (!confirm) return toolError("confirm=true required to add to menu");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/menu/add`, body: {}, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${catalogId}/menu/add`, body: {}, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -446,7 +449,7 @@ export function registerCatalogElementTools(
       if (!params.confirm) return toolError("confirm=true required to delete from menu");
       if (!requireDangerConfirm(params.danger_confirm, "CHANGE_EVENTICIOUS_CATALOG_ORDER")) return toolError("danger_confirm='CHANGE_EVENTICIOUS_CATALOG_ORDER' required");
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${params.catalogId}/menu/delete`, body: {}, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/catalogs/${params.catalogId}/menu/delete`, body: {}, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }

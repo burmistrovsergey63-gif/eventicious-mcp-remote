@@ -1,10 +1,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
+import { randomBytes } from "crypto";
 import { config } from "../config";
 import {
+  extractAuthContext,
   extractEventiciousCredentials,
   validateEventiciousCredentials,
+  fingerprint,
+  EventiciousCredentials,
+  NormalizedRequestContext,
+  CredentialSource,
 } from "../auth";
 import { eventiciousRequest } from "../eventicious-client";
 import { logger } from "../logger";
@@ -45,17 +51,45 @@ import { registerCourseImportTools } from "../tools/course-import";
 import { registerExpoTools } from "../tools/expo";
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
-  logger.info("mcp_request_start", { method: request.method });
+  const requestId = randomBytes(8).toString("hex");
+  logger.info("mcp_request_start", { requestId, method: request.method });
 
-  const credentials = extractEventiciousCredentials(request);
+  const authContext = extractAuthContext(request);
+
+  if ("error" in authContext) {
+    logger.warn("mcp_auth_conflict", {
+      requestId,
+      code: authContext.code,
+      error: authContext.error,
+    });
+    return new Response(
+      JSON.stringify({ error: authContext.error, code: authContext.code }),
+      { status: 409, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const { credentials, requestContext, credentialSource } = authContext;
+
   const validation = validateEventiciousCredentials(credentials);
   if (!validation.ok) {
-    logger.warn("mcp_credentials_invalid", { error: validation.error });
+    logger.warn("mcp_credentials_invalid", {
+      requestId,
+      credentialSource,
+      error: validation.error,
+    });
     return new Response(
       JSON.stringify({ error: validation.error }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
+
+  logger.info("mcp_auth_resolved", {
+    requestId,
+    credentialSource,
+    clientIdFingerprint: fingerprint(credentials.clientId),
+    baseUrlHost: new URL(credentials.baseUrl).host,
+    eventId: requestContext?.eventId || "(not set)",
+  });
 
   const server = new McpServer({
     name: "eventicious-mcp-remote",
@@ -64,7 +98,7 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
   const imgbbApiKey = request.headers.get("x-imgbb-api-key") || undefined;
 
-  registerTools(server, credentials, imgbbApiKey);
+  registerTools(server, credentials, requestContext, credentialSource, requestId, imgbbApiKey);
 
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
@@ -99,10 +133,20 @@ function toolError(message: string, context?: { tool?: string; endpoint?: string
 
 function registerTools(
   server: McpServer,
-  credentials: ReturnType<typeof extractEventiciousCredentials>,
+  credentials: EventiciousCredentials,
+  requestContext: NormalizedRequestContext | null,
+  credentialSource: CredentialSource,
+  requestId: string,
   imgbbApiKey?: string
 ) {
   const maxUsers = config.maxUsersPerRequest;
+  const apiRequestContext = requestContext ? {
+    eventId: requestContext.eventId,
+    applicationId: requestContext.applicationId,
+    languageId: requestContext.languageId,
+    appLanguageId: requestContext.appLanguageId,
+  } : undefined;
+  const acceptLanguage = requestContext?.acceptLanguage;
 
   server.tool(
     "eventicious_auth_check",
@@ -115,6 +159,8 @@ function registerTools(
           method: "GET",
           endpoint: "/api/external/v2/aclgroups",
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -570,6 +616,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/create",
           body: { users: params.users },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -629,6 +677,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/update",
           body: { users: params.users },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -684,6 +734,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/block",
           body: { userIds: params.userIds },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -739,6 +791,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/unblock",
           body: { userIds: params.userIds },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -766,6 +820,8 @@ function registerTools(
           method: "GET",
           endpoint: "/api/external/v2/aclgroups",
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -818,6 +874,8 @@ function registerTools(
           endpoint: "/api/external/v2/aclgroups/create",
           body: { id: params.id, name: params.name },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -879,6 +937,8 @@ function registerTools(
           endpoint: "/api/external/v2/aclgroups/users/move",
           body: payload,
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -943,6 +1003,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/delete",
           body: { userIds: params.userIds },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -995,6 +1057,8 @@ function registerTools(
           endpoint: `/api/external/v2/aclgroups/update/${params.id}`,
           body: { name: params.name },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1050,6 +1114,8 @@ function registerTools(
           method: "DELETE",
           endpoint: `/api/external/v2/aclgroups/delete/${params.id}`,
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1105,6 +1171,8 @@ function registerTools(
           endpoint: "/api/external/v2/aclgroups/roles/add",
           body: { roleInfo: params.roleInfo },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1160,6 +1228,8 @@ function registerTools(
           endpoint: "/api/external/v2/aclgroups/roles/remove",
           body: { roleInfo: params.roleInfo },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1216,6 +1286,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/mentor",
           body: { mentorId: params.mentorId, menteeIds: params.menteeIds },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1272,6 +1344,8 @@ function registerTools(
           endpoint: "/api/external/v2/users/mentor",
           body: { mentorId: params.mentorId, menteeIds: params.menteeIds },
           credentials,
+          ...(apiRequestContext ? { requestContext: apiRequestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return {
           content: [
@@ -1288,20 +1362,20 @@ function registerTools(
     }
   );
 
-  registerLocationTools(server, credentials);
-  registerTagTools(server, credentials);
-  registerSessionTools(server, credentials);
-  registerSessionAttachmentTools(server, credentials);
-  registerScheduleImportTools(server, credentials);
-  registerCatalogTools(server, credentials, toolError);
-  registerCatalogElementTools(server, credentials, toolError, imgbbApiKey);
-  registerGravityJsonTools(server, toolError);
-  registerCatalogImportTools(server, toolError);
-  registerCourseTools(server, credentials, toolError);
-  registerPollTools(server, credentials, toolError);
-  registerTaskContentTools(server, credentials, toolError);
-  registerScormTools(server, credentials, toolError);
-  registerGamificationTools(server, credentials, toolError);
-  registerCourseImportTools(server, toolError);
-  registerExpoTools(server, credentials, toolError);
+  registerLocationTools(server, credentials, apiRequestContext, acceptLanguage);
+  registerTagTools(server, credentials, apiRequestContext, acceptLanguage);
+  registerSessionTools(server, credentials, apiRequestContext, acceptLanguage);
+  registerSessionAttachmentTools(server, credentials, apiRequestContext, acceptLanguage);
+  registerScheduleImportTools(server, credentials, apiRequestContext, acceptLanguage);
+  registerCatalogTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerCatalogElementTools(server, credentials, toolError, apiRequestContext, acceptLanguage, imgbbApiKey);
+  registerGravityJsonTools(server, toolError, apiRequestContext, acceptLanguage);
+  registerCatalogImportTools(server, toolError, apiRequestContext, acceptLanguage);
+  registerCourseTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerPollTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerTaskContentTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerScormTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerGamificationTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
+  registerCourseImportTools(server, toolError, apiRequestContext, acceptLanguage);
+  registerExpoTools(server, credentials, toolError, apiRequestContext, acceptLanguage);
 }

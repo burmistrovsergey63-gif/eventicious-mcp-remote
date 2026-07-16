@@ -10,7 +10,7 @@ export interface EventiciousCredentials {
 }
 
 async function fetchToken(creds: EventiciousCredentials): Promise<string> {
-  const cached = getCachedToken(creds.clientId, creds.baseUrl);
+  const cached = getCachedToken(creds.clientId, creds.clientSecret, creds.baseUrl);
   if (cached) return cached;
 
   const tokenUrl = `${creds.baseUrl}/connect/token`;
@@ -54,7 +54,7 @@ async function fetchToken(creds: EventiciousCredentials): Promise<string> {
     throw new AuthError(tokenUrl, "Token response missing access_token");
   }
 
-  setCachedToken(creds.clientId, creds.baseUrl, data.access_token);
+  setCachedToken(creds.clientId, creds.clientSecret, creds.baseUrl, data.access_token);
   return data.access_token;
 }
 

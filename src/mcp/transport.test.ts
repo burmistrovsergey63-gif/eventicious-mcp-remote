@@ -151,7 +151,7 @@ describe("x-imgbb-api-key header extraction", () => {
     const transportPath = path.join(__dirname, "..", "mcp", "transport.ts");
     const content = fs.readFileSync(transportPath, "utf-8");
 
-    expect(content).toContain("registerCatalogElementTools(server, credentials, toolError, imgbbApiKey)");
+    expect(content).toContain("registerCatalogElementTools(server, credentials, toolError, apiRequestContext, acceptLanguage, imgbbApiKey)");
   });
 
   it("catalog-elements.ts accepts requestScopedImgbbKey parameter", () => {

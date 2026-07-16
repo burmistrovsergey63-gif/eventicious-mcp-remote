@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   catalogCreateSchema,
@@ -12,7 +13,9 @@ import { requireDangerConfirm } from "../utils/confirm";
 export function registerCatalogTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_list_catalogs",
@@ -25,6 +28,8 @@ export function registerCatalogTools(
           method: "GET",
           endpoint: "/api/external/v2/catalogs",
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) {
@@ -44,6 +49,8 @@ export function registerCatalogTools(
           method: "GET",
           endpoint: `/api/external/v2/catalogs/${catalogId}`,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) {
@@ -71,6 +78,8 @@ export function registerCatalogTools(
           endpoint: "/api/external/v2/catalogs",
           body,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) {
@@ -98,6 +107,8 @@ export function registerCatalogTools(
           endpoint: `/api/external/v2/catalogs/${catalogId}`,
           body,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) {
@@ -126,6 +137,8 @@ export function registerCatalogTools(
           method: "DELETE",
           endpoint: `/api/external/v2/catalogs/${params.catalogId}`,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) {

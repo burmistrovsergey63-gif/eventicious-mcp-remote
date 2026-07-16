@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   createLocationShape,
@@ -9,7 +10,9 @@ import {
 
 export function registerLocationTools(
   server: McpServer,
-  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>
+  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>,
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_create_location",
@@ -48,6 +51,8 @@ export function registerLocationTools(
           endpoint: "/api/external/v2/locations/create",
           body: { id: params.id, name: params.name, position: params.position },
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
@@ -87,6 +92,8 @@ export function registerLocationTools(
           endpoint: `/api/external/v2/locations/update/${params.id}`,
           body: { name: params.name, position: params.position },
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
@@ -125,6 +132,8 @@ export function registerLocationTools(
           method: "DELETE",
           endpoint: `/api/external/v2/locations/delete/${params.id}`,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {

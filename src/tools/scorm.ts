@@ -1,12 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import { scormUploadSchema } from "../schemas/scorm";
 
 export function registerScormTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_upload_scorm_to_stage",
@@ -25,7 +28,7 @@ export function registerScormTools(
         const blob = new Blob([buffer]);
         const formData = new FormData();
         formData.append("file", blob, path.basename(params.filePath));
-        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/courses/${params.courseId}/stages/${params.stageId}/scorm/${params.scormId}/upload`, body: formData, credentials, isMultipart: true });
+        const res = await eventiciousRequest({ method: "POST", endpoint: `/api/external/v2/courses/${params.courseId}/stages/${params.stageId}/scorm/${params.scormId}/upload`, body: formData, credentials, isMultipart: true, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (err) { return toolError(String(err)); }
     }

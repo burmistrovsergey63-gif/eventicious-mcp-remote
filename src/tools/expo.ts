@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   exhibitorCreateSchema,
@@ -13,7 +14,9 @@ import { requireDangerConfirm } from "../utils/confirm";
 export function registerExpoTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   // --- eventicious_create_exhibitor ---
   server.tool(
@@ -47,6 +50,8 @@ export function registerExpoTools(
           endpoint: "/api/external/v2/expo/create",
           body,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
@@ -97,6 +102,8 @@ export function registerExpoTools(
           endpoint: `/api/external/v2/expo/update/${id}`,
           body,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
@@ -140,6 +147,8 @@ export function registerExpoTools(
           method: "DELETE",
           endpoint: `/api/external/v2/expo/delete/${params.id}`,
           credentials,
+          ...(requestContext ? { requestContext } : {}),
+          ...(acceptLanguage ? { acceptLanguage } : {}),
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data ?? { success: true }) }] };
       } catch (e) {

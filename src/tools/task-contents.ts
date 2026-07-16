@@ -1,12 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest, EventiciousCredentials } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import { taskContentImportSchema, taskAttachmentUploadSchema } from "../schemas/task-contents";
 
 export function registerTaskContentTools(
   server: McpServer,
   credentials: EventiciousCredentials,
-  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true }
+  toolError: (msg: string) => { content: { type: "text"; text: string }[]; isError: true },
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_import_task_content",
@@ -21,7 +24,7 @@ export function registerTaskContentTools(
       }
       if (!confirm) return toolError("confirm=true required to import task content");
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/task-contents/${taskContentId}`, body, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/task-contents/${taskContentId}`, body, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }
@@ -46,7 +49,7 @@ export function registerTaskContentTools(
           const blob = new Blob([buffer]);
           formData.append("file", blob, path.basename(fp));
         }
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/task-contents/attachments/upload", body: formData, credentials, isMultipart: true });
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/task-contents/attachments/upload", body: formData, credentials, isMultipart: true, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (err) { return toolError(String(err)); }
     }

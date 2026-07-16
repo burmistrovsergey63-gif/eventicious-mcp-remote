@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { config } from "./config";
 import { logger } from "./logger";
 import { decryptMcpToken } from "./auth/mcp-token";
@@ -17,6 +18,8 @@ export const DEFAULT_COURSE_CONTEXT = {
  */
 export const MISSING_EVENT_ID_ERROR = "missing_event_id";
 export const MISSING_REQUEST_INFO_ERROR = "missing_eventicious_request_info";
+
+export type CredentialSource = "bearer_mcp_token" | "legacy_headers";
 
 export interface EventiciousCredentials {
   baseUrl: string;
@@ -43,6 +46,12 @@ export interface NormalizedRequestContext extends EventiciousRequestInfo {
   acceptLanguage?: string;
 }
 
+export interface AuthContext {
+  credentials: EventiciousCredentials;
+  requestContext: NormalizedRequestContext | null;
+  credentialSource: CredentialSource;
+}
+
 /**
  * Normalize Eventicious base URL:
  * - trim spaces
@@ -54,6 +63,14 @@ export function normalizeBaseUrl(url: string): string {
   normalized = normalized.replace(/^["']+|["']+$/g, "");
   normalized = normalized.replace(/\/+$/, "");
   return normalized;
+}
+
+/**
+ * Compute SHA-256 fingerprint prefix for diagnostic logging.
+ * Returns first 12 hex chars of the SHA-256 hash.
+ */
+export function fingerprint(value: string): string {
+  return createHash("sha256").update(value).digest("hex").slice(0, 12);
 }
 
 export function validateMcpToken(request: Request): boolean {
@@ -80,34 +97,77 @@ export function validateMcpToken(request: Request): boolean {
 }
 
 /**
- * Extract Eventicious credentials from request.
- * Supports both legacy headers and new MCP token format.
+ * Check if request has legacy Eventicious credential headers.
  */
-export function extractEventiciousCredentials(request: Request): EventiciousCredentials {
-  // First check if we have MCP token with embedded credentials
+function hasLegacyCredentials(request: Request): boolean {
+  return !!(
+    request.headers.get("x-eventicious-client-id") ||
+    request.headers.get("x-eventicious-client-secret") ||
+    request.headers.get("x-eventicious-base-url")
+  );
+}
+
+/**
+ * Extract full auth context from request.
+ * Returns structured error when Bearer + legacy headers conflict.
+ * When Bearer mcp_evt_ token is present, credentials come ONLY from token claims.
+ * Legacy headers are used ONLY when no Bearer token is present.
+ */
+export function extractAuthContext(request: Request): AuthContext | { error: string; code: string } {
   const authHeader = request.headers.get("authorization");
-  if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
-    const token = authHeader.slice(7).trim();
-    if (token.startsWith("mcp_evt_")) {
-      const payload = decryptMcpToken(token);
-      if (payload) {
-        return {
+  const hasBearer = !!(authHeader && authHeader.toLowerCase().startsWith("bearer "));
+  const hasMcpEvtToken = hasBearer && authHeader!.slice(7).trim().startsWith("mcp_evt_");
+  const hasLegacy = hasLegacyCredentials(request);
+
+  if (hasMcpEvtToken && hasLegacy) {
+    return {
+      error: "Conflicting auth sources: Bearer MCP token and legacy x-eventicious-* headers both present. Use one or the other, not both.",
+      code: "conflicting_auth_sources",
+    };
+  }
+
+  if (hasMcpEvtToken) {
+    const token = authHeader!.slice(7).trim();
+    const payload = decryptMcpToken(token);
+    if (payload) {
+      const requestContext = extractRequestContext(payload);
+      return {
+        credentials: {
           baseUrl: payload.baseUrl,
           clientId: payload.clientId,
           clientSecret: payload.clientSecret,
-        };
-      }
+        },
+        requestContext,
+        credentialSource: "bearer_mcp_token" as CredentialSource,
+      };
     }
   }
 
-  // Legacy: extract from headers
+  // Non-mcp_evt Bearer token or no Bearer at all: fall through to legacy headers
   const rawBaseUrl =
     request.headers.get("x-eventicious-base-url") || config.defaultBaseUrl;
   const baseUrl = normalizeBaseUrl(rawBaseUrl);
   const clientId = request.headers.get("x-eventicious-client-id") || "";
   const clientSecret = request.headers.get("x-eventicious-client-secret") || "";
 
-  return { baseUrl, clientId, clientSecret };
+  return {
+    credentials: { baseUrl, clientId, clientSecret },
+    requestContext: null,
+    credentialSource: "legacy_headers" as CredentialSource,
+  };
+}
+
+/**
+ * Extract Eventicious credentials from request.
+ * Supports both legacy headers and new MCP token format.
+ * @deprecated Use extractAuthContext instead for full isolation.
+ */
+export function extractEventiciousCredentials(request: Request): EventiciousCredentials {
+  const result = extractAuthContext(request);
+  if ("error" in result) {
+    return { baseUrl: config.defaultBaseUrl, clientId: "", clientSecret: "" };
+  }
+  return result.credentials;
 }
 
 export function validateEventiciousCredentials(

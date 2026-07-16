@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eventiciousRequest } from "../eventicious-client";
+import { EventiciousRequestInfo } from "../auth";
 import { logger } from "../logger";
 import {
   createTagShape,
@@ -9,7 +10,9 @@ import {
 
 export function registerTagTools(
   server: McpServer,
-  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>
+  credentials: ReturnType<typeof import("../auth").extractEventiciousCredentials>,
+  requestContext?: EventiciousRequestInfo,
+  acceptLanguage?: string
 ) {
   server.tool(
     "eventicious_create_tag",
@@ -36,7 +39,7 @@ export function registerTagTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/tags/create", body: payload, credentials });
+        const res = await eventiciousRequest({ method: "POST", endpoint: "/api/external/v2/tags/create", body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_create_tag", error: e instanceof Error ? e.message : "Unknown" });
@@ -70,7 +73,7 @@ export function registerTagTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/tags/update/${params.id}`, body: payload, credentials });
+        const res = await eventiciousRequest({ method: "PUT", endpoint: `/api/external/v2/tags/update/${params.id}`, body: payload, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_update_tag", error: e instanceof Error ? e.message : "Unknown" });
@@ -101,7 +104,7 @@ export function registerTagTools(
       }
 
       try {
-        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/tags/delete/${params.id}`, credentials });
+        const res = await eventiciousRequest({ method: "DELETE", endpoint: `/api/external/v2/tags/delete/${params.id}`, credentials, ...(requestContext ? { requestContext } : {}), ...(acceptLanguage ? { acceptLanguage } : {}) });
         return { content: [{ type: "text" as const, text: JSON.stringify(res.data) }] };
       } catch (e) {
         logger.error("eventicious_api_error", { tool: "eventicious_delete_tag", error: e instanceof Error ? e.message : "Unknown" });
