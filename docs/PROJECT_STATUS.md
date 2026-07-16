@@ -1,8 +1,8 @@
 # Project Status: Eventicious MCP Remote Connector
 
-**Version:** 1.0.0  
+**Version:** 1.0.1  
 **Branch:** main  
-**Last Commit:** `2f8cb2e`  
+**Last Commit:** `c7bf413`  
 **Production:** Layero preview environment
 
 ---
@@ -26,7 +26,7 @@
 **Status:** COMPLETE
 
 - ✅ tsconfig.tsbuildinfo added to .gitignore
-- ✅ Version bump to 0.6.4
+- ✅ Version bump to 1.0.1
 - ✅ Legacy file cleanup (server.ts, auth-check.ts removed)
 - ✅ Confirm helper utility created (`src/utils/confirm.ts`)
 - ✅ Structured errors utility (`src/utils/errors.ts`)

@@ -1,6 +1,6 @@
 {
   "name": "eventicious-mcp-remote",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Remote MCP connector for Eventicious External API v2",
   "private": true,
   "main": "dist/index.js",

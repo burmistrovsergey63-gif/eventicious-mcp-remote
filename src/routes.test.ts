@@ -7,12 +7,12 @@ describe("healthz route", () => {
     const healthResponse = {
       ok: true,
       service: "eventicious-mcp-remote",
-      version: "0.6.0",
+      version: "1.0.1",
     };
     
     expect(healthResponse.ok).toBe(true);
     expect(healthResponse.service).toBe("eventicious-mcp-remote");
-    expect(healthResponse.version).toBe("0.6.0");
+    expect(healthResponse.version).toBe("1.0.1");
   });
 });
 
@@ -22,11 +22,11 @@ describe("mcp route info response", () => {
       service: "eventicious-mcp-remote",
       protocol: "mcp",
       endpoint: "POST /mcp",
-      version: "0.6.0",
+      version: "1.0.1",
     };
     
     expect(mcpInfo.protocol).toBe("mcp");
-    expect(mcpInfo.version).toBe("0.6.0");
+    expect(mcpInfo.version).toBe("1.0.1");
     expect(mcpInfo.endpoint).toBe("POST /mcp");
   });
 });
