@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     }
 
     const tokenOptions: Parameters<typeof issueMcpToken>[1] = {
-      issuer: label || (process.env.MCP_TOKEN_ISSUER ?? "eventicious-mcp-remote"),
+      issuer: process.env.MCP_TOKEN_ISSUER ?? "eventicious-mcp-remote",
     };
 
     if (normalizedRequestInfo) {

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { logger } from "@/logger";
 import { verifyMcpToken } from "@/auth/mcp-token";
 import { checkEventiciousCredentials } from "@/auth/eventicious-credentials";
-import { maskSecret } from "@/auth";
+import { getMcpAuthorizationHeader, maskSecret } from "@/auth";
 
 function extractBearerToken(request: Request): string | null {
-  const authHeader = request.headers.get("authorization");
+  const authHeader = getMcpAuthorizationHeader(request);
   if (!authHeader) return null;
   const match = authHeader.match(/^Bearer\s+(.+)$/i);
   return match ? match[1] : null;

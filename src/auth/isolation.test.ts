@@ -53,6 +53,15 @@ function makeBearerRequest(token: string, legacyHeaders?: Record<string, string>
   return new Request("http://localhost/mcp", { method: "POST", headers });
 }
 
+function makeLayeroFallbackRequest(token: string): Request {
+  return new Request("http://localhost/mcp", {
+    method: "POST",
+    headers: {
+      "X-MCP-Authorization": `Bearer ${token}`,
+    },
+  });
+}
+
 function makeLegacyRequest(headers: Record<string, string>): Request {
   return new Request("http://localhost/mcp", { method: "POST", headers });
 }
@@ -79,6 +88,22 @@ describe("Auth isolation", () => {
         expect(result.credentials.clientId).toBe("client-A");
         expect(result.credentials.clientSecret).toBe("secret-A");
         expect(result.credentials.baseUrl).toBe("https://api-a.eventicious.ru");
+        expect(result.credentialSource).toBe("bearer_mcp_token");
+      }
+    });
+
+    it("accepts the Layero-safe MCP authorization fallback header", () => {
+      const token = makeMcpToken({
+        clientId: "client-layero",
+        clientSecret: "secret-layero",
+      });
+
+      const result = extractAuthContext(makeLayeroFallbackRequest(token));
+
+      expect("error" in result).toBe(false);
+      if (!("error" in result)) {
+        expect(result.credentials.clientId).toBe("client-layero");
+        expect(result.credentials.clientSecret).toBe("secret-layero");
         expect(result.credentialSource).toBe("bearer_mcp_token");
       }
     });

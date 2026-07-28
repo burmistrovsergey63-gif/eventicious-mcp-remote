@@ -73,13 +73,25 @@ export function fingerprint(value: string): string {
   return createHash("sha256").update(value).digest("hex").slice(0, 12);
 }
 
+/**
+ * Layero currently strips the standard Authorization header before the
+ * request reaches Next.js. Accept an explicit MCP-only fallback header while
+ * keeping Authorization as the preferred transport everywhere else.
+ */
+export function getMcpAuthorizationHeader(request: Request): string | null {
+  return (
+    request.headers.get("authorization") ||
+    request.headers.get("x-mcp-authorization")
+  );
+}
+
 export function validateMcpToken(request: Request): boolean {
   if (!config.mcpAccessToken) {
     logger.warn("mcp_token_skip", { reason: "MCP_ACCESS_TOKEN not set, allowing request in dev mode" });
     return true;
   }
 
-  const authHeader = request.headers.get("authorization");
+  const authHeader = getMcpAuthorizationHeader(request);
   if (!authHeader) {
     logger.warn("mcp_token_missing", { reason: "No Authorization header" });
     return false;
@@ -114,7 +126,7 @@ function hasLegacyCredentials(request: Request): boolean {
  * Legacy headers are used ONLY when no Bearer token is present.
  */
 export function extractAuthContext(request: Request): AuthContext | { error: string; code: string } {
-  const authHeader = request.headers.get("authorization");
+  const authHeader = getMcpAuthorizationHeader(request);
   const hasBearer = !!(authHeader && authHeader.toLowerCase().startsWith("bearer "));
   const hasMcpEvtToken = hasBearer && authHeader!.slice(7).trim().startsWith("mcp_evt_");
   const hasLegacy = hasLegacyCredentials(request);

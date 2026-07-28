@@ -68,7 +68,8 @@ Pass credentials directly in each request:
 
 | Header | Required | Description |
 |--------|----------|-------------|
-| `Authorization: Bearer <token>` | If using MCP token | MCP token with `mcp_evt_` prefix |
+| `Authorization: Bearer <token>` | Preferred MCP authentication | MCP token with `mcp_evt_` prefix |
+| `X-MCP-Authorization: Bearer <token>` | Layero fallback if the proxy strips `Authorization` | MCP token with `mcp_evt_` prefix |
 | `x-eventicious-client-id` | If not using MCP token | Eventicious client ID |
 | `x-eventicious-client-secret` | If not using MCP token | Eventicious client secret |
 | `x-eventicious-base-url` | No | Eventicious API base URL |

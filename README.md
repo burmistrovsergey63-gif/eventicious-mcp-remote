@@ -104,6 +104,8 @@ For MCP requests (POST /mcp), use either:
 **Option A: MCP Token (recommended)**
 ```
 Authorization: Bearer mcp_evt_...
+# Layero fallback when Authorization is stripped:
+X-MCP-Authorization: Bearer mcp_evt_...
 ```
 
 **Option B: Legacy headers**
